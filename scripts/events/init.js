@@ -1,8 +1,6 @@
+// Modified in this fork.
 const { deepMerge } = require('hexo-util')
-const path = require('path')
-
-// Cache default config to avoid repeated file reads
-let cachedDefaultConfig = null
+const defaultConfig = require('../common/default_config')
 
 /**
  * Check Hexo version and configuration
@@ -32,19 +30,6 @@ function checkHexoEnvironment (hexo) {
 }
 
 /**
- * Load default configuration
- */
-function loadDefaultConfig () {
-  if (cachedDefaultConfig) {
-    return cachedDefaultConfig
-  }
-
-  const configPath = path.join(__dirname, '../common/default_config.js')
-  cachedDefaultConfig = require(configPath)
-  return cachedDefaultConfig
-}
-
-/**
  * Process comment system configuration
  */
 function processCommentConfig (themeConfig) {
@@ -66,20 +51,16 @@ function processCommentConfig (themeConfig) {
     })
     .filter(Boolean)
 
-  // Handle Disqus and Disqusjs conflict
-  if (use.includes('Disqus') && use.includes('Disqusjs')) {
-    hexo.log.warn('Disqus and Disqusjs conflict detected, keeping only the first one')
-    hexo.log.warn('檢測到 Disqus 和 Disqusjs 衝突，只保留第一個')
-    use = [use[0]]
-  }
-
-  themeConfig.comments.use = use
+  const supported = ['Artalk', 'Twikoo', 'Waline']
+  const removed = use.filter(name => !supported.includes(name))
+  if (removed.length) hexo.log.warn(`Unsupported comment systems: ${removed.join(', ')}. Choose Artalk, Twikoo or Waline.`)
+  use = [...new Set(use.filter(name => supported.includes(name)))].slice(0, 2)
+  themeConfig.comments.use = use.length ? use : null
 }
 
 hexo.extend.filter.register('before_generate', () => {
   checkHexoEnvironment(hexo)
 
-  const defaultConfig = loadDefaultConfig()
   hexo.theme.config = deepMerge(defaultConfig, hexo.theme.config)
 
   processCommentConfig(hexo.theme.config)

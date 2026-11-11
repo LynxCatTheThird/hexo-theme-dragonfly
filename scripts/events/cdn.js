@@ -1,3 +1,4 @@
+// Modified in this fork.
 /**
  * Butterfly
  * Merge CDN
@@ -19,35 +20,19 @@ const loadPlugins = hexo => {
 hexo.extend.filter.register('before_generate', () => {
   const themeConfig = hexo.theme.config
   const { CDN } = themeConfig
+  if (!['local', 'custom'].includes(CDN.internal_provider)) {
+    throw new Error('Use local or a custom CDN for this fork’s internal scripts.')
+  }
 
   const thirdPartySrc = loadPlugins(hexo)
-  const internalSrc = {
-    main: {
-      name: 'hexo-theme-butterfly',
-      file: 'js/main.js',
-      version
-    },
-    utils: {
-      name: 'hexo-theme-butterfly',
-      file: 'js/utils.js',
-      version
-    },
-    translate: {
-      name: 'hexo-theme-butterfly',
-      file: 'js/tw_cn.js',
-      version
-    },
-    local_search: {
-      name: 'hexo-theme-butterfly',
-      file: 'js/search/local-search.js',
-      version
-    },
-    algolia_js: {
-      name: 'hexo-theme-butterfly',
-      file: 'js/search/algolia.js',
-      version
-    }
-  }
+  const internalSrc = Object.fromEntries(Object.entries({
+    main: 'js/main.js',
+    utils: 'js/utils.js',
+    navigation: 'js/navigation.js',
+    echarts_runtime: 'js/echarts.js',
+    local_search: 'js/search/local-search.js',
+    algolia_js: 'js/search/algolia.js'
+  }).map(([key, file]) => [key, { name: 'hexo-theme-butterfly', file, version }]))
 
   const minFile = file => {
     return file.replace(/(?<!\.min)\.(js|css)$/g, ext => '.min' + ext)
@@ -86,18 +71,9 @@ hexo.extend.filter.register('before_generate', () => {
     }, cond === 'internal' ? { main_css: 'css/index.css' + (CDN.version ? `?v=${version}` : '') } : {})
   }
 
-  // delete null value
-  const deleteNullValue = obj => {
-    if (!obj) return {}
-    for (const i in obj) {
-      if (obj[i] === null) delete obj[i]
-    }
-    return obj
-  }
-
   themeConfig.asset = Object.assign(
     createCDNLink(internalSrc, CDN.internal_provider, 'internal'),
     createCDNLink(thirdPartySrc, CDN.third_party_provider),
-    deleteNullValue(CDN.option)
+    Object.fromEntries(Object.entries(CDN.option || {}).filter(([, value]) => value !== null))
   )
 })

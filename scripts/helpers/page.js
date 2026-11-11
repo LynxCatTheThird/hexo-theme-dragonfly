@@ -1,8 +1,8 @@
+// Modified in this fork.
 'use strict'
 
 const { truncateContent, postDesc } = require('../common/postDesc')
 const { prettyUrls, stripHTML } = require('hexo-util')
-const crypto = require('crypto')
 const moment = require('moment-timezone')
 
 const absoluteUrlPattern = /^(?:[a-z][a-z\d+.-]*:)?\/\//i
@@ -48,27 +48,8 @@ hexo.extend.helper.register('cloudTags', function (options = {}) {
     return `rgb(${Math.max(r, 50)}, ${Math.max(g, 50)}, ${Math.max(b, 50)})`
   }
 
-  const normalizeColors = input => {
-    if (!input) return null
-    if (typeof input === 'string') {
-      const color = input.trim()
-      return color ? [color] : null
-    }
-    if (Array.isArray(input)) {
-      const result = []
-      for (let i = 0; i < input.length; i++) {
-        const value = input[i]
-        if (value === null || value === undefined) continue
-        const color = String(value).trim()
-        if (!color) continue
-        result.push(color)
-      }
-      return result.length ? result : null
-    }
-    return null
-  }
-
-  const userColors = normalizeColors(custom_colors)
+  const colors = typeof custom_colors === 'string' ? [custom_colors] : Array.isArray(custom_colors) ? custom_colors : []
+  const userColors = colors.filter(color => color != null).map(color => String(color).trim()).filter(Boolean)
 
   const generateStyle = (size, unit, page, color) => {
     const colorStyle = page === 'tags' ? `background-color: ${color};` : `color: ${color};`
@@ -83,24 +64,15 @@ hexo.extend.helper.register('cloudTags', function (options = {}) {
     const ratio = length ? sizeMap.get(tag.length) / length : 0
     const size = minfontsize + ((maxfontsize - minfontsize) * ratio)
 
-    if (userColors && userColors.length) {
-      const color = userColors[idx % userColors.length]
-      const style = generateStyle(size, unit, page, color)
-      return `<a href="${env.url_for(tag.path)}" class="tag-cloud-item" style="${style}">${tag.name}</a>`
-    }
-
-    const color = getRandomColor()
+    const color = userColors.length ? userColors[idx % userColors.length] : getRandomColor()
     const style = generateStyle(size, unit, page, color)
-    return `<a href="${env.url_for(tag.path)}" style="${style}">${tag.name}</a>`
+    const className = userColors.length ? ' class="tag-cloud-item"' : ''
+    return `<a href="${env.url_for(tag.path)}"${className} style="${style}">${tag.name}</a>`
   }).join('')
 })
 
 hexo.extend.helper.register('urlNoIndex', function (url = null, trailingIndex = false, trailingHtml = false) {
   return prettyUrls(url || this.url, { trailing_index: trailingIndex, trailing_html: trailingHtml })
-})
-
-hexo.extend.helper.register('md5', function (path) {
-  return crypto.createHash('md5').update(decodeURI(this.url_for(path, { relative: false }))).digest('hex')
 })
 
 hexo.extend.helper.register('injectHtml', data => {

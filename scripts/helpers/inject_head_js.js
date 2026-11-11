@@ -1,7 +1,8 @@
+// Modified in this fork.
 'use strict'
 
 hexo.extend.helper.register('inject_head_js', function () {
-  const { darkmode, aside, pjax } = this.theme
+  const { darkmode, aside, navigation } = this.theme
   const start = darkmode.start || 6
   const end = darkmode.end || 18
   const { theme_color: themeColor } = hexo.theme.config
@@ -42,62 +43,39 @@ hexo.extend.helper.register('inject_head_js', function () {
       }
     }
 
-    const scriptCache = new Map()
-    const cssCache = new Map()
+    const assetLoader = (tag, defaults, source) => {
+      const cache = new Map()
+      return (url, attributes = {}) => {
+        if (cache.has(url)) return cache.get(url)
+        const promise = new Promise((resolve, reject) => {
+          const element = Object.assign(document.createElement(tag), defaults, { [source]: url })
+          for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value)
+          element.onload = resolve
+          element.onerror = () => {
+            cache.delete(url)
+            element.remove()
+            reject(new Error('Failed to load ' + tag + ': ' + url))
+          }
+          document.head.appendChild(element)
+        })
+        cache.set(url, promise)
+        return promise
+      }
+    }
+    const loadCSS = assetLoader('link', { rel: 'stylesheet' }, 'href')
     window.btf = {
       saveToLocal,
-      getScript: (url, attr = {}) => {
-        if (scriptCache.has(url)) {
-          return scriptCache.get(url)
-        }
-
-        const promise = new Promise((resolve, reject) => {
-          const script = document.createElement('script')
-
-          script.src = url
-          script.async = true
-
-          for (const key in attr) {
-            script.setAttribute(key, attr[key])
-          }
-
-          script.onload = resolve
-          script.onerror = reject
-
-          document.head.appendChild(script)
-        })
-
-        scriptCache.set(url, promise)
-
-        return promise
-      },
-      getCSS: (url, id) => {
-        if (cssCache.has(url)) {
-          return cssCache.get(url)
-        }
-
-        const promise = new Promise((resolve, reject) => {
-          const link = document.createElement('link')
-
-          link.rel = 'stylesheet'
-          link.href = url
-
-          if (id) {
-            link.id = id
-          }
-
-          link.onload = resolve
-          link.onerror = reject
-
-          document.head.appendChild(link)
-        })
-
-        cssCache.set(url, promise)
-
-        return promise
+      getScript: assetLoader('script', { async: true }, 'src'),
+      getCSS: (url, id) => loadCSS(url, id ? { id } : {}),
+      // Named callbacks are removed when the current page is replaced.
+      addPageFn: (key, fn, name) => {
+        btf.addGlobalFn(key, fn, name)
+        btf.addGlobalFn('pageCleanup', () => {
+          delete (window.globalFn[key] || {})[name]
+        }, key + ':' + name)
       },
       addGlobalFn: (key, fn, name = false, parent = window) => {
-        if (!${pjax.enable} && key.startsWith('pjax')) return
+        if (!${navigation.enable} && ['pageLoad', 'pageCleanup', 'navigationStart'].includes(key)) return
         const globalFn = parent.globalFn || {}
         globalFn[key] = globalFn[key] || {}
         globalFn[key][name || Object.keys(globalFn[key]).length] = fn
@@ -109,76 +87,43 @@ hexo.extend.helper.register('inject_head_js', function () {
   const createDarkmodeJs = () => {
     if (!darkmode.enable) return ''
 
-    let darkmodeJs = `
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
-      const activateDarkMode = () => {
-        document.documentElement.dataset.theme = 'dark'
-        if (metaThemeColor !== null) {
-          metaThemeColor.setAttribute('content', '${themeColorDark}')
-        }
-      }
-      const activateLightMode = () => {
-        document.documentElement.dataset.theme = 'light'
-        if (metaThemeColor !== null) {
-          metaThemeColor.setAttribute('content', '${themeColorLight}')
-        }
-      }
-
-      btf.activateDarkMode = activateDarkMode
-      btf.activateLightMode = activateLightMode
-
-      const theme = saveToLocal.get('theme')
+    const timeFallback = `
+      const hour = new Date().getHours()
+      const isNight = ${start} < ${end}
+        ? hour < ${start} || hour >= ${end}
+        : hour >= ${start} || hour < ${end}
+      isNight ? activateDarkMode() : activateLightMode()
     `
+    const autoMode = darkmode.autoChangeMode
+    const automatic = autoMode === 1 ? `
+      const dark = window.matchMedia('(prefers-color-scheme: dark)')
+      const light = window.matchMedia('(prefers-color-scheme: light)')
+      if (light.matches) activateLightMode()
+      else if (dark.matches) activateDarkMode()
+      else { ${timeFallback} }
+      dark.addEventListener('change', e => {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    ` : autoMode === 2 ? timeFallback : ''
 
-    switch (darkmode.autoChangeMode) {
-      case 1:
-        darkmodeJs += `
-          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
-          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
-
-          if (theme === undefined) {
-            if (mediaQueryLight.matches) activateLightMode()
-            else if (mediaQueryDark.matches) activateDarkMode()
-            else {
-              const hour = new Date().getHours()
-              const start = ${start}
-              const end = ${end}
-              const isNight =
-                start < end
-                    ? hour < start || hour >= end
-                    : hour >= start || hour < end
-              isNight ? activateDarkMode() : activateLightMode()
-            }
-            mediaQueryDark.addEventListener('change', e => {
-              if (saveToLocal.get('theme') === undefined) {
-                e.matches ? activateDarkMode() : activateLightMode()
-              }
-            })
-          } else {
-            theme === 'light' ? activateLightMode() : activateDarkMode()
-          }
-        `
-        break
-      case 2:
-        darkmodeJs += `
-          const hour = new Date().getHours()
-          const start = ${start}
-          const end = ${end}
-          const isNight =
-            start < end
-                ? hour < start || hour >= end
-                : hour >= start || hour < end
-          if (theme === undefined) isNight ? activateDarkMode() : activateLightMode()
-          else theme === 'light' ? activateLightMode() : activateDarkMode()
-        `
-        break
-      default:
-        darkmodeJs += `
-          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
-        `
-    }
-
-    return darkmodeJs
+    return `
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const setTheme = theme => {
+        document.documentElement.dataset.theme = theme
+        metaThemeColor?.setAttribute('content', theme === 'dark' ? '${themeColorDark}' : '${themeColorLight}')
+      }
+      const activateDarkMode = btf.activateDarkMode = () => setTheme('dark')
+      const activateLightMode = btf.activateLightMode = () => setTheme('light')
+      const theme = saveToLocal.get('theme')
+      if (theme === undefined) { ${automatic} }
+      else {
+        ${autoMode === 1 || autoMode === 2
+          ? "theme === 'light' ? activateLightMode() : activateDarkMode()"
+          : "if (theme === 'dark') activateDarkMode(); else if (theme === 'light') activateLightMode()"}
+      }
+    `
   }
 
   const createAsideStatusJs = () => {
@@ -192,15 +137,12 @@ hexo.extend.helper.register('inject_head_js', function () {
   }
 
   const createDetectAppleJs = () => `
-    const detectApple = () => {
-      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
-        document.documentElement.classList.add('apple')
-      }
+    if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+      document.documentElement.classList.add('apple')
     }
-    detectApple()
   `
 
-  return `<script>
+  return `<script data-swup-theme>
     (() => {
       ${createCustomJs()}
       ${createDarkmodeJs()}
