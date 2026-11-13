@@ -276,7 +276,7 @@ test('MathJax chemistry augments custom packages and repeated initialization doe
 
 test('local search preserves literal title markup and excludes executable links', () => {
   const context = { window: { addEventListener () {} }, URL, location: { origin: 'https://site.test' } }
-  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../browser/search/local-search.js'), 'utf8').split('const initLocalSearch =')[0] + '\nglobalThis.Search = LocalSearch', context)
+  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../browser/search/local-search.js'), 'utf8').split('const initLocalSearch =')[0].replace(/^import[^\n]+\n/gm, '') + '\nglobalThis.Search = LocalSearch', context)
   const search = new context.Search({})
   search.datas = [
     { title: 'vector<int> & "example"', content: 'vector', url: '/post/' },

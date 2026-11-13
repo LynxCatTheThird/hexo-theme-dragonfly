@@ -23,11 +23,16 @@ const server = http.createServer((req, res) => {
     const context = await browser.newContext()
     await require('./vendors.cjs')(context)
     await context.route('https://events.vercount.one/**', route => route.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"status":"success","data":{"site_uv":1,"site_pv":1,"page_pv":1}}' }))
+    const origin = `http://127.0.0.1:${server.address().port}`
+    if (process.env.TEST_VARIANT === 'algolia') {
+      await require('./dialog-checks.cjs')(browser, origin, mount, 'algolia')
+      await context.close()
+      return
+    }
     const page = await context.newPage()
     const requests = [], errors = []
     page.on('request', request => requests.push(request.url()))
     page.on('pageerror', error => errors.push(error.message))
-    const origin = `http://127.0.0.1:${server.address().port}`
     await page.goto(origin + mount, { waitUntil: 'networkidle' })
     const connections = await page.locator('link[rel=preconnect]').evaluateAll(links => links.map(link => new URL(link.href).origin))
     assert.ok(connections.length > 0)

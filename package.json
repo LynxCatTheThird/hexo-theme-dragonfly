@@ -70,6 +70,7 @@
     "swup": "4.10.0",
     "js-yaml": "^5.5.0",
     "@swup/scripts-plugin": "2.1.0",
-    "@egjs/infinitegrid": "4.13.1"
+    "@egjs/infinitegrid": "4.13.1",
+    "algoliasearch": "5.61.0"
   }
 }

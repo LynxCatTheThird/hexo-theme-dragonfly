@@ -26,7 +26,7 @@ const run = (args, site, env = {}) => {
   if (result.status !== 0 || /^ERROR\b/m.test((result.stdout || '') + (result.stderr || ''))) throw result.error || new Error(`Test failed in ${site}: ${result.status}`)
 }
 try {
-  for (const variant of ['default', 'components', 'subpath', 'navigation-off', 'cdn-modules', 'development']) {
+  for (const variant of ['default', 'components', 'subpath', 'navigation-off', 'cdn-modules', 'development', 'algolia']) {
     if (process.env.TEST_VARIANT && process.env.TEST_VARIANT !== variant) continue
     const site = path.join(temp, variant)
     fs.mkdirSync(path.join(site, 'source/_posts'), { recursive: true })
@@ -35,7 +35,7 @@ try {
     fs.symlinkSync(path.join(theme, 'node_modules'), path.join(site, 'node_modules'), 'dir')
     fs.writeFileSync(path.join(site, 'package.json'), JSON.stringify(sitePackage))
     const config = structuredClone(base)
-    const basic = ['default', 'development'].includes(variant)
+    const basic = ['default', 'development', 'algolia'].includes(variant)
     if (!basic) Object.assign(config.theme_config, structuredClone(components))
     if (variant === 'subpath') {
       config.root = '/blog/'
@@ -50,6 +50,11 @@ try {
       config.theme_config.CDN.internal_provider = 'custom'
       config.theme_config.CDN.internal_custom_format = 'https://dragonfly-assets.test/${file}'
       config.theme_config.CDN.development = variant === 'development'
+    }
+    if (variant === 'algolia') {
+      config.algolia = { appId: 'TESTAPP', apiKey: 'test-only-key', indexName: 'fixture' }
+      config.theme_config.search = { use: 'algolia_search' }
+      config.theme_config.navigation = { enable: true }
     }
     if (process.env.TEST_PROVIDER) config.theme_config.CDN.third_party_provider = process.env.TEST_PROVIDER
     fs.writeFileSync(path.join(site, '_config.yml'), JSON.stringify(config))

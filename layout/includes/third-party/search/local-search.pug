@@ -1,24 +1,23 @@
 #local-search
-  .search-dialog
+  dialog.search-dialog(id="local-search-dialog" aria-labelledby="local-search-title")
     nav.search-nav
-      span.search-dialog-title= _p('search.title')
+      span.search-dialog-title(id="local-search-title")= _p('search.title')
       i.fas.fa-spinner.fa-pulse#loading-status(hidden)
-      button.search-close-button
+      button.search-close-button(type="button" aria-label=_p("search.close"))
         i.fas.fa-times
 
-    #loading-database.text-center
+    #loading-database.text-center(role="status" aria-live="polite")
       i.fas.fa-spinner.fa-pulse
       span= '  ' + _p("search.load_data")
 
     .local-search-input
-      input(placeholder=theme.search.placeholder || _p("search.input_placeholder") type="text")
+      input(placeholder=theme.search.placeholder || _p("search.input_placeholder") type="search" aria-label=_p("search.input_placeholder") autofocus)
 
     hr
 
     #local-search-results
     #local-search-pagination.ais-Pagination(style="display:none;")
       ul.ais-Pagination-list
-    #local-search-stats
+    #local-search-stats(role="status" aria-live="polite")
 
-  #search-mask
   script(type="application/json" data-dragonfly-module="local_search" data-src=url_for(theme.asset.local_search))

@@ -1,3 +1,5 @@
+import { createSearchDialog } from './dialog.js'
+
 // Modified in this fork.
 /**
  * Refer to hexo-generator-searchdb
@@ -261,7 +263,6 @@ const initLocalSearch = () => {
   const $input = document.querySelector('.local-search-input input')
   const $statsItem = document.getElementById('local-search-stats')
   const $loadingStatus = document.getElementById('loading-status')
-  const $searchMask = document.getElementById('search-mask')
   const $searchDialog = document.querySelector('#local-search .search-dialog')
   const $results = document.getElementById('local-search-results')
   const $pagination = document.getElementById('local-search-pagination')
@@ -462,54 +463,10 @@ const initLocalSearch = () => {
     searchTimeout = setTimeout(inputEventFunction, 200)
   }
 
-  let searchOpen = false
-
-  const fixSafariHeight = () => {
-    if (window.innerWidth < 768) {
-      $searchDialog.style.setProperty('--search-height', window.innerHeight + 'px')
-    }
-  }
-
-  // Debounced resize to avoid layout thrashing
-  let resizeTimer
-  const onResize = () => {
-    clearTimeout(resizeTimer)
-    resizeTimer = setTimeout(fixSafariHeight, 150)
-  }
-
-  const handleEscape = event => {
-    if (event.code === 'Escape') {
-      closeSearch()
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }
-
-  let focusTimer
-  const openSearch = () => {
-    searchOpen = true
-    btf.overflowPaddingR.add()
-    btf.animateIn($searchMask, 'to_show 0.5s')
-    btf.animateIn($searchDialog, 'titleScale 0.5s')
-    focusTimer = setTimeout(() => { if (searchOpen) $input.focus() }, 300)
-    if (!localSearch.isfetched) localSearch.fetchData()
-    // shortcut: ESC
-    btf.addPageEventListener(document, 'keydown', handleEscape)
-
-    fixSafariHeight()
-    btf.addPageEventListener(window, 'resize', onResize)
-  }
-
-  const closeSearch = () => {
-    clearTimeout(resizeTimer)
-    clearTimeout(focusTimer)
-    clearTimeout(searchTimeout)
-    searchOpen = false
-    btf.overflowPaddingR.remove()
-    btf.animateOut($searchDialog, 'search_close .5s')
-    btf.animateOut($searchMask, 'to_hide 0.5s')
-    document.removeEventListener('keydown', handleEscape)
-    window.removeEventListener('resize', onResize)
-  }
+  const { open: openSearch, close: closeSearch } = createSearchDialog($searchDialog, {
+    onOpen: () => { if (!localSearch.isfetched) localSearch.fetchData() },
+    onClose: () => clearTimeout(searchTimeout)
+  })
 
   const searchClickFn = () => {
     btf.addPageEventListener(document.querySelector('#search-button > .search'), 'click', openSearch)
@@ -518,7 +475,6 @@ const initLocalSearch = () => {
   const searchFnOnce = () => {
     btf.addAppEventListener($input, 'input', debouncedInputEvent)
     btf.addAppEventListener(document.querySelector('#local-search .search-close-button'), 'click', closeSearch)
-    btf.addAppEventListener($searchMask, 'click', closeSearch)
     if (GLOBAL_CONFIG.localSearch.preload) {
       localSearch.fetchData()
     }
@@ -553,22 +509,21 @@ const initLocalSearch = () => {
       retry.textContent = languages.retry
       retry.addEventListener('click', () => localSearch.fetchData())
       $loadDataItem.replaceChildren(retry)
-      if (searchOpen) retry.focus({ preventScroll: true })
+      if ($searchDialog.open) retry.focus({ preventScroll: true })
       return
     }
     $loadDataItem.nextElementSibling.style.visibility = 'visible'
     $loadDataItem.remove()
-    if (searchOpen) $input.focus({ preventScroll: true })
+    if ($searchDialog.open) $input.focus({ preventScroll: true })
     inputEventFunction()
   })
 
-  btf.addAppEventListener(document, 'theme:page-leave', () => { if (!btf.isHidden($searchMask)) closeSearch() })
   searchClickFn()
   searchFnOnce()
   btf.addGlobalFn('encrypt', () => localSearch.highlightSearchWords(document.getElementById('article-container')), 'search')
 
   btf.addAppEventListener(window, 'theme:page-load', () => {
-    !btf.isHidden($searchMask) && closeSearch()
+    closeSearch()
     localSearch.highlightSearchWords(document.getElementById('article-container'))
     searchClickFn()
   })

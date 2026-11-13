@@ -1,22 +1,40 @@
 .search-dialog
   position: fixed
   top: 10%
-  left: 50%
-  z-index: 1001
-  display: none
-  margin-left: -300px
+  left: 0
+  right: 0
+  bottom: auto
+  margin: 0 auto
+  border: 0
+  color: var(--font-color)
+  max-width: calc(100% - 2rem)
+  max-height: 80vh
+  overflow: auto
   padding: 20px
   width: 600px
   background: var(--search-bg)
-  --search-height: 100vh
+  --search-height: 100dvh
   addBorderRadius(8)
+
+  &[open]
+    display: block
+    animation: titleScale .5s ease
+
+  &::backdrop
+    background: rgba($dark-black, .6)
+
+  :focus-visible
+    outline: 2px solid $search-color
+    outline-offset: 2px
 
   +maxWidth768()
     top: 0
     left: 0
     margin: 0
     width: 100%
-    height: 100%
+    height: 100dvh
+    max-width: none
+    max-height: 100dvh
     border-radius: 0
 
   .search-nav
@@ -192,15 +210,13 @@
     margin: 15px auto
     @extend .custom-hr
 
-#search-mask
-  position: fixed
-  top: 0
-  right: 0
-  bottom: 0
-  left: 0
-  z-index: 1000
-  display: none
-  background: rgba($dark-black, .6)
+html:has(dialog.search-dialog[open])
+  overflow: hidden
+  scrollbar-gutter: stable
+
+@media (prefers-reduced-motion: reduce)
+  .search-dialog[open]
+    animation: none
 
 .search-result-stats,
 .ais-Stats-text

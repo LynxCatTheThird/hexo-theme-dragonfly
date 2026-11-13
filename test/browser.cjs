@@ -668,5 +668,6 @@ const server = http.createServer((req, res) => {
     assert.deepEqual(await page.evaluate(() => __lifecycleStats()), dataPageBaseline)
     assert.deepEqual(errors, [])
     console.log('PASS: async notes and links cancel on leave, paginate, and keep listeners stable for 20 round trips')
+    await require('./dialog-checks.cjs')(browser, origin, mount, 'local')
   } finally { await browser.close() }
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(() => server.close())

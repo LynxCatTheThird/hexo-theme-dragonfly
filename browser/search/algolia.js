@@ -1,3 +1,5 @@
+import { createSearchDialog } from './dialog.js'
+
 // Modified in this fork.
 const initAlgolia = () => {
   const { algolia } = GLOBAL_CONFIG
@@ -17,7 +19,6 @@ const initAlgolia = () => {
   // Pre-compiled regex for tag balancing (reused across cutContent calls)
   const TAG_REGEX = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*\/?>/g
 
-  const $searchMask = document.getElementById('search-mask')
   const $searchDialog = document.querySelector('#algolia-search .search-dialog')
   const $loadingStatus = document.getElementById('loading-status')
   const $hits = document.getElementById('algolia-hits')
@@ -30,68 +31,18 @@ const initAlgolia = () => {
   const $searchInput = document.querySelector('#algolia-search-input .ais-SearchBox-input')
   const $searchForm = document.querySelector('#algolia-search-input .ais-SearchBox-form')
 
-  const animateElements = show => {
-    const action = show ? 'animateIn' : 'animateOut'
-    const maskAnimation = show ? 'to_show 0.5s' : 'to_hide 0.5s'
-    const dialogAnimation = show ? 'titleScale 0.5s' : 'search_close .5s'
-    btf[action]($searchMask, maskAnimation)
-    btf[action]($searchDialog, dialogAnimation)
-  }
-
-  const fixSafariHeight = () => {
-    if (window.innerWidth < 768) {
-      $searchDialog.style.setProperty('--search-height', `${window.innerHeight}px`)
-    }
-  }
-
-  // Debounced resize to avoid layout thrashing
-  let resizeTimer
-  const onResize = () => {
-    clearTimeout(resizeTimer)
-    resizeTimer = setTimeout(fixSafariHeight, 150)
-  }
-
-  const handleEscape = event => {
-    if (event.code === 'Escape') {
-      closeSearch()
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }
-
   const showLoading = show => {
     if ($loadingStatus) $loadingStatus.hidden = !show
   }
-
-  let focusTimer
-  const openSearch = () => {
-    btf.overflowPaddingR.add()
-    animateElements(true)
-    showLoading(false)
-
-    focusTimer = setTimeout(() => {
-      if ($searchInput) $searchInput.focus()
-    }, 100)
-
-    btf.addPageEventListener(document, 'keydown', handleEscape)
-    fixSafariHeight()
-    btf.addPageEventListener(window, 'resize', onResize)
-  }
-
-  const closeSearch = () => {
-    clearTimeout(resizeTimer)
-    clearTimeout(focusTimer)
-    btf.overflowPaddingR.remove()
-    animateElements(false)
-    document.removeEventListener('keydown', handleEscape)
-    window.removeEventListener('resize', onResize)
-  }
+  const { open: openSearch, close: closeSearch } = createSearchDialog($searchDialog, {
+    onOpen: () => showLoading(false)
+  })
 
   const searchClickFn = () => {
     btf.addPageEventListener(document.querySelector('#search-button > .search'), 'click', openSearch)
   }
 
   const searchFnOnce = () => {
-    btf.addAppEventListener($searchMask, 'click', closeSearch)
     btf.addAppEventListener(document.querySelector('#algolia-search .search-close-button'), 'click', closeSearch)
   }
 
@@ -462,12 +413,11 @@ const initAlgolia = () => {
   }
 
   initializeSearch()
-  btf.addAppEventListener(document, 'theme:page-leave', () => { if (!btf.isHidden($searchMask)) closeSearch() })
   searchClickFn()
   searchFnOnce()
 
   btf.addAppEventListener(window, 'theme:page-load', () => {
-    if (!btf.isHidden($searchMask)) closeSearch()
+    closeSearch()
     searchClickFn()
   })
 }

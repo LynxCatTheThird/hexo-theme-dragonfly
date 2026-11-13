@@ -15,7 +15,7 @@ nav#nav
   #menus
     if theme.search.use
       #search-button
-        span.site-page.social-icon.search
+        button.site-page.social-icon.search(type="button" aria-haspopup="dialog" aria-label=_p("search.title"))
           i.fas.fa-search.fa-fw
           span= ' ' + _p('search.title')
     if theme.menu
