@@ -233,13 +233,15 @@ git pull
 
 首次初始化使用 `DOMContentLoaded`；後續切頁會觸發 `theme:page-load`，替換內容前觸發 `theme:page-leave`。`btf.addPageFn` 註冊頁面範圍的回調，`pageCleanup` 用於釋放元件資源。
 
-以下命令在主題目錄執行。整合測試使用主題渲染器與站點的加密外掛，測試文章會自動清理。
+以下命令在主題目錄執行。整合測試建立獨立消費站點並使用本地元件資源，暫存輸出會自動清理。
 
 ```sh
 npm install --no-package-lock
 npm test
 npx playwright install chromium
-TEST_MATHJAX=1 npm run test:integration -- /path/to/web-v3
+npm run test:integration
+# 可選：驗證既有消費站點
+npm run test:site -- /path/to/site
 ```
 
 KaTeX 在站點建置時渲染；`math.katex.mhchem: true` 啟用化學公式，無需瀏覽器端擴展。`math.katex.copy_tex: true` 使用主題內建的公式源碼複製。MathJax 預設建置 SVG，`math.mathjax.render: client` 選擇瀏覽器渲染，`math.mathjax.mhchem: true` 啟用化學擴展。文章的 `math: katex`、`math: mathjax` 或 `math: false` 選擇引擎或停用公式。

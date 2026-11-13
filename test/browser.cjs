@@ -5,11 +5,14 @@ const path = require('node:path')
 const http = require('node:http')
 const { chromium } = require('playwright')
 
-const root = path.resolve(process.argv[2] || '../../public')
+if (!process.argv[2]) throw new Error('Pass the generated site directory')
+const root = path.resolve(process.argv[2])
+const mount = process.env.TEST_ROOT || '/'
+const withRoot = value => mount === '/' || value.startsWith(mount) ? value : mount + value.replace(/^\//, '')
 const htmlFiles = fs.readdirSync(root, { recursive: true }).filter(f => f.endsWith('.html'))
 const chartFile = htmlFiles.find(f => /class=["']echarts-container/.test(fs.readFileSync(path.join(root, f), 'utf8')))
 assert.ok(chartFile, 'Include at least one article with an ECharts block')
-const chartPath = '/' + chartFile.replace(/index\.html$/, '').split(path.sep).join('/')
+const chartPath = withRoot('/' + chartFile.replace(/index\.html$/, '').split(path.sep).join('/'))
 const forbidden = /copy-tex|\/pjax\/|instant\.page|busuanzi|googletagmanager|google-analytics|cloudflareinsights|hm\.baidu\.com|clarity\.ms|pagead2\.googlesyndication|addtoany|social-share|chatra\.io|tidio\.co|client\.crisp\.chat|trtc\.io\/knocket/
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.xml': 'application/xml', '.json': 'application/json', '.woff2': 'font/woff2' }
 const mathTheme = structuredClone(require('../scripts/common/default_config'))
@@ -23,11 +26,13 @@ require('node:vm').runInNewContext(fs.readFileSync(path.join(__dirname, '../scri
 })
 const longClientMath = '<script type="math/tex">' + Array.from({ length: 35 }, (_, i) => `x_{${i}}`).join(' + ') + '</script>'
 const clientBlocks = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map(tag => `<${tag}>Formula ${longClientMath}</${tag}>`).join('') + `<ul><li>${longClientMath}</li></ul><div class="note"><p>${longClientMath}</p></div><div class="table-wrap"><table><tr><td>${longClientMath}</td></tr></table></div>`
-const mathFixture = '<html><head><meta name="theme-color" content="#fff"><link rel="stylesheet" href="/css/index.css">' + headHelper.call({ theme: mathTheme }) + '</head><body><div id="article-container"><script type="math/tex; mode=display">\\Probe + x^2 + \\ce{H2O}</script>' + clientBlocks + '</div>' + require('pug').renderFile(path.join(__dirname, '../layout/includes/third-party/math/mathjax.pug'), { theme: mathTheme, url_for: v => v }) + '</body></html>'
+const mathFixture = '<html><head><meta name="theme-color" content="#fff"><link rel="stylesheet" href="' + withRoot('/css/index.css') + '">' + headHelper.call({ theme: mathTheme }) + '</head><body><div id="article-container"><script type="math/tex; mode=display">\\Probe + x^2 + \\ce{H2O}</script>' + clientBlocks + '</div>' + require('pug').renderFile(path.join(__dirname, '../layout/includes/third-party/math/mathjax.pug'), { theme: mathTheme, url_for: v => v }) + '</body></html>'
 const server = http.createServer((req, res) => {
-  if (req.url === '/__mathjax_test__/') { res.setHeader('Content-Type', 'text/html'); res.end(mathFixture); return }
-  let file = path.join(root, decodeURIComponent(new URL(req.url, 'http://localhost').pathname))
-  if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return }
+  if (req.url === withRoot('/__mathjax_test__/')) { res.setHeader('Content-Type', 'text/html'); res.end(mathFixture); return }
+  const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
+  if (!pathname.startsWith(mount)) { res.writeHead(404).end(); return }
+  let file = path.join(root, pathname.slice(mount.length))
+  if (file !== root && !file.startsWith(root + path.sep)) { res.writeHead(403).end(); return }
   try {
     if (fs.statSync(file).isDirectory()) file = path.join(file, 'index.html')
     res.setHeader('Content-Type', types[path.extname(file)] || 'application/octet-stream')
@@ -41,6 +46,7 @@ const server = http.createServer((req, res) => {
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined })
   try {
     const nojs = await browser.newContext({ javaScriptEnabled: false })
+    await require('./vendors.cjs')(nojs)
     for (const engine of ['katex', 'mathjax']) {
       const file = engine === 'katex' ? chartFile : htmlFiles.find(file => file.startsWith('article/ssr-mathjax-public'))
       assert.ok(file, `Missing public ${engine} fixture`)
@@ -48,7 +54,7 @@ const server = http.createServer((req, res) => {
       await staticPage.route('**/*', route => route.request().resourceType() === 'image' ? route.abort() : route.fallback())
       const requests = []
       staticPage.on('request', request => requests.push(request.url()))
-      await staticPage.goto(origin + '/' + file, { waitUntil: 'networkidle' })
+      await staticPage.goto(origin + withRoot('/' + file), { waitUntil: 'networkidle' })
       for (const width of [1280, 390]) {
         await staticPage.setViewportSize({ width, height: 900 })
         const formula = staticPage.locator(engine === 'katex' ? '#article-container .katex-html' : '#article-container mjx-container svg').first()
@@ -78,6 +84,8 @@ const server = http.createServer((req, res) => {
     await nojs.close()
     console.log('PASS: KaTeX and MathJax visible without JavaScript at desktop and mobile widths')
     const context = await browser.newContext()
+    await context.addInitScript(root => { window.__testRoot = root }, mount)
+    await require('./vendors.cjs')(context)
     let counterCalls = 0
     if (process.env.MOCK_VISITOR_COUNTER) {
       await context.route('https://events.vercount.one/**', route => {
@@ -87,31 +95,13 @@ const server = http.createServer((req, res) => {
         return route.fulfill({ headers, contentType: 'application/json', body: JSON.stringify({ status: 'success', data: { site_uv: 77, site_pv: 100, page_pv: 19 } }) })
       })
     }
-    if (process.env.NAV_VENDOR_DIR) {
-      const vendors = {
-        '**/swup/4.10.0/**': 'swup/package/dist/Swup.umd.js',
-        '**/@swup/head-plugin/2.3.1/**': '@swup_head-plugin/package/dist/index.umd.js',
-        '**/@swup/preload-plugin/3.2.12/**': '@swup_preload-plugin/package/dist/index.umd.js',
-        '**/@swup/a11y-plugin/5.2.1/**': '@swup_a11y-plugin/package/dist/index.umd.js'
-      }
-      for (const [pattern, file] of Object.entries(vendors)) await context.route(pattern, route => route.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(path.join(process.env.NAV_VENDOR_DIR, file), 'utf8') }))
-    }
-    if (process.env.COMPONENT_VENDOR_DIR) {
-      const vendors = {
-        '**/echarts/6.1.0/**': 'echarts.js',
-        '**/chart.js/4.6.1/**': 'chartjs.js',
-        '**/mermaid/12.3.0/**': 'mermaid.js',
-        '**/katex/0.19.1/files/dist/katex.min.css': 'katex.css',
-      }
-      for (const [pattern, file] of Object.entries(vendors)) await context.route(pattern, route => route.fulfill({ contentType: file.endsWith('.css') ? 'text/css' : 'text/javascript', body: fs.readFileSync(path.join(process.env.COMPONENT_VENDOR_DIR, file), 'utf8') }))
-    }
     const page = await context.newPage()
     const errors = [], forbiddenRequests = []
     let chartRequests = 0
     page.on('pageerror', e => errors.push(e.message))
     page.on('request', r => {
       if (forbidden.test(r.url())) forbiddenRequests.push(r.url())
-      if (/\/echarts\//.test(r.url())) chartRequests++
+      if (/\/echarts(?:\/|@)/.test(r.url())) chartRequests++
     })
     await page.route('**/*', r => r.request().resourceType() === 'image' ? r.abort() : r.fallback())
     await page.addInitScript(() => {
@@ -133,7 +123,7 @@ const server = http.createServer((req, res) => {
       await page.evaluate(p => new Promise(resolve => {
         document.addEventListener('theme:page-load', resolve, { once: true })
         swup.navigate(p)
-      }), pathname)
+      }), withRoot(pathname))
     }
     const ready = () => page.waitForFunction(() => {
       const els = [...document.querySelectorAll('.echarts-container')]
@@ -200,7 +190,7 @@ const server = http.createServer((req, res) => {
       og: document.querySelector('meta[property="og:url"]')?.content,
       json: [...document.querySelectorAll('script[type="application/ld+json"]')].map(e => JSON.parse(e.textContent))
     }))
-    await page.goto(origin, { waitUntil: 'networkidle' })
+    await page.goto(origin + mount, { waitUntil: 'networkidle' })
     await page.waitForFunction(() => typeof window.swup?.navigate === 'function')
     if (process.env.MOCK_VISITOR_COUNTER) {
       await page.waitForFunction(() => document.getElementById('custom-uv')?.textContent === '77' && document.getElementById('custom-site-pv')?.textContent === '100')
@@ -220,10 +210,10 @@ const server = http.createServer((req, res) => {
     if (process.env.MOCK_VISITOR_COUNTER) {
       const beforeMissing = counterCalls
       const countedMissing = page.waitForResponse(r => r.url().includes('/api/v2/log') && r.request().method() === 'POST')
-      await go('/__missing_audit_page__/')
+      await go(withRoot('/__missing_audit_page__/'))
       await countedMissing
       await page.waitForTimeout(200)
-      assert.equal(new URL(page.url()).pathname, '/__missing_audit_page__/')
+      assert.equal(new URL(page.url()).pathname, withRoot('/__missing_audit_page__/'))
       assert.equal(counterCalls - beforeMissing, 1, `Failed navigation counter update; page errors: ${errors.join('; ')}`)
       await go(chartPath)
       await ready()
@@ -288,14 +278,14 @@ const server = http.createServer((req, res) => {
     await race.route('**/*', r => r.request().resourceType() === 'image' ? r.abort() : r.fallback())
     let release
     const gate = new Promise(resolve => { release = resolve })
-    await race.route('**/echarts/**', async r => { await gate; await r.fallback() })
-    await race.goto(origin, { waitUntil: 'networkidle' })
-    const requested = race.waitForRequest(r => /\/echarts\//.test(r.url()))
+    await race.route(/\/echarts(?:\/|@)/, async r => { await gate; await r.fallback() })
+    await race.goto(origin + mount, { waitUntil: 'networkidle' })
+    const requested = race.waitForRequest(r => /\/echarts(?:\/|@)/.test(r.url()))
     await race.evaluate(p => swup.navigate(p), chartPath)
     await requested
     await race.evaluate(() => { window.__departedChart = document.querySelector('.echarts-container') })
-    await race.evaluate(() => swup.navigate('/'))
-    await race.waitForURL(origin + '/')
+    await race.evaluate(() => swup.navigate(window.__testRoot))
+    await race.waitForURL(origin + mount)
     release()
     await race.waitForFunction(() => typeof window.echarts?.init === 'function')
     assert.ok(await race.evaluate(() => !echarts.getInstanceByDom(window.__departedChart)))
@@ -306,7 +296,7 @@ const server = http.createServer((req, res) => {
     const retryPage = await context.newPage()
     await retryPage.route('**/*', r => r.request().resourceType() === 'image' ? r.abort() : r.fallback())
     let attempts = 0
-    await retryPage.route('**/echarts/**', r => ++attempts === 1 ? r.abort() : r.fallback())
+    await retryPage.route(/\/echarts(?:\/|@)/, r => ++attempts === 1 ? r.abort() : r.fallback())
     await retryPage.goto(origin + chartPath, { waitUntil: 'networkidle' })
     await retryPage.locator('.echarts-error').first().click()
     await retryPage.waitForFunction(() => [...document.querySelectorAll('.echarts-container')].every(el => typeof window.echarts?.getInstanceByDom === 'function' && echarts.getInstanceByDom(el)))
@@ -323,7 +313,7 @@ const server = http.createServer((req, res) => {
     const fallback = await context.newPage()
     const fallbackErrors = []
     fallback.on('pageerror', error => fallbackErrors.push(error.message))
-    await fallback.route('**/swup/4.10.0/**', route => route.abort())
+    await fallback.route(/\/swup(?:\/|@)/, route => route.abort())
     await fallback.route('**/*', route => route.request().resourceType() === 'image' ? route.abort() : route.fallback())
     await fallback.goto(origin + chartPath, { waitUntil: 'networkidle' })
     await fallback.waitForFunction(() => typeof window.echarts?.getInstanceByDom === 'function' && [...document.querySelectorAll('.echarts-container')].every(el => echarts.getInstanceByDom(el)))
@@ -334,9 +324,9 @@ const server = http.createServer((req, res) => {
 
     await page.setViewportSize({ width: 1280, height: 900 })
     const beforePreload = counterCalls
-    await page.evaluate(() => swup.preload('/about/'))
+    await page.evaluate(() => swup.preload(window.__testRoot + 'about/'))
     assert.equal(counterCalls, beforePreload, 'Prefetch must not execute the counter')
-    assert.ok(await page.evaluate(() => swup.cache.has('/about/')))
+    assert.ok(await page.evaluate(() => swup.cache.has(window.__testRoot + 'about/')))
     await go('/about/')
     await page.waitForFunction(() => document.activeElement?.id === 'content-inner')
     assert.ok(await page.evaluate(() => {
@@ -380,7 +370,7 @@ const server = http.createServer((req, res) => {
       const mathPage = await context.newPage()
       const mathRequests = []
       mathPage.on('request', request => { if (/\/mathjax\//.test(request.url())) mathRequests.push(request.url()) })
-      await mathPage.goto(origin + '/' + file.replace(/index\.html$/, ''), { waitUntil: 'networkidle' })
+      await mathPage.goto(origin + withRoot('/' + file).replace(/index\.html$/, ''), { waitUntil: 'networkidle' })
       if (variant === 'private') {
         assert.equal(await mathPage.locator('mjx-container').count(), 0)
         await mathPage.locator('input[type=password]').fill('component-test-only')
@@ -401,7 +391,7 @@ const server = http.createServer((req, res) => {
       const math = await context.newPage()
       const mathErrors = []
       math.on('pageerror', error => mathErrors.push(error.message))
-      await math.goto(origin + '/__mathjax_test__/', { waitUntil: 'domcontentloaded' })
+      await math.goto(origin + withRoot('/__mathjax_test__/'), { waitUntil: 'domcontentloaded' })
       await math.waitForSelector('#article-container mjx-container', { timeout: 45000 })
       assert.ok(await math.locator('mjx-container mjx-mi').count() > 0)
       assert.equal(await math.locator('mjx-merror').count(), 0)
@@ -427,14 +417,14 @@ const server = http.createServer((req, res) => {
         await gate
         await route.fallback()
       })
-      await slowCounter.goto(origin, { waitUntil: 'domcontentloaded' })
+      await slowCounter.goto(origin + mount, { waitUntil: 'domcontentloaded' })
       await slowCounter.waitForFunction(() => typeof window.swup?.navigate === 'function')
-      await slowCounter.evaluate(() => swup.navigate('/tags/'))
-      await slowCounter.waitForFunction(() => location.pathname === '/tags/' && !swup.navigating)
-      assert.ok(urls.some(url => new URL(url).pathname === '/'))
+      await slowCounter.evaluate(() => swup.navigate(window.__testRoot + 'tags/'))
+      await slowCounter.waitForFunction(() => location.pathname === window.__testRoot + 'tags/' && !swup.navigating)
+      assert.ok(urls.some(url => new URL(url).pathname === mount))
       releaseCounter()
       await slowCounter.waitForFunction(() => document.getElementById('custom-uv')?.textContent === '77')
-      assert.ok(urls.some(url => new URL(url).pathname === '/tags/'))
+      assert.ok(urls.some(url => new URL(url).pathname === withRoot('/tags/')))
       await slowCounter.close()
       console.log('PASS: slow counters preserve page URLs and do not block navigation')
     }
@@ -443,8 +433,8 @@ const server = http.createServer((req, res) => {
     await delayedNavigation.route('**/*', route => route.request().resourceType() === 'image' ? route.abort() : route.fallback())
     let releaseNavigation
     const navigationGate = new Promise(resolve => { releaseNavigation = resolve })
-    await delayedNavigation.route('**/swup/4.10.0/**', async route => { await navigationGate; await route.fallback() })
-    await delayedNavigation.goto(origin, { waitUntil: 'domcontentloaded' })
+    await delayedNavigation.route(/\/swup(?:\/|@)/, async route => { await navigationGate; await route.fallback() })
+    await delayedNavigation.goto(origin + mount, { waitUntil: 'domcontentloaded' })
     assert.ok(await delayedNavigation.evaluate(() => typeof window.globalFn.pageLoad.refreshFn === 'function'))
     assert.equal(await delayedNavigation.evaluate(() => typeof window.swup?.navigate), 'undefined')
     releaseNavigation()
@@ -456,7 +446,7 @@ const server = http.createServer((req, res) => {
     await searchRetry.route('**/*', route => route.request().resourceType() === 'image' ? route.abort() : route.fallback())
     let searchAttempts = 0
     await searchRetry.route('**/search.xml', route => ++searchAttempts === 1 ? route.abort() : route.fallback())
-    await searchRetry.goto(origin, { waitUntil: 'networkidle' })
+    await searchRetry.goto(origin + mount, { waitUntil: 'networkidle' })
     await searchRetry.locator('#search-button .search').click()
     await searchRetry.locator('.search-retry').click()
     await searchRetry.locator('.local-search-input input').fill(chartMeta.json[0].headline.includes('<T>') ? '<T>' : chartMeta.json[0].headline)
@@ -467,7 +457,7 @@ const server = http.createServer((req, res) => {
 
     const encryptedFile = htmlFiles.find(file => file.startsWith('article/') && /<title>Component integration test/.test(fs.readFileSync(path.join(root, file), 'utf8')))
     if (encryptedFile) {
-      const encryptedPath = '/' + encryptedFile.replace(/index\.html$/, '')
+      const encryptedPath = withRoot('/' + encryptedFile.replace(/index\.html$/, ''))
       const encrypted = await context.newPage()
       const componentErrors = []
       encrypted.on('pageerror', error => componentErrors.push(error.message))
@@ -502,7 +492,7 @@ const server = http.createServer((req, res) => {
           mermaid: document.querySelector('.mermaid-wrap').__mermaidAbortController
         }
       })
-      await encrypted.evaluate(() => new Promise(resolve => { document.addEventListener('theme:page-load', resolve, { once: true }); swup.navigate('/') }))
+      await encrypted.evaluate(() => new Promise(resolve => { document.addEventListener('theme:page-load', resolve, { once: true }); swup.navigate(window.__testRoot) }))
       assert.equal(await encrypted.evaluate(() => !!Fancybox.getInstance()), false)
       assert.ok(await encrypted.evaluate(() => __componentState.echarts.isDisposed() && __componentState.chart.ctx === null && __componentState.mermaid.signal.aborted))
       await encrypted.evaluate(path => new Promise(resolve => { document.addEventListener('theme:page-load', resolve, { once: true }); swup.navigate(path) }), encryptedPath)

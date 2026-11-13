@@ -233,13 +233,15 @@ Thanks to everyone who has contributed to Butterfly — your support keeps the t
 
 Use `DOMContentLoaded` for initial setup, `theme:page-load` after navigation and `theme:page-leave` before replacement. `btf.addPageFn` registers page-scoped callbacks; `pageCleanup` releases component resources.
 
-Run these commands in the theme directory. Integration tests use the theme renderer and the site's encryption plugin and clean up their temporary posts.
+Run these commands in the theme directory. Integration tests create an isolated consumer with local component assets and remove temporary output.
 
 ```sh
 npm install --no-package-lock
 npm test
 npx playwright install chromium
-TEST_MATHJAX=1 npm run test:integration -- /path/to/web-v3
+npm run test:integration
+# Optional: check an existing consumer site
+npm run test:site -- /path/to/site
 ```
 
 KaTeX renders at site build time; `math.katex.mhchem: true` enables chemistry without a browser extension. `math.katex.copy_tex: true` uses the built-in TeX copy handler. MathJax builds SVG by default; `math.mathjax.render: client` selects browser rendering. `math.mathjax.mhchem: true` enables chemistry. Article front matter `math: katex`, `math: mathjax`, or `math: false` selects one engine or disables math.
