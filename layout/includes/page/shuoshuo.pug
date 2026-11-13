@@ -14,7 +14,7 @@
     if page.comments !== false && theme.comments.use
       - commentsJsLoad = true
 
-      script.
+      script(data-swup-reload-script).
         (() => {
           const commentDiv = `!{partial('includes/third-party/comments/index', {}, {cache: true})}`
 
@@ -51,7 +51,7 @@
       script(type='application/json' id='shuoshuo-data')!= safeJSON(localDate)
 
     - const { enable, native, placeholder, field } = theme.lazyload
-    script.
+    script(data-swup-reload-script).
       (() => {
         const limitConfig = !{ JSON.stringify(page.limit || {}) }
 

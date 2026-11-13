@@ -5,7 +5,7 @@
 
     if flink_url || random
       - const linkData = flink_url ? false : site.data.link || false
-      script.
+      script(data-swup-reload-script).
         (()=>{
           const replaceSymbol = (str) => {
             return str.replace(/[\p{P}\p{S}]/gu, "-")

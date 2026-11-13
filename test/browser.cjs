@@ -518,5 +518,24 @@ const server = http.createServer((req, res) => {
     }
 
 
+    for (let visit = 1; visit <= 2; visit++) {
+      await go('/script-contract/')
+      await page.waitForFunction(count => window.__asyncRuns === count && window.__moduleMounts === count, visit)
+      assert.equal(await page.evaluate(() => window.__unmarkedRuns), undefined)
+      assert.equal(await page.evaluate(() => window.__markedRuns), visit)
+      assert.equal(await page.evaluate(() => window.__classicRuns), visit)
+      assert.equal(await page.evaluate(() => window.__moduleRuns), 1)
+      assert.deepEqual(await page.evaluate(() => window.__scriptOrder), ['classic', 'inline'])
+      assert.equal(await page.locator('#contract-data').textContent(), '{"value":1}')
+      await go('/')
+    }
+    const directScripts = await context.newPage()
+    await directScripts.goto(origin + withRoot('/script-contract/'), { waitUntil: 'networkidle' })
+    assert.equal(await directScripts.evaluate(() => window.__unmarkedRuns), 1)
+    assert.equal(await directScripts.evaluate(() => window.__moduleRuns), 1)
+    assert.equal(await directScripts.evaluate(() => window.__moduleMounts), 1)
+    await directScripts.close()
+    assert.deepEqual(errors, [])
+    console.log('PASS: explicit script opt-in, classic ordering, async execution, data blocks and cached module mounts')
   } finally { await browser.close() }
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(() => server.close())

@@ -2,7 +2,7 @@
 - const { serverURL, option, pageview } = theme.waline
 - const { lazyload, count, use } = theme.comments
 
-script.
+script(data-swup-reload-script).
   (() => {
     let initFn = window.walineFn || null
     const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'

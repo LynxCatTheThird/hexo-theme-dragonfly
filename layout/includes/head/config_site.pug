@@ -16,7 +16,7 @@
   }
 -
 
-script#config-diff(data-swup-theme).
+script#config-diff(data-swup-theme data-swup-reload-script).
   var GLOBAL_CONFIG_SITE = {
     title: !{JSON.stringify(pageTitle).replace(/</g, '\\u003c')},
     isHighlightShrink: !{isHighlightShrink},

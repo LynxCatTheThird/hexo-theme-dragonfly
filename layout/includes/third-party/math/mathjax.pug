@@ -14,7 +14,7 @@
   } else {
     tex.autoload = { mhchem: [], ...tex.autoload }
   }
-script.
+script(data-swup-reload-script).
   (() => {
     const rendered = new WeakSet()
     const loadMathjax = async () => {

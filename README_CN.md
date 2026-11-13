@@ -247,3 +247,5 @@ npm run test:site -- /path/to/site
 KaTeX 在站點建置時渲染；`math.katex.mhchem: true` 啟用化學公式，無需瀏覽器端擴展。`math.katex.copy_tex: true` 使用主題內建的公式源碼複製。MathJax 預設建置 SVG，`math.mathjax.render: client` 選擇瀏覽器渲染，`math.mathjax.mhchem: true` 啟用化學擴展。文章的 `math: katex`、`math: mathjax` 或 `math: false` 選擇引擎或停用公式。
 
 在站點 `theme_config.markdown.renderer`（或 `_config.butterfly.yml`）設定 Markdown 所有權。`auto` 僅在未安裝 Markdown 渲染器時使用主題內建渲染器；`theme` 明確選用內建渲染器；`external` 保留站點渲染。內建數學選項與 Markdown 擴展僅適用於主題渲染器；外部渲染器自行處理公式解析。
+
+頁面腳本須以 `data-swup-reload-script` 明確選擇切頁後執行。同一模組 URL 每個會話只執行一次；後續掛載請註冊明確的 `pageLoad` 回調。

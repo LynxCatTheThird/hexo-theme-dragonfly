@@ -57,6 +57,27 @@ try {
       fs.mkdirSync(path.join(site, 'source', slug), { recursive: true })
       fs.writeFileSync(path.join(site, 'source', slug, 'index.md'), `---\ntitle: ${slug}\n---\nTest ${slug} page.`)
     }
+    fs.mkdirSync(path.join(site, 'source/script-contract'), { recursive: true })
+    fs.writeFileSync(path.join(site, 'source/script-contract/index.md'), `---
+title: Script contract
+comments: false
+---
+<div id="script-contract">Script fixture</div>
+<script>window.__unmarkedRuns = (window.__unmarkedRuns || 0) + 1</script>
+<script data-swup-reload-script>window.__markedRuns = (window.__markedRuns || 0) + 1; window.__scriptOrder = []</script>
+<script data-swup-reload-script src="${config.root}contract-classic.js"></script>
+<script data-swup-reload-script>window.__scriptOrder.push('inline')</script>
+<script data-swup-reload-script async src="${config.root}contract-async.js"></script>
+<script data-swup-reload-script type="module" src="${config.root}contract-module.js"></script>
+<script type="application/json" id="contract-data">{"value":1}</script>
+`)
+    fs.writeFileSync(path.join(site, 'source/contract-classic.js'), "window.__classicRuns = (window.__classicRuns || 0) + 1; window.__scriptOrder.push('classic')")
+    fs.writeFileSync(path.join(site, 'source/contract-async.js'), 'window.__asyncRuns = (window.__asyncRuns || 0) + 1')
+    fs.writeFileSync(path.join(site, 'source/contract-module.js'), `window.__moduleRuns = (window.__moduleRuns || 0) + 1
+const mount = () => { if (document.getElementById('script-contract')) window.__moduleMounts = (window.__moduleMounts || 0) + 1 }
+btf.addGlobalFn('pageLoad', mount, 'contractModule')
+if (document.readyState !== 'complete') document.addEventListener('DOMContentLoaded', mount, { once: true })
+`)
     // Home stays tall enough to exercise scroll restoration without personal posts.
     for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(site, 'source/_posts', `post-${i}.md`), `---\ntitle: Post ${i}\ndate: 2025-01-01\n---\nTest post ${i}.`)
     const fixture = fs.readFileSync(path.join(__dirname, 'fixtures/components.md'), 'utf8')

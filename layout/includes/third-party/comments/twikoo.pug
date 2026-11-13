@@ -1,7 +1,7 @@
 - const { envId, region, option } = theme.twikoo
 - const { use, lazyload, count } = theme.comments
 
-script.
+script(data-swup-reload-script).
   (() => {
     const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
     const option = !{JSON.stringify(option)}

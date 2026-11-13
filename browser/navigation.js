@@ -11,7 +11,7 @@
 
   // Global bundles stay loaded; only replaced containers run their scripts.
   const runPageScripts = async () => {
-    const scripts = document.querySelectorAll('#config-diff, #body-wrap script, .page-scripts script')
+    const scripts = document.querySelectorAll('#config-diff[data-swup-reload-script], #body-wrap script[data-swup-reload-script], .page-scripts script[data-swup-reload-script]')
     for (const old of scripts) {
       if (!old.isConnected) continue
       const type = (old.type || '').toLowerCase()

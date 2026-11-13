@@ -247,3 +247,5 @@ npm run test:site -- /path/to/site
 KaTeX renders at site build time; `math.katex.mhchem: true` enables chemistry without a browser extension. `math.katex.copy_tex: true` uses the built-in TeX copy handler. MathJax builds SVG by default; `math.mathjax.render: client` selects browser rendering. `math.mathjax.mhchem: true` enables chemistry. Article front matter `math: katex`, `math: mathjax`, or `math: false` selects one engine or disables math.
 
 Markdown ownership is configured in the site's `theme_config.markdown.renderer` (or `_config.butterfly.yml`). `auto` uses the built-in renderer only when no Markdown renderer is installed; `theme` explicitly selects it; `external` preserves site rendering. Built-in math options and Markdown extensions apply only to the theme renderer; external renderers own their math parsing.
+
+Page scripts must opt in to navigation execution with `data-swup-reload-script`. A module URL runs once per session; register an explicit `pageLoad` callback for subsequent mounts.

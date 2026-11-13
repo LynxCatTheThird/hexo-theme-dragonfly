@@ -2,7 +2,7 @@
 - const { effect, source, sub, typed_option } = theme.subtitle
 - let subContent = typeof sub === 'string' ? [sub] : (sub || new Array())
 
-script.
+script(data-swup-reload-script).
   window.typedJSFn = {
     _seq: 0,
     init: str => {
@@ -71,7 +71,7 @@ script.
 
 case source
   when 1
-    script.
+    script(data-swup-reload-script).
       function subtitleType () {
         typedJSFn.fetchSubtitle(
           () => fetch('https://v1.hitokoto.cn').then(response => response.json()),
@@ -81,7 +81,7 @@ case source
       typedJSFn.run(subtitleType)
 
   when 2
-    script.
+    script(data-swup-reload-script).
       function subtitleType () {
         typedJSFn.fetchSubtitle(
           () => fetch('https://v.api.aa1.cn/api/yiyan/index.php').then(response => response.text()),
@@ -96,7 +96,7 @@ case source
       typedJSFn.run(subtitleType)
 
   when 3
-    script.
+    script(data-swup-reload-script).
       function subtitleType () {
         typedJSFn.fetchSubtitle(
           () => btf.getScript('https://sdk.jinrishici.com/v2/browser/jinrishici.js').then(() =>
@@ -114,7 +114,7 @@ case source
 
   default
     if subContent.length > 0
-      script.
+      script(data-swup-reload-script).
         function subtitleType () {
           typedJSFn.processSubtitle(!{JSON.stringify(subContent)})
         }

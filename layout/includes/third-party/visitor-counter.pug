@@ -4,7 +4,7 @@
 each key in ['site_uv', 'site_pv', 'page_pv']
   if counter[key]
     - ids[key] = elements[key] || `vercount_value_${key}`
-script.
+script(data-swup-reload-script).
   (async () => {
     if (!/^https?:$/.test(location.protocol)) return
     const api = !{JSON.stringify(counter.api_url).replace(/</g, '\\u003c')}
