@@ -16,6 +16,7 @@
   }
 script(data-swup-reload-script).
   (() => {
+    const pageSignal = btf.pageSignal
     const rendered = new WeakSet()
     const loadMathjax = async () => {
       const article = document.getElementById('article-container')
@@ -46,9 +47,10 @@ script(data-swup-reload-script).
       }
       try {
         await window.mathjaxReady
-        if (!article.isConnected) return
+        if (pageSignal.aborted || !article.isConnected) return
         MathJax.typesetClear([article])
         await MathJax.typesetPromise([article])
+        if (pageSignal.aborted || !article.isConnected) MathJax.typesetClear([article])
       } catch (error) {
         rendered.delete(article)
         console.error('[mathjax]', error)

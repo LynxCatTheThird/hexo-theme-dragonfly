@@ -235,7 +235,7 @@ test('MathJax configuration forwards loader, font, TeX and document options', ()
   const html = pug.renderFile(path.resolve(__dirname, '../layout/includes/third-party/math/mathjax.pug'), { theme, url_for: value => value })
   const window = {}
   const article = { querySelector: () => null, querySelectorAll: () => [], isConnected: true }
-  vm.runInNewContext(html.match(/<script[^>]*>([\s\S]*)<\/script>/)[1], { window, document: { readyState: 'complete', getElementById: () => article }, btf: { addGlobalFn () {}, addPageFn () {}, getScript: () => new Promise(() => {}) } })
+  vm.runInNewContext(html.match(/<script[^>]*>([\s\S]*)<\/script>/)[1], { window, document: { readyState: 'complete', getElementById: () => article }, btf: { pageSignal: new AbortController().signal, addGlobalFn () {}, addPageFn () {}, getScript: () => new Promise(() => {}) } })
   assert.equal(window.MathJax.loader.load[0], '[tex]/physics')
   assert.equal(window.MathJax.output.font, 'mathjax-tex')
   assert.equal(window.MathJax.tex.macros.R, '\\mathbb{R}')
@@ -256,6 +256,7 @@ test('MathJax chemistry augments custom packages and repeated initialization doe
   const article = { querySelector: () => null, querySelectorAll: () => [], isConnected: true }
   const context = { document: { readyState: 'complete', getElementById: () => article }, console,
     btf: {
+      pageSignal: new AbortController().signal,
       addGlobalFn () {}, addPageFn: (_, fn) => { retry = fn },
       getScript: async () => {
         downloads++

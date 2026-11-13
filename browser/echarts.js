@@ -15,10 +15,11 @@
   const init = async () => {
     const elements = [...document.querySelectorAll('#article-container .echarts-container')]
     if (!elements.length) return
+    const signal = btf.pageSignal
     const current = generation
     try {
       if (typeof window.echarts?.init !== 'function') await btf.getScript(src)
-      if (current !== generation) return
+      if (signal.aborted || current !== generation) return
       elements.forEach(el => {
         if (!el.isConnected) return
         const theme = config.theme[document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light']
@@ -44,7 +45,7 @@
         observer.observe(el)
       })
     } catch (error) {
-      if (current !== generation) return
+      if (signal.aborted || current !== generation) return
       console.error('[echarts] Failed to render charts:', error)
       elements.filter(el => el.isConnected && !charts.has(el)).forEach(el => {
         if (el.querySelector('.echarts-error')) return
@@ -61,11 +62,11 @@
   const refresh = () => {
     btf.addPageFn('themeChange', init, 'echarts')
     btf.addPageFn('encrypt', init, 'echarts')
-    init()
+    return init()
   }
   // Register cleanup once: it must also cancel a download during fast navigation.
-  document.addEventListener('theme:page-leave', dispose)
-  document.addEventListener('theme:page-load', refresh)
+  btf.addAppEventListener(document, 'theme:page-leave', dispose)
+  btf.addAppEventListener(document, 'theme:page-load', refresh)
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh, { once: true })
   else refresh()
 })()

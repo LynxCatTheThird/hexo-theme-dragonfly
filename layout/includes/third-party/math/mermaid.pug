@@ -1,6 +1,7 @@
 //- Modified in this fork.
 script(data-swup-reload-script).
   (() => {
+    const pageSignal = btf.pageSignal
     const parseViewBox = viewBox => {
       if (!viewBox) return null
       const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
@@ -115,6 +116,7 @@ script(data-swup-reload-script).
         if (wrap.__mermaidRafId) cancelAnimationFrame(wrap.__mermaidRafId)
       }
       const ac = new AbortController()
+      pageSignal.addEventListener('abort', () => { ac.abort(); cancelAnimationFrame(wrap.__mermaidRafId) }, { once: true })
       wrap.__mermaidAbortController = ac
       const svg = wrap.querySelector('svg')
       if (!svg) return
@@ -285,9 +287,13 @@ script(data-swup-reload-script).
       }
       const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? '!{theme.mermaid.theme.dark}' : '!{theme.mermaid.theme.light}'
       ele.forEach((item, index) => {
-        if (!item.isConnected) return
-        const renderId = item.__mermaidRenderId = (item.__mermaidRenderId || 0) + 1
+        if (pageSignal.aborted || !item.isConnected) return
         const mermaidSrc = item.firstElementChild
+        const renderKey = JSON.stringify([theme, mermaidSrc.dataset.config, mermaidSrc.textContent])
+        if (item.__mermaidRenderKey === renderKey && (item.querySelector('svg') || item.__mermaidPending)) return
+        item.__mermaidRenderKey = renderKey
+        item.__mermaidPending = true
+        const renderId = item.__mermaidRenderId = (item.__mermaidRenderId || 0) + 1
         // Clean up event listeners and stale content before re-rendering
         if (item.__mermaidAbortController) {
           item.__mermaidAbortController.abort()
@@ -310,7 +316,8 @@ script(data-swup-reload-script).
         const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
 
         const renderMermaid = svg => {
-          if (!item.isConnected || item.__mermaidRenderId !== renderId) return
+          if (pageSignal.aborted || !item.isConnected || item.__mermaidRenderId !== renderId) return
+          item.__mermaidPending = false
           mermaidSrc.insertAdjacentHTML('afterend', svg)
           if (!{theme.mermaid.zoom_pan}) initMermaidGestures(item)
           item.__mermaidOriginalSvg = svg
@@ -318,7 +325,8 @@ script(data-swup-reload-script).
         }
 
         const handleError = err => {
-          if (!item.isConnected || item.__mermaidRenderId !== renderId) return
+          if (pageSignal.aborted || !item.isConnected || item.__mermaidRenderId !== renderId) return
+          item.__mermaidPending = false
           console.error(`[mermaid] render failed for block #${index}:`, err)
           const errorEl = document.createElement('div')
           errorEl.className = 'mermaid-error'
@@ -364,7 +372,7 @@ script(data-swup-reload-script).
       const $mermaid = $article.querySelectorAll('.mermaid-wrap')
       if ($mermaid.length === 0) return
 
-      const runMermaidFn = () => runMermaid($mermaid)
+      const runMermaidFn = () => { if (!pageSignal.aborted) runMermaid($mermaid) }
       btf.addPageFn('themeChange', runMermaidFn, 'mermaid')
       typeof window.mermaid?.render === 'function' ? runMermaidFn() : btf.getScript('!{url_for(theme.asset.mermaid)}').then(runMermaidFn)
     }

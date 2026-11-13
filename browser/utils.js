@@ -3,7 +3,7 @@
   const btfFn = {
     debounce: (func, wait = 0, immediate = false) => {
       let timeout
-      return (...args) => {
+      const debounced = (...args) => {
         const later = () => {
           timeout = null
           if (!immediate) func(...args)
@@ -13,6 +13,8 @@
         timeout = setTimeout(later, wait)
         if (callNow) func(...args)
       }
+      debounced.cancel = () => { clearTimeout(timeout); timeout = null }
+      return debounced
     },
 
     throttle: (func, wait, options = {}) => {
@@ -174,11 +176,13 @@
     getEleTop: ele => ele.getBoundingClientRect().top + window.scrollY,
 
     loadLightbox: async ele => {
+      const signal = btf.pageSignal
       const service = GLOBAL_CONFIG.lightbox
       if (!ele.length || !['medium_zoom', 'fancybox'].includes(service)) return
       try {
         await btf.getScript(GLOBAL_CONFIG.lightboxSrc)
       } catch (error) { console.error('[lightbox]', error); return }
+      if (signal.aborted) return
       ele = [...ele].filter(element => element.isConnected)
       if (!ele.length) return
 

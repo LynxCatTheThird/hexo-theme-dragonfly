@@ -3,6 +3,7 @@
 
 script(data-swup-reload-script).
   (() => {
+    const pageSignal = btf.pageSignal
     const applyThemeDefaultsConfig = theme => {
       if (theme === 'dark-mode') {
         Chart.defaults.color = "!{fontColor.dark}"
@@ -40,11 +41,18 @@ script(data-swup-reload-script).
 
     const runChartJS = ele => {
       Array.from(ele).forEach((item, index) => {
-        if (!item.isConnected) return
+        if (pageSignal.aborted || !item.isConnected) return
+        const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
         const chartSrc = item.firstElementChild
         const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
         const width = item.getAttribute('data-width')
         const existingCanvas = document.getElementById(chartID)
+
+        const existingChart = existingCanvas && Chart.getChart(existingCanvas)
+        if (existingChart && item.__chartTheme === theme && item.__chartDefinition === chartSrc.textContent) {
+          existingChart.resize()
+          return
+        }
 
         // If a canvas already exists, destroy its chart and remove it to avoid rendering duplicates
         if (existingCanvas) {
@@ -71,7 +79,6 @@ script(data-swup-reload-script).
         const config = JSON.parse(chartDefinition)
         config.options = { ...!{JSON.stringify(theme.chartjs.options || {}).replace(/</g, '\\u003c')}, ...config.options }
 
-        const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
 
         // Set default styles (initial setup)
         applyThemeDefaultsConfig(theme)
@@ -80,10 +87,13 @@ script(data-swup-reload-script).
         applyThemeConfig(config, theme)
 
         new Chart(ctx, config)
+        item.__chartTheme = theme
+        item.__chartDefinition = chartDefinition
       })
     }
 
     const loadChartJS = () => {
+      if (pageSignal.aborted) return
       const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
       if (chartJSEle.length === 0) return
 

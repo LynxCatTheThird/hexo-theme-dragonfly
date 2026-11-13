@@ -1,16 +1,19 @@
 // Modified in Dragonfly.
-const fetchUrl = async url => {
+const loading = new WeakSet()
+const indexGrids = new WeakMap()
+
+const fetchUrl = async (url, signal) => {
   try {
-    const response = await fetch(url)
+    const response = await fetch(url, { signal })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     return await response.json()
   } catch (error) {
-    console.error('Failed to fetch URL:', error)
+    if (!signal.aborted) console.error('Failed to fetch URL:', error)
     throw error
   }
 }
 
-const runJustifiedGallery = (container, data, config) => {
+const runJustifiedGallery = (container, data, config, signal) => {
   const { isButton, tabs } = config
   const limit = Math.max(1, Number(config.limit) || 20)
   const firstLimit = Math.max(1, Number(config.firstLimit) || limit)
@@ -61,7 +64,7 @@ const runJustifiedGallery = (container, data, config) => {
     const button = document.createElement('button')
     button.innerHTML = `${GLOBAL_CONFIG.infinitegrid.buttonText}<i class="fa-solid fa-arrow-down"></i>`
 
-    button.addEventListener('click', () => {
+    btf.addPageEventListener(button, 'click', () => {
       button.remove()
       btf.setLoading.add(container)
       appendItems(ig.getGroups().length + 1, limit)
@@ -71,11 +74,13 @@ const runJustifiedGallery = (container, data, config) => {
   }
 
   const appendItems = (nextGroupKey, count, isFirst) => {
+    if (signal.aborted || !container.isConnected) return
     ig.append(getItems(nextGroupKey, count, isFirst), nextGroupKey)
   }
 
   // Event handlers
   const handleRenderComplete = e => {
+    if (signal.aborted || !container.isConnected) return
     if (tabs) {
       const parentNode = container.parentNode
       if (isLayoutHidden) {
@@ -125,15 +130,17 @@ const runJustifiedGallery = (container, data, config) => {
     btf.setLoading.remove(container)
   }
 
-  btf.addGlobalFn('pageCleanup', () => ig.destroy())
+  signal.addEventListener('abort', () => { handleRequestAppend.cancel(); ig.destroy() }, { once: true })
 }
 
 const addJustifiedGallery = async (elements, tabs = false) => {
   if (!elements.length) return
+  const signal = btf.pageSignal
 
   const initGallery = async () => {
     for (const element of elements) {
-      if (btf.isHidden(element) || element.classList.contains('loaded')) continue
+      if (signal.aborted || !element.isConnected || loading.has(element) || btf.isHidden(element) || element.classList.contains('loaded')) continue
+      loading.add(element)
 
       const config = {
         isButton: element.getAttribute('data-button') === 'true',
@@ -146,13 +153,17 @@ const addJustifiedGallery = async (elements, tabs = false) => {
       const content = container.textContent
       container.textContent = ''
       try {
-        const data = element.getAttribute('data-type') === 'url' ? await fetchUrl(content) : JSON.parse(content)
+        const data = element.getAttribute('data-type') === 'url' ? await fetchUrl(content, signal) : JSON.parse(content)
+        if (signal.aborted || !element.isConnected) return
         if (!Array.isArray(data)) throw new TypeError('Gallery data must be an array')
-        runJustifiedGallery(container, data, config)
+        runJustifiedGallery(container, data, config, signal)
         element.classList.add('loaded')
       } catch (error) {
-        console.error('Gallery data parsing failed:', error)
-      }
+        if (!signal.aborted && element.isConnected) {
+          container.textContent = content
+          console.error('Gallery data parsing failed:', error)
+        }
+      } finally { loading.delete(element) }
     }
   }
 
@@ -167,18 +178,21 @@ const addJustifiedGallery = async (elements, tabs = false) => {
 const justifiedIndexPostUI = () => {
   const recentPostsElement = document.getElementById('recent-posts')
   if (!(recentPostsElement && recentPostsElement.classList.contains('masonry'))) return
+  const signal = btf.pageSignal
 
   const init = () => {
+    if (signal.aborted || !recentPostsElement.isConnected || indexGrids.has(recentPostsElement)) return
     const masonryItem = new InfiniteGrid.MasonryInfiniteGrid('.recent-post-items', {
       gap: { horizontal: 10, vertical: 20 },
       useTransform: true,
       useResizeObserver: true
     })
+    indexGrids.set(recentPostsElement, masonryItem)
     masonryItem.renderItems()
-    btf.addGlobalFn('pageCleanup', () => { masonryItem.destroy() }, 'removeJustifiedIndexPostUI')
+    signal.addEventListener('abort', () => { masonryItem.destroy(); indexGrids.delete(recentPostsElement) }, { once: true })
   }
 
-  typeof InfiniteGrid === 'function' ? init() : btf.getScript(`${GLOBAL_CONFIG.infinitegrid.js}`).then(init)
+  return typeof InfiniteGrid === 'function' ? init() : btf.getScript(`${GLOBAL_CONFIG.infinitegrid.js}`).then(init)
 }
 
 export { addJustifiedGallery, justifiedIndexPostUI }

@@ -78,6 +78,18 @@ const mount = () => { if (document.getElementById('script-contract')) window.__m
 btf.addGlobalFn('pageLoad', mount, 'contractModule')
 if (document.readyState !== 'complete') document.addEventListener('DOMContentLoaded', mount, { once: true })
 `)
+    fs.mkdirSync(path.join(site, 'source/gallery'), { recursive: true })
+    fs.writeFileSync(path.join(site, 'source/gallery/index.md'), `---
+title: Gallery
+comments: false
+---
+{% gallery true,1,1 %}
+![First](${config.root}img/favicon.ico)
+![Second](${config.root}img/favicon.ico)
+{% endgallery %}
+{% gallery url,/gallery-data.json,true %}{% endgallery %}
+`)
+    fs.writeFileSync(path.join(site, 'source/gallery-data.json'), JSON.stringify([{ url: config.root + 'img/favicon.ico', alt: 'Remote gallery' }]))
     // Home stays tall enough to exercise scroll restoration without personal posts.
     for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(site, 'source/_posts', `post-${i}.md`), `---\ntitle: Post ${i}\ndate: 2025-01-01\n---\nTest post ${i}.`)
     const fixture = fs.readFileSync(path.join(__dirname, 'fixtures/components.md'), 'utf8')
