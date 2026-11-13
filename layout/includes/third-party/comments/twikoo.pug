@@ -3,6 +3,7 @@
 
 script(data-swup-reload-script).
   (() => {
+    const pageSignal = btf.pageSignal
     const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
     const option = !{JSON.stringify(option)}
 
@@ -15,13 +16,14 @@ script(data-swup-reload-script).
         urls: [window.location.pathname],
         includeReply: false
       }).then(res => {
-        countELement.textContent = res[0].count
+        if (!pageSignal.aborted && countELement.isConnected) countELement.textContent = res[0].count
       }).catch(err => {
         console.error(err)
       })
     }
 
     const init = (el = document, path = location.pathname) => {
+      if (pageSignal.aborted || !el.querySelector('#twikoo-wrap')?.isConnected) return
       twikoo.init({
         el: el.querySelector('#twikoo-wrap'),
         envId: '!{envId}',

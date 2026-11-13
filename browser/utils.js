@@ -108,14 +108,17 @@
     },
 
     loadComment: (dom, callback) => {
+      const signal = btf.pageSignal
+      if (!dom || signal.aborted) return
       if ('IntersectionObserver' in window) {
         const observerItem = new IntersectionObserver(entries => {
-          if (entries[0].isIntersecting) {
+          if (!signal.aborted && dom.isConnected && entries[0].isIntersecting) {
             callback()
             observerItem.disconnect()
           }
         }, { threshold: [0] })
         observerItem.observe(dom)
+        signal.addEventListener('abort', () => observerItem.disconnect(), { once: true })
       } else {
         callback()
       }

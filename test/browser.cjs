@@ -634,5 +634,39 @@ const server = http.createServer((req, res) => {
     assert.deepEqual(await page.evaluate(() => __lifecycleStats()), galleryBaseline)
     assert.deepEqual(errors, [])
     console.log('PASS: gallery fetch cancellation, load more and repeated instance cleanup')
+    for (const [slug, selector] of [['notes', '.shuoshuo-item'], ['links', '.flink-list-item']]) {
+      let releaseData
+      const gate = new Promise(resolve => { releaseData = resolve })
+      const pattern = `**/${slug}-data.json`
+      await page.route(pattern, async route => { await gate; await route.fallback().catch(() => {}) })
+      const requested = page.waitForRequest(pattern)
+      await go(`/${slug}/`)
+      await requested
+      await page.evaluate(() => { window.__departedDataPage = document.getElementById('article-container') })
+      await go('/')
+      releaseData()
+      await page.waitForLoadState('networkidle')
+      assert.equal(await page.evaluate(selector => __departedDataPage.querySelectorAll(selector).length, selector), 0)
+      await page.unroute(pattern)
+      await go(`/${slug}/`)
+      await page.locator(selector).first().waitFor()
+      if (slug === 'notes') {
+        assert.equal(await page.locator(selector).count(), 8)
+        await page.locator('.shuoshuo-next-btn').click()
+        assert.equal(await page.locator(selector).count(), 2)
+      }
+      await go('/')
+    }
+    const dataPageBaseline = await page.evaluate(() => __lifecycleStats())
+    for (let visit = 0; visit < 20; visit++) {
+      await go('/notes/')
+      await page.locator('.shuoshuo-item').first().waitFor()
+      await go('/links/')
+      await page.locator('.flink-list-item').first().waitFor()
+      await go('/')
+    }
+    assert.deepEqual(await page.evaluate(() => __lifecycleStats()), dataPageBaseline)
+    assert.deepEqual(errors, [])
+    console.log('PASS: async notes and links cancel on leave, paginate, and keep listeners stable for 20 round trips')
   } finally { await browser.close() }
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(() => server.close())

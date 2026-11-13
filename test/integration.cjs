@@ -90,6 +90,12 @@ comments: false
 {% gallery url,/gallery-data.json,true %}{% endgallery %}
 `)
     fs.writeFileSync(path.join(site, 'source/gallery-data.json'), JSON.stringify([{ url: config.root + 'img/favicon.ico', alt: 'Remote gallery' }]))
+    for (const [slug, type, setting, dataFile] of [['notes', 'shuoshuo', 'shuoshuo_url', 'notes-data.json'], ['links', 'link', 'flink_url', 'links-data.json']]) {
+      fs.mkdirSync(path.join(site, 'source', slug), { recursive: true })
+      fs.writeFileSync(path.join(site, 'source', slug, 'index.md'), `---\ntitle: ${slug}\ntype: ${type}\ncomments: false\n${setting}: /${dataFile}\n---\n`)
+    }
+    fs.writeFileSync(path.join(site, 'source/notes-data.json'), JSON.stringify(Array.from({ length: 10 }, (_, index) => ({ date: '2026-01-01T12:00:00Z', author: 'Test author', content: `<p>Note ${index}</p>`, tags: ['test'] }))))
+    fs.writeFileSync(path.join(site, 'source/links-data.json'), JSON.stringify([{ class_name: 'Test links', class_desc: 'Fixture', link_list: [{ name: 'Example', link: 'https://example.test/', avatar: config.root + 'img/favicon.ico', descr: 'Test link' }] }]))
     // Home stays tall enough to exercise scroll restoration without personal posts.
     for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(site, 'source/_posts', `post-${i}.md`), `---\ntitle: Post ${i}\ndate: 2025-01-01\n---\nTest post ${i}.`)
     const fixture = fs.readFileSync(path.join(__dirname, 'fixtures/components.md'), 'utf8')

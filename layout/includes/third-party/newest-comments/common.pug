@@ -64,10 +64,12 @@ script.
     },
 
     fetchAndRender: (keyName, ele, getComment) => {
+      const signal = btf.pageSignal
       Promise.resolve(getComment(ele)).then(array => {
         btf.saveToLocal.set(keyName, JSON.stringify(array), !{theme.aside.card_newest_comments.storage}/(60*24))
-        newestComments.generateHtml(array, ele)
+        if (!signal.aborted && ele.isConnected) newestComments.generateHtml(array, ele)
       }).catch(e => {
+        if (signal.aborted || !ele.isConnected) return
         console.error(e)
         const data = btf.saveToLocal.get(keyName)
         if (data) {

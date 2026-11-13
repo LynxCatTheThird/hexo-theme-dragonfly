@@ -53,6 +53,13 @@
     - const { enable, native, placeholder, field } = theme.lazyload
     script(data-swup-reload-script).
       (() => {
+        const pageSignal = btf.pageSignal
+        const article = document.getElementById('article-container')
+        const delay = (fn, ms) => {
+          const cancel = () => clearTimeout(timer)
+          const timer = setTimeout(() => { pageSignal.removeEventListener('abort', cancel); if (!pageSignal.aborted) fn() }, ms)
+          pageSignal.addEventListener('abort', cancel, { once: true })
+        }
         const limitConfig = !{ JSON.stringify(page.limit || {}) }
 
         const escapeHtml = str => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
@@ -122,6 +129,7 @@
         let data = []
 
         const renderData = (dataSlice) => {
+          if (pageSignal.aborted || !article.isConnected) return
           const content = dataSlice.map(item => {
             const formattedDate = formatToTimeZone(item.date)
             const tags = item.tags && item.tags.map(tag => `<span class="shuoshuo-tag">${escapeHtml(tag)}</span>`).join('') || ''
@@ -158,7 +166,7 @@
               </div>`
           }).join('')
 
-          const container = document.getElementById('article-container')
+          const container = article
           container.innerHTML = content
 
           window.lazyLoadInstance && window.lazyLoadInstance.update()
@@ -166,21 +174,21 @@
         }
 
         const setupNavEvents = (nav) => {
-          nav.querySelector('.shuoshuo-prev-btn').addEventListener('click', () => {
+          btf.addPageEventListener(nav.querySelector('.shuoshuo-prev-btn'), 'click', () => {
             if (currentPage > 1) { currentPage--; renderPage(currentPage) }
           })
-          nav.querySelector('.shuoshuo-next-btn').addEventListener('click', () => {
+          btf.addPageEventListener(nav.querySelector('.shuoshuo-next-btn'), 'click', () => {
             if (currentPage < totalPages) { currentPage++; renderPage(currentPage) }
           })
 
           const input = nav.querySelector('.shuoshuo-page-input')
 
-          input.addEventListener('focus', e => { e.target.placeholder = '' })
-          input.addEventListener('blur', e => {
+          btf.addPageEventListener(input, 'focus', e => { e.target.placeholder = '' })
+          btf.addPageEventListener(input, 'blur', e => {
             if (!e.target.value.trim()) e.target.placeholder = currentPage
           })
 
-          input.addEventListener('input', e => {
+          btf.addPageEventListener(input, 'input', e => {
             const value = parseInt(e.target.value) || 0
             let wasInvalid = false
 
@@ -189,11 +197,11 @@
 
             if (wasInvalid) {
               e.target.classList.add('invalid')
-              setTimeout(() => e.target.classList.remove('invalid'), 500)
+              delay(() => e.target.classList.remove('invalid'), 500)
             }
           })
 
-          input.addEventListener('keydown', e => {
+          btf.addPageEventListener(input, 'keydown', e => {
             const value = e.target.value + e.key
 
             if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete' ||
@@ -221,13 +229,13 @@
             if (newValue > totalPages || (value.length > 1 && newValue === 0)) {
               e.preventDefault()
               e.target.classList.add('invalid')
-              setTimeout(() => e.target.classList.remove('invalid'), 500)
+              delay(() => e.target.classList.remove('invalid'), 500)
             }
           })
         }
 
         const renderNavigation = () => {
-          const container = document.getElementById('article-container')
+          const container = article
           let nav = container.nextElementSibling
           const pageInfoTemplate = '#{__('pagination.page_info')}'
           const pageInfoText = pageInfoTemplate
@@ -264,12 +272,12 @@
         }
 
         const loadShuoshuo = async () => {
-          const container = document.getElementById('article-container')
+          const container = article
           try {
             let originData = []
             if (!{Boolean(page.shuoshuo_url)}) {
               container.innerHTML = '<div class="shuoshuo-loading"><i class="fa-solid fa-circle-notch fa-spin"></i></div>'
-              const response = await fetch('!{url_for(page.shuoshuo_url)}')
+              const response = await fetch('!{url_for(page.shuoshuo_url)}', { signal: pageSignal })
               if (!response.ok) throw new Error(`HTTP ${response.status}`)
               originData = await response.json()
             } else {
@@ -277,6 +285,7 @@
               originData = dataElement ? JSON.parse(dataElement.textContent) : []
             }
 
+            if (pageSignal.aborted || !container.isConnected) return
             data = filterDataByLimit(sortDataByDate(originData), limitConfig)
             totalPages = Math.ceil(data.length / itemsPerPage)
 
@@ -287,23 +296,21 @@
 
             renderPage(currentPage)
           } catch (error) {
+            if (pageSignal.aborted || !container.isConnected) return
             console.error(error)
             container.innerHTML = '<div class="shuoshuo-error"><i class="fa-solid fa-circle-exclamation"></i></div>'
           }
         }
 
         const cleanupComments = () => {
-          const container = document.getElementById('article-container')
+          const container = article
           if (container) {
             const nav = container.nextElementSibling
             if (nav && nav.classList.contains('shuoshuo-navigation')) nav.remove()
           }
         }
 
-        if (window.swup) {
-          document.addEventListener('theme:page-leave', cleanupComments)
-          loadShuoshuo()
-        } else {
-          window.addEventListener('load', loadShuoshuo)
-        }
+        pageSignal.addEventListener('abort', cleanupComments, { once: true })
+        if (document.readyState === 'complete') loadShuoshuo()
+        else window.addEventListener('load', loadShuoshuo, { once: true, signal: pageSignal })
       })()

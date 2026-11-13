@@ -7,12 +7,15 @@
       - const linkData = flink_url ? false : site.data.link || false
       script(data-swup-reload-script).
         (()=>{
+          const signal = btf.pageSignal
+          const container = document.querySelector(".flink")
           const replaceSymbol = (str) => {
             return str.replace(/[\p{P}\p{S}]/gu, "-")
           }
 
           let result = ""
           const add = (str) => {
+            if (signal.aborted || !container.isConnected) return
             for(let i = 0; i < str.length; i++){
               const replaceClassName = replaceSymbol(str[i].class_name)
               const className = str[i].class_name ? `<h2 id="${replaceClassName}"><a href="#${replaceClassName}" class="headerlink" title="${str[i].class_name}"></a>${str[i].class_name}</h2>` : ""
@@ -39,15 +42,16 @@
               result += `${className}${classDesc} <div class="flink-list">${listResult}</div>`
             }
 
-            document.querySelector(".flink").insertAdjacentHTML("afterbegin", result)
+            container.insertAdjacentHTML("afterbegin", result)
             window.lazyLoadInstance && window.lazyLoadInstance.update()
           }
 
           const linkData = !{JSON.stringify(linkData)}
           if (!{Boolean(flink_url)}) {
-            fetch("!{url_for(flink_url)}")
+            fetch("!{url_for(flink_url)}", { signal })
               .then(response => response.json())
               .then(add)
+              .catch(error => { if (!signal.aborted) console.error('[flink]', error) })
           } else if (linkData) {
             add(linkData)
           }
