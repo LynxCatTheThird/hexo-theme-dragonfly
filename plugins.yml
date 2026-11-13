@@ -165,3 +165,8 @@ swup_a11y:
   name: '@swup/a11y-plugin'
   file: dist/index.umd.js
   version: 5.2.1
+swup_scripts:
+  name: '@swup/scripts-plugin'
+  file: dist/index.umd.js
+  version: 2.1.0
+  cdnjs: false

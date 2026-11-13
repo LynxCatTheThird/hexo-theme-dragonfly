@@ -1,3 +1,5 @@
+import { createPageScriptsPlugin } from './page-scripts.js'
+
 (() => {
   const settings = JSON.parse(document.querySelector('script[data-navigation]').dataset.navigation)
   const emit = name => document.dispatchEvent(new Event(name, { bubbles: true }))
@@ -9,40 +11,16 @@
     })
   }
 
-  // Global bundles stay loaded; only replaced containers run their scripts.
-  const runPageScripts = async () => {
-    const scripts = document.querySelectorAll('#config-diff[data-swup-reload-script], #body-wrap script[data-swup-reload-script], .page-scripts script[data-swup-reload-script]')
-    for (const old of scripts) {
-      if (!old.isConnected) continue
-      const type = (old.type || '').toLowerCase()
-      if (type && !['module', 'text/javascript', 'application/javascript'].includes(type)) continue
-      const script = document.createElement('script')
-      for (const { name, value } of old.attributes) script.setAttribute(name, value)
-      script.textContent = old.textContent
-      const loaded = (script.src || type === 'module') && !old.hasAttribute('async')
-        ? new Promise(resolve => {
-          const finish = () => { clearTimeout(timer); resolve() }
-          const timer = settings.timeout ? setTimeout(() => {
-            console.warn('Page script timed out:', script.src)
-            resolve()
-          }, settings.timeout) : undefined
-          script.onload = script.onerror = finish
-        })
-        : Promise.resolve()
-      old.replaceWith(script)
-      await loaded
-    }
-  }
-
   const init = async () => {
     try {
       await btf.getScript(settings.assets.swup)
-      await Promise.all([btf.getScript(settings.assets.head), btf.getScript(settings.assets.a11y)])
+      await Promise.all([btf.getScript(settings.assets.head), btf.getScript(settings.assets.a11y), btf.getScript(settings.assets.scripts)])
     } catch (error) {
       console.warn('[navigation]', error)
       return
     }
     const plugins = [
+      createPageScriptsPlugin(settings.timeout),
       new SwupHeadPlugin({ persistAssets: true, awaitAssets: true }),
       new SwupA11yPlugin({ announcements: { visit: '{title}', url: '{url}' } })
     ]
@@ -81,8 +59,8 @@
       run('pageCleanup', true)
       document.body.classList.remove('read-mode')
     })
-    swup.hooks.on('content:replace', async () => {
-      await runPageScripts()
+    swup.hooks.on('content:replace', visit => {
+      if (visit.done) return
       run('pageLoad')
     })
     swup.hooks.on('page:view', () => {
