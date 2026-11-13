@@ -10,12 +10,15 @@ export const createPageScriptsPlugin = timeout => new class extends SwupScriptsP
       const script = super.runScript(old)
       if ((script.src || type === 'module') && !script.hasAttribute('async')) {
         await new Promise(resolve => {
-          const finish = () => { clearTimeout(timer); script.onload = script.onerror = null; resolve() }
+          const signal = btf.pageSignal
+          const finish = () => { clearTimeout(timer); signal.removeEventListener('abort', finish); script.onload = script.onerror = null; resolve() }
           const timer = timeout ? setTimeout(() => {
             console.warn('Page script timed out:', script.src)
             finish()
           }, timeout) : undefined
           script.onload = script.onerror = finish
+          signal.addEventListener('abort', finish, { once: true })
+          if (signal.aborted) finish()
         })
       }
     }

@@ -3,12 +3,13 @@ import { createPageScriptsPlugin } from './page-scripts.js'
 (() => {
   const settings = JSON.parse(document.querySelector('script[data-navigation]').dataset.navigation)
   const emit = name => document.dispatchEvent(new Event(name, { bubbles: true }))
-  const run = (key, clear = false) => {
+  const run = async (key, clear = false, visit) => {
     const functions = window.globalFn?.[key] || {}
     if (clear && window.globalFn) delete window.globalFn[key]
-    Object.values(functions).forEach(fn => {
-      try { fn() } catch (error) { console.error(`[${key}]`, error) }
-    })
+    for (const fn of Object.values(functions)) {
+      if (visit?.done) break
+      try { await fn() } catch (error) { console.error(`[${key}]`, error) }
+    }
   }
 
   const init = async () => {
@@ -54,14 +55,15 @@ import { createPageScriptsPlugin } from './page-scripts.js'
       if (visit.a11y) visit.a11y.focus = { selector: '#content-inner', wait: true }
       run('navigationStart')
     })
-    swup.hooks.before('content:replace', () => {
+    swup.hooks.before('content:replace', async () => {
       emit('theme:page-leave')
-      run('pageCleanup', true)
+      await run('pageCleanup', true)
+      btf.resetPageScope()
       document.body.classList.remove('read-mode')
     })
     swup.hooks.on('content:replace', visit => {
       if (visit.done) return
-      run('pageLoad')
+      return run('pageLoad', false, visit)
     })
     swup.hooks.on('page:view', () => {
       emit('theme:page-load')

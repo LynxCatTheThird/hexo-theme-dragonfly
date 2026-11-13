@@ -484,21 +484,25 @@ const initLocalSearch = () => {
     }
   }
 
+  let focusTimer
   const openSearch = () => {
     searchOpen = true
     btf.overflowPaddingR.add()
     btf.animateIn($searchMask, 'to_show 0.5s')
     btf.animateIn($searchDialog, 'titleScale 0.5s')
-    setTimeout(() => { $input.focus() }, 300)
+    focusTimer = setTimeout(() => { if (searchOpen) $input.focus() }, 300)
     if (!localSearch.isfetched) localSearch.fetchData()
     // shortcut: ESC
-    document.addEventListener('keydown', handleEscape)
+    btf.addPageEventListener(document, 'keydown', handleEscape)
 
     fixSafariHeight()
-    window.addEventListener('resize', onResize)
+    btf.addPageEventListener(window, 'resize', onResize)
   }
 
   const closeSearch = () => {
+    clearTimeout(resizeTimer)
+    clearTimeout(focusTimer)
+    clearTimeout(searchTimeout)
     searchOpen = false
     btf.overflowPaddingR.remove()
     btf.animateOut($searchDialog, 'search_close .5s')
@@ -512,9 +516,9 @@ const initLocalSearch = () => {
   }
 
   const searchFnOnce = () => {
-    $input.addEventListener('input', debouncedInputEvent)
-    document.querySelector('#local-search .search-close-button').addEventListener('click', closeSearch)
-    $searchMask.addEventListener('click', closeSearch)
+    btf.addAppEventListener($input, 'input', debouncedInputEvent)
+    btf.addAppEventListener(document.querySelector('#local-search .search-close-button'), 'click', closeSearch)
+    btf.addAppEventListener($searchMask, 'click', closeSearch)
     if (GLOBAL_CONFIG.localSearch.preload) {
       localSearch.fetchData()
     }
@@ -522,7 +526,7 @@ const initLocalSearch = () => {
 
     // Pagination event delegation - only add if pagination is enabled
     if (enablePagination) {
-      $pagination.addEventListener('click', e => {
+      btf.addAppEventListener($pagination, 'click', e => {
         e.preventDefault()
         const link = e.target.closest('a[data-page]')
         if (link) {
@@ -539,7 +543,7 @@ const initLocalSearch = () => {
     toggleResultsVisibility(false)
   }
 
-  window.addEventListener('search:loaded', () => {
+  btf.addAppEventListener(window, 'search:loaded', () => {
     const $loadDataItem = document.getElementById('loading-database')
     if (!$loadDataItem) return
     if (!localSearch.isfetched) {
@@ -558,11 +562,12 @@ const initLocalSearch = () => {
     inputEventFunction()
   })
 
+  btf.addAppEventListener(document, 'theme:page-leave', () => { if (!btf.isHidden($searchMask)) closeSearch() })
   searchClickFn()
   searchFnOnce()
   btf.addGlobalFn('encrypt', () => localSearch.highlightSearchWords(document.getElementById('article-container')), 'search')
 
-  window.addEventListener('theme:page-load', () => {
+  btf.addAppEventListener(window, 'theme:page-load', () => {
     !btf.isHidden($searchMask) && closeSearch()
     localSearch.highlightSearchWords(document.getElementById('article-container'))
     searchClickFn()

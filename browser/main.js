@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   }
 
-  document.getElementById('rightside').addEventListener('click', e => {
+  btf.addAppEventListener(document.getElementById('rightside'), 'click', e => {
     const $target = e.target.closest('[id]')
     if ($target && rightSideFn[$target.id]) {
       rightSideFn[$target.id](e.currentTarget, $target)
@@ -261,21 +261,16 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarFn.close()
       }
     })
-    window.addEventListener('resize', resizeHandler, { passive: true })
+    btf.addAppEventListener(window, 'resize', resizeHandler, { passive: true })
 
     const menuMask = document.getElementById('menu-mask')
-    menuMask && menuMask.addEventListener('click', () => { sidebarFn.close() })
+    menuMask && btf.addAppEventListener(menuMask, 'click', () => { sidebarFn.close() })
 
     clickFnOfSubMenu()
     GLOBAL_CONFIG.islazyloadPlugin && lazyloadImg()
     if (GLOBAL_CONFIG.copy.tex || GLOBAL_CONFIG.copyright) import('./modules/copy.js').then(({ addCopyHandler }) => addCopyHandler())
 
-    if (GLOBAL_CONFIG.autoDarkmode) {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        if (btf.saveToLocal.get('theme') !== undefined) return
-        e.matches ? handleThemeChange('dark') : handleThemeChange('light')
-      })
-    }
+
   }
 
   const scrollDownInIndex = () => {
@@ -299,17 +294,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const article = document.getElementById('article-container')
     if (!article || article.querySelector('.hbe-container')) return
     loadOptionalModules()
+    const signal = btf.pageSignal
+    let ready
     if (!mountedArticles.has(article)) {
       mountedArticles.add(article)
-      import('./modules/article.js').then(({ mountArticle }) => {
-        if (article.isConnected) mountArticle(article)
+      ready = import('./modules/article.js').then(({ mountArticle }) => {
+        if (!signal.aborted && article.isConnected) mountArticle(article)
       }).catch(error => { mountedArticles.delete(article); console.error('[article]', error) })
     }
     if (article.querySelector('img') && (GLOBAL_CONFIG.isPhotoFigcaption || GLOBAL_CONFIG.lightbox !== 'null')) {
-      import('./modules/media.js').then(({ mountMedia }) => { if (article.isConnected) mountMedia(article) })
+      import('./modules/media.js').then(({ mountMedia }) => { if (!signal.aborted && article.isConnected) mountMedia(article) })
     }
     const galleries = article.querySelectorAll('.gallery-container')
-    if (galleries.length) import('./modules/gallery.js').then(({ addJustifiedGallery }) => { if (article.isConnected) addJustifiedGallery(galleries) })
+    if (galleries.length) import('./modules/gallery.js').then(({ addJustifiedGallery }) => { if (!signal.aborted && article.isConnected) addJustifiedGallery(galleries) })
+    return ready
   }
 
   const refreshFn = () => {
@@ -332,12 +330,14 @@ document.addEventListener('DOMContentLoaded', () => {
     GLOBAL_CONFIG_SITE.pageType === 'home' && scrollDownInIndex()
     scrollFn()
 
+    let articleReady
     if (GLOBAL_CONFIG_SITE.pageType !== 'shuoshuo') {
-      forPostFn()
+      articleReady = forPostFn()
       btf.switchComments(document)
     }
 
     openMobileMenu()
+    return articleReady
   }
 
   btf.addGlobalFn('pageLoad', refreshFn, 'refreshFn')
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadOptionalModules()
 
   // 處理 hexo-blog-encrypt 事件
-  window.addEventListener('hexo-blog-decrypt', e => {
+  btf.addAppEventListener(window, 'hexo-blog-decrypt', e => {
     forPostFn()
     const encryptFn = window.globalFn && window.globalFn.encrypt ? window.globalFn.encrypt : {}
     Object.values(encryptFn).forEach(fn => {
@@ -354,5 +354,5 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   })
 
-  document.addEventListener('shuoshuo:rendered', forPostFn)
+  btf.addAppEventListener(document, 'shuoshuo:rendered', forPostFn)
 })

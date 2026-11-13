@@ -63,23 +63,32 @@ hexo.extend.helper.register('inject_head_js', function () {
       }
     }
     const loadCSS = assetLoader('link', { rel: 'stylesheet' }, 'href')
+    const appController = new AbortController()
+    let pageController = new AbortController()
+    let callbackId = 0
     window.btf = {
+      get appSignal () { return appController.signal },
+      get pageSignal () { return pageController.signal },
+      resetPageScope: () => { pageController.abort(); pageController = new AbortController() },
       saveToLocal,
       getScript: assetLoader('script', { async: true }, 'src'),
       getCSS: (url, id) => loadCSS(url, id ? { id } : {}),
-      // Named callbacks are removed when the current page is replaced.
+      // Page callbacks expire with the page that registered them.
       addPageFn: (key, fn, name) => {
-        btf.addGlobalFn(key, fn, name)
-        btf.addGlobalFn('pageCleanup', () => {
-          delete (window.globalFn[key] || {})[name]
-        }, key + ':' + name)
+        const id = btf.addGlobalFn(key, fn, name)
+        if (id === undefined) return
+        btf.pageSignal.addEventListener('abort', () => {
+          if (window.globalFn?.[key]?.[id] === fn) delete window.globalFn[key][id]
+        }, { once: true })
       },
       addGlobalFn: (key, fn, name = false, parent = window) => {
         if (!${navigation.enable} && ['pageLoad', 'pageCleanup', 'navigationStart'].includes(key)) return
         const globalFn = parent.globalFn || {}
         globalFn[key] = globalFn[key] || {}
-        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        const id = name || ('callback:' + ++callbackId)
+        globalFn[key][id] = fn
         parent.globalFn = globalFn
+        return id
       }
     }
   `
@@ -104,8 +113,9 @@ hexo.extend.helper.register('inject_head_js', function () {
       dark.addEventListener('change', e => {
         if (saveToLocal.get('theme') === undefined) {
           e.matches ? activateDarkMode() : activateLightMode()
+          Object.values(window.globalFn?.themeChange || {}).forEach(fn => fn(e.matches ? 'dark' : 'light'))
         }
-      })
+      }, { signal: btf.appSignal })
     ` : autoMode === 2 ? timeFallback : ''
 
     return `

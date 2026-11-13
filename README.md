@@ -231,7 +231,7 @@ Thanks to everyone who has contributed to Butterfly — your support keeps the t
 
 `navigation` controls page changes, caching and preloading. `visitor_counter` controls visit counts. Component options live in their respective config sections; KaTeX build options live in the site's `math.katex.options`.
 
-Use `DOMContentLoaded` for initial setup, `theme:page-load` after navigation and `theme:page-leave` before replacement. `btf.addPageFn` registers page-scoped callbacks; `pageCleanup` releases component resources.
+Use `DOMContentLoaded` for initial setup, `theme:page-load` after navigation and `theme:page-leave` before replacement. `btf.addPageFn` registers page-scoped callbacks; `pageCleanup` releases component resources. Capture `btf.pageSignal` for asynchronous page work, and use `btf.addAppEventListener` for persistent listeners.
 
 Run these commands in the theme directory. Integration tests create an isolated consumer with local component assets and remove temporary output.
 

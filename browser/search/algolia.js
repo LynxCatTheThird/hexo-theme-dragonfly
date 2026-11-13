@@ -62,21 +62,24 @@ const initAlgolia = () => {
     if ($loadingStatus) $loadingStatus.hidden = !show
   }
 
+  let focusTimer
   const openSearch = () => {
     btf.overflowPaddingR.add()
     animateElements(true)
     showLoading(false)
 
-    setTimeout(() => {
+    focusTimer = setTimeout(() => {
       if ($searchInput) $searchInput.focus()
     }, 100)
 
-    document.addEventListener('keydown', handleEscape)
+    btf.addPageEventListener(document, 'keydown', handleEscape)
     fixSafariHeight()
-    window.addEventListener('resize', onResize)
+    btf.addPageEventListener(window, 'resize', onResize)
   }
 
   const closeSearch = () => {
+    clearTimeout(resizeTimer)
+    clearTimeout(focusTimer)
     btf.overflowPaddingR.remove()
     animateElements(false)
     document.removeEventListener('keydown', handleEscape)
@@ -88,8 +91,8 @@ const initAlgolia = () => {
   }
 
   const searchFnOnce = () => {
-    $searchMask.addEventListener('click', closeSearch)
-    document.querySelector('#algolia-search .search-close-button').addEventListener('click', closeSearch)
+    btf.addAppEventListener($searchMask, 'click', closeSearch)
+    btf.addAppEventListener(document.querySelector('#algolia-search .search-close-button'), 'click', closeSearch)
   }
 
   const extractContentStr = content => {
@@ -430,20 +433,20 @@ const initAlgolia = () => {
     showLoading(false)
 
     if ($searchInput) {
-      $searchInput.addEventListener('input', e => {
+      btf.addAppEventListener($searchInput, 'input', e => {
         debouncedSearch(e.target.value)
       })
     }
 
     if ($searchForm) {
-      $searchForm.addEventListener('submit', e => {
+      btf.addAppEventListener($searchForm, 'submit', e => {
         e.preventDefault()
         performSearch($searchInput ? $searchInput.value : '')
       })
     }
 
     // Pagination event delegation
-    $pagination.addEventListener('click', e => {
+    btf.addAppEventListener($pagination, 'click', e => {
       e.preventDefault()
       const link = e.target.closest('a[data-page]')
       if (link) {
@@ -459,10 +462,11 @@ const initAlgolia = () => {
   }
 
   initializeSearch()
+  btf.addAppEventListener(document, 'theme:page-leave', () => { if (!btf.isHidden($searchMask)) closeSearch() })
   searchClickFn()
   searchFnOnce()
 
-  window.addEventListener('theme:page-load', () => {
+  btf.addAppEventListener(window, 'theme:page-load', () => {
     if (!btf.isHidden($searchMask)) closeSearch()
     searchClickFn()
   })

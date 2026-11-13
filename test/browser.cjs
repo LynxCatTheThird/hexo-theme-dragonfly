@@ -108,18 +108,36 @@ const server = http.createServer((req, res) => {
     await page.route('**/*', r => r.request().resourceType() === 'image' ? r.abort() : r.fallback())
     await page.addInitScript(() => {
       window.__resizeListeners = new Set()
-      const add = window.addEventListener, remove = window.removeEventListener
-      window.addEventListener = function (type, fn, options) {
-        if (type === 'resize' && !options?.signal?.aborted) {
-          window.__resizeListeners.add(fn)
-          options?.signal?.addEventListener('abort', () => window.__resizeListeners.delete(fn), { once: true })
+      const listeners = new Set(), observers = new Set()
+      const add = EventTarget.prototype.addEventListener, remove = EventTarget.prototype.removeEventListener
+      const capture = options => typeof options === 'boolean' ? options : !!options?.capture
+      const forget = (target, type, fn, options) => {
+        for (const record of listeners) if (record.target === target && record.type === type && record.fn === fn && record.capture === capture(options)) listeners.delete(record)
+        if (target === window && type === 'resize') window.__resizeListeners.delete(fn)
+      }
+      EventTarget.prototype.addEventListener = function (type, fn, options) {
+        if ((this === window || this === document) && !options?.once && !options?.signal?.aborted) {
+          if (![...listeners].some(record => record.target === this && record.type === type && record.fn === fn && record.capture === capture(options))) listeners.add({ target: this, type, fn, capture: capture(options) })
+          if (this === window && type === 'resize') window.__resizeListeners.add(fn)
+          if (options?.signal) add.call(options.signal, 'abort', () => forget(this, type, fn, options), { once: true })
         }
         return add.call(this, type, fn, options)
       }
-      window.removeEventListener = function (type, fn, options) {
-        if (type === 'resize') window.__resizeListeners.delete(fn)
+      EventTarget.prototype.removeEventListener = function (type, fn, options) {
+        forget(this, type, fn, options)
         return remove.call(this, type, fn, options)
       }
+      for (const name of ['ResizeObserver', 'IntersectionObserver', 'MutationObserver']) {
+        const Native = window[name]
+        if (!Native) continue
+        window[name] = class extends Native {
+          constructor (...args) { super(...args); this.targets = new Set() }
+          observe (target, ...args) { this.targets.add(target); observers.add(this); return super.observe(target, ...args) }
+          unobserve (target) { this.targets.delete(target); if (!this.targets.size) observers.delete(this); return super.unobserve(target) }
+          disconnect () { this.targets.clear(); observers.delete(this); return super.disconnect() }
+        }
+      }
+      window.__lifecycleStats = () => ({ listeners: listeners.size, observers: observers.size, charts: Object.keys(window.Chart?.instances || {}).length })
     })
     const go = async pathname => {
       await page.evaluate(p => new Promise(resolve => {
@@ -260,7 +278,11 @@ const server = http.createServer((req, res) => {
     await go('/')
     assert.deepEqual(await meta(), homeMeta)
     assert.ok(await page.evaluate(() => window.__oldCharts.every(chart => chart.isDisposed())))
-    for (let i = 0; i < 3; i++) { await go(chartPath); await ready(); await go('/') }
+    await page.waitForLoadState('networkidle')
+    const lifecycleBaseline = await page.evaluate(() => window.__lifecycleStats())
+    for (let i = 0; i < 20; i++) { await go(chartPath); await ready(); await go('/') }
+    assert.deepEqual(await page.evaluate(() => window.__lifecycleStats()), lifecycleBaseline, '20 round trips must not accumulate global listeners, observers or chart instances')
+    console.log('PASS: 20 round trips return listeners, observers and charts to baseline')
     await go(chartPath); await ready(); await checkCopy(page); await go('/')
     assert.equal(await page.evaluate(() => window.__resizeListeners.size), baseline, 'Navigation must not accumulate resize listeners')
     assert.equal(chartRequests, 1, 'Only one download across page visits')
@@ -537,5 +559,42 @@ const server = http.createServer((req, res) => {
     await directScripts.close()
     assert.deepEqual(errors, [])
     console.log('PASS: explicit script opt-in, classic ordering, async execution, data blocks and cached module mounts')
+    const cancelled = await context.newPage()
+    await cancelled.goto(origin + mount, { waitUntil: 'networkidle' })
+    let releasePage
+    const pageGate = new Promise(resolve => { releasePage = resolve })
+    await cancelled.route('**/about/', async route => { await pageGate; await route.fallback().catch(() => {}) })
+    const beforeCancel = counterCalls
+    const slowPageRequest = cancelled.waitForRequest(request => new URL(request.url()).pathname === withRoot('/about/'))
+    await cancelled.evaluate(path => { swup.navigate(path) }, withRoot('/about/'))
+    await slowPageRequest
+    await cancelled.evaluate(path => { swup.navigate(path) }, withRoot('/tags/'))
+    await cancelled.waitForFunction(path => location.pathname === path && !swup.navigating, withRoot('/tags/'))
+    releasePage()
+    await cancelled.waitForLoadState('networkidle')
+    assert.equal(new URL(cancelled.url()).pathname, withRoot('/tags/'))
+    if (process.env.MOCK_VISITOR_COUNTER) assert.equal(counterCalls - beforeCancel, 1, 'A cancelled page must not initialize its counter')
+    await cancelled.close()
+    for (const failure of ['non-html', 'network']) {
+      const failed = await context.newPage()
+      const target = withRoot(`/__${failure}__/`)
+      await failed.goto(origin + mount, { waitUntil: 'networkidle' })
+      let native = 0
+      await failed.route('**' + target, route => {
+        if (route.request().isNavigationRequest()) {
+          native++
+          return route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Native fallback</title><p id="native-fallback">Fallback</p>' })
+        }
+        return failure === 'network' ? route.abort() : route.fulfill({ contentType: 'application/json', body: '{"not":"html"}' })
+      })
+      await Promise.all([
+        failed.waitForNavigation({ waitUntil: 'load' }),
+        failed.evaluate(path => { swup.navigate(path) }, target)
+      ])
+      await failed.locator('#native-fallback').waitFor()
+      assert.equal(native, 1)
+      await failed.close()
+    }
+    console.log('PASS: cancelled responses do not initialize pages; non-HTML and network failures fall back to native navigation')
   } finally { await browser.close() }
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(() => server.close())

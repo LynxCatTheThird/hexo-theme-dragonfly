@@ -231,7 +231,7 @@ git pull
 
 `navigation` 控制切頁、快取與預載，`visitor_counter` 控制訪問計數。元件選項位於各自配置段；KaTeX 建置選項位於站點的 `math.katex.options`。
 
-首次初始化使用 `DOMContentLoaded`；後續切頁會觸發 `theme:page-load`，替換內容前觸發 `theme:page-leave`。`btf.addPageFn` 註冊頁面範圍的回調，`pageCleanup` 用於釋放元件資源。
+首次初始化使用 `DOMContentLoaded`；後續切頁會觸發 `theme:page-load`，替換內容前觸發 `theme:page-leave`。`btf.addPageFn` 註冊頁面範圍的回調，`pageCleanup` 用於釋放元件資源。非同步頁面工作應捕獲 `btf.pageSignal`，持續存在的監聽器使用 `btf.addAppEventListener`。
 
 以下命令在主題目錄執行。整合測試建立獨立消費站點並使用本地元件資源，暫存輸出會自動清理。
 

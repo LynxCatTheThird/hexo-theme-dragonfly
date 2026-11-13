@@ -1,6 +1,6 @@
 // Modified in Dragonfly.
 const addCopyHandler = () => {
-  document.addEventListener('copy', event => {
+  btf.addAppEventListener(document, 'copy', event => {
     const selection = window.getSelection()
     if (event.defaultPrevented || !event.clipboardData || !selection?.rangeCount || selection.isCollapsed) return
     if (event.target.closest?.('input, textarea, [contenteditable]:not([contenteditable="false"])')) return

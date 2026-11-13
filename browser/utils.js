@@ -48,13 +48,15 @@
 
     rafThrottle: fn => {
       let rafId = null
-      return (...args) => {
+      const throttled = (...args) => {
         if (rafId) return
         rafId = requestAnimationFrame(() => {
           fn(...args)
           rafId = null
         })
       }
+      throttled.cancel = () => { cancelAnimationFrame(rafId); rafId = null }
+      return throttled
     },
 
     overflowPaddingR: {
@@ -277,7 +279,7 @@
 
       window.addEventListener('resize', () => {
         cache = new WeakMap()
-      })
+      }, { signal: window.btf?.appSignal })
 
       return (currentTop, ele, useDocHeight = ele === document.body) => {
         const eleHeight = ele.clientHeight
@@ -313,10 +315,17 @@
     })(),
 
     addPageEventListener: (ele, event, fn, option = false) => {
-      ele.addEventListener(event, fn, option)
-      btf.addGlobalFn('pageCleanup', () => {
-        ele.removeEventListener(event, fn, option)
-      })
+      const options = typeof option === 'boolean' ? { capture: option } : option
+      const signal = options.signal && AbortSignal.any ? AbortSignal.any([options.signal, btf.pageSignal]) : btf.pageSignal
+      if (options.signal?.aborted) return
+      ele.addEventListener(event, fn, { ...options, signal })
+      if (fn.cancel) signal.addEventListener('abort', fn.cancel, { once: true })
+      if (options.signal && !AbortSignal.any) options.signal.addEventListener('abort', () => ele.removeEventListener(event, fn, options), { once: true, signal: btf.pageSignal })
+    },
+
+    addAppEventListener: (ele, event, fn, option = false) => {
+      const options = typeof option === 'boolean' ? { capture: option } : option
+      ele.addEventListener(event, fn, { ...options, signal: btf.appSignal })
     },
 
     switchComments: (el = document, path) => {
@@ -337,5 +346,5 @@
     }
   }
 
-  window.btf = { ...window.btf, ...btfFn }
+  Object.assign(window.btf || (window.btf = {}), btfFn)
 })()

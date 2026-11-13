@@ -21,6 +21,9 @@ const addHighlightTool = $article => {
   const highlightFullpageEle = highlightFullpage ? '<i class="fa-solid fa-up-right-and-down-left-from-center fullpage-button"></i>' : ''
 
   const alertInfo = (ele, text) => {
+    if (!ele.isConnected) return
+    const signal = btf.pageSignal
+    let removeTimer
     const newEle = document.createElement('div')
     newEle.className = 'copy-notice'
     newEle.textContent = text
@@ -49,18 +52,21 @@ const addHighlightTool = $article => {
   transition: opacity 0.3s ease, top 0.3s ease;
 `
 
-    requestAnimationFrame(() => {
+    const frame = requestAnimationFrame(() => {
+      if (signal.aborted) return
       newEle.style.opacity = '1'
       newEle.style.top = `${topValue}px`
     })
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      if (signal.aborted) return
       newEle.style.opacity = '0'
       newEle.style.top = `${topValue + 10}px`
-      setTimeout(() => {
+      removeTimer = setTimeout(() => {
         newEle?.remove()
       }, 300)
     }, 800)
+    signal.addEventListener('abort', () => { cancelAnimationFrame(frame); clearTimeout(timer); clearTimeout(removeTimer); newEle.remove() }, { once: true })
   }
 
   const copy = async (text, ctx) => {
