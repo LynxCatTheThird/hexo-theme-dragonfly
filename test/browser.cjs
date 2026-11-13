@@ -191,6 +191,14 @@ const server = http.createServer((req, res) => {
       json: [...document.querySelectorAll('script[type="application/ld+json"]')].map(e => JSON.parse(e.textContent))
     }))
     await page.goto(origin + mount, { waitUntil: 'networkidle' })
+    const connections = await page.locator('link[rel=preconnect]').evaluateAll(links => links.map(link => new URL(link.href).origin))
+    assert.ok(connections.length > 0)
+    assert.equal(new Set(connections).size, connections.length)
+    assert.ok(await page.evaluate(origins => {
+      const clone = document.documentElement.cloneNode(true)
+      clone.querySelectorAll('link[rel=preconnect]').forEach(link => link.remove())
+      return origins.every(origin => clone.outerHTML.includes(origin))
+    }, connections), 'Preconnect origins must come from actual page references')
     await page.waitForFunction(() => typeof window.swup?.navigate === 'function')
     if (process.env.MOCK_VISITOR_COUNTER) {
       await page.waitForFunction(() => document.getElementById('custom-uv')?.textContent === '77' && document.getElementById('custom-site-pv')?.textContent === '100')

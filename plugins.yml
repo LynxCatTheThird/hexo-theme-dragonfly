@@ -33,6 +33,7 @@ canvas_ribbon:
   version: 1.1.6
 chartjs:
   name: chart.js
+  other_name: Chart.js
   file: dist/chart.umd.js
   version: 4.6.1
 clickShowText:
@@ -150,14 +151,17 @@ swup:
   file: dist/Swup.umd.js
   version: 4.10.0
 swup_head:
+  cdnjs: false
   name: '@swup/head-plugin'
   file: dist/index.umd.js
   version: 2.3.1
 swup_preload:
+  cdnjs: false
   name: '@swup/preload-plugin'
   file: dist/index.umd.js
   version: 3.2.12
 swup_a11y:
+  cdnjs: false
   name: '@swup/a11y-plugin'
   file: dist/index.umd.js
   version: 5.2.1

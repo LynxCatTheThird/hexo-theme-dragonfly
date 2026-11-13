@@ -45,6 +45,7 @@ try {
       config.theme_config.navigation.enable = false
       config.theme_config.CDN = { internal_provider: 'local', third_party_provider: 'local' }
     }
+    if (process.env.TEST_PROVIDER) config.theme_config.CDN.third_party_provider = process.env.TEST_PROVIDER
     fs.writeFileSync(path.join(site, '_config.yml'), JSON.stringify(config))
     for (const slug of ['tags', 'about', 'policy']) {
       fs.mkdirSync(path.join(site, 'source', slug), { recursive: true })

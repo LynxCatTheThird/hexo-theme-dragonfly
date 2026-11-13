@@ -29,6 +29,10 @@ const server = http.createServer((req, res) => {
     page.on('pageerror', error => errors.push(error.message))
     const origin = `http://127.0.0.1:${server.address().port}`
     await page.goto(origin + mount, { waitUntil: 'networkidle' })
+    const connections = await page.locator('link[rel=preconnect]').evaluateAll(links => links.map(link => new URL(link.href).origin))
+    assert.ok(connections.length > 0)
+    assert.equal(new Set(connections).size, connections.length)
+    assert.ok(!connections.includes('https://fonts.googleapis.com'))
     assert.equal(await page.evaluate(() => typeof window.swup), 'undefined')
     assert.ok(!requests.some(url => /\/(?:swup|echarts|chart\.js|mermaid|mathjax)\//.test(url)))
     await page.locator('#recent-posts a.article-title').first().click()

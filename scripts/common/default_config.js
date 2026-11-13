@@ -490,7 +490,9 @@ module.exports = {
     internal_provider: 'local',
     third_party_provider: 'jsdelivr',
     version: true,
+    development: false,
     custom_format: null,
+    internal_custom_format: null,
     option: null
   }
 }

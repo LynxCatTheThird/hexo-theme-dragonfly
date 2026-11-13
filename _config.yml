@@ -894,17 +894,23 @@ inject:
 # CDN Settings
 CDN:
   # Internal scripts: local, or a custom CDN serving this fork.
-  # Note: When setting third-party scripts to 'local', you need to install hexo-butterfly-extjs
+  # Local third-party files must match plugins.yml at source/pluginsSrc/<package>/<file>.
   internal_provider: local
   # Third-party scripts: local/jsdelivr/unpkg/cdnjs/custom
+  # cdnjs uses unpkg for entries marked cdnjs: false in plugins.yml.
   third_party_provider: jsdelivr
 
   # Add version number to url, true or false
   version: true
 
-  # Custom format
-  # For example: https://cdn.staticfile.org/${cdnjs_name}/${version}/${min_cdnjs_file}
+  # Development always uses local internal code, including CDN.option overrides.
+  development: false
+  # Custom placeholders: name/version/file/min_file/cdnjs_name/cdnjs_file/min_cdnjs_file.
+  # Example: https://registry.npmmirror.com/${name}/${version}/files/${file}
   custom_format:
+  # Optional separate template for Dragonfly internal files; generated CSS stays local.
+  # Example: https://assets.example.com/dragonfly/${version}/${file}
+  internal_custom_format:
 
   option:
     # abcjs_basic_js:
