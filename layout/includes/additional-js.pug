@@ -1,13 +1,10 @@
 //- Modified in this fork.
 div
   script(src=url_for(theme.asset.utils))
-  script(src=url_for(theme.asset.main))
+  script(type="module" src=url_for(theme.asset.main))
 
   if theme.echarts.enable
-    script(src=url_for(theme.asset.echarts_runtime) defer data-echarts-config=JSON.stringify({init_options: theme.echarts.init_options, theme: theme.echarts.theme, retryText: _p('chart_retry')}) data-echarts-src=url_for((config.echarts && config.echarts.cdn) || theme.asset.echarts))
-
-  if theme.lightbox
-    script(src=url_for(theme.asset[theme.lightbox]))
+    script(type="application/json" data-dragonfly-module="echarts_runtime" data-src=url_for(theme.asset.echarts_runtime) defer data-echarts-config=JSON.stringify({init_options: theme.echarts.init_options, theme: theme.echarts.theme, retryText: _p('chart_retry')}) data-echarts-src=url_for((config.echarts && config.echarts.cdn) || theme.asset.echarts))
 
   if theme.lazyload.enable && !theme.lazyload.native
     script(src=url_for(theme.asset.lazyload))

@@ -35,6 +35,13 @@ const server = http.createServer((req, res) => {
     assert.ok(!connections.includes('https://fonts.googleapis.com'))
     assert.equal(await page.evaluate(() => typeof window.swup), 'undefined')
     assert.ok(!requests.some(url => /\/(?:swup|echarts|chart\.js|mermaid|mathjax)\//.test(url)))
+    if (['default', 'development'].includes(process.env.TEST_VARIANT)) {
+      assert.ok(!requests.some(url => /\/js\/build\/.*(?:article-|media-|gallery-|local_search-|algolia_js-|echarts_runtime-|navigation-)/.test(url)), 'Default home must not download optional modules')
+    }
+    if (process.env.TEST_VARIANT === 'development') {
+      assert.ok(requests.some(url => /\/js\/build\/development\/main-/.test(url)))
+      assert.ok(!requests.some(url => url.includes('dragonfly-assets.test')))
+    }
     await page.locator('#recent-posts a.article-title').first().click()
     await page.waitForURL('**/article/**')
     assert.ok(await page.locator('#article-container').isVisible())

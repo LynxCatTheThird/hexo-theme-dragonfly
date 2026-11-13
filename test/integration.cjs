@@ -26,7 +26,7 @@ const run = (args, site, env = {}) => {
   if (result.status !== 0 || /^ERROR\b/m.test((result.stdout || '') + (result.stderr || ''))) throw result.error || new Error(`Test failed in ${site}: ${result.status}`)
 }
 try {
-  for (const variant of ['default', 'components', 'subpath', 'navigation-off']) {
+  for (const variant of ['default', 'components', 'subpath', 'navigation-off', 'cdn-modules', 'development']) {
     if (process.env.TEST_VARIANT && process.env.TEST_VARIANT !== variant) continue
     const site = path.join(temp, variant)
     fs.mkdirSync(path.join(site, 'source/_posts'), { recursive: true })
@@ -35,7 +35,8 @@ try {
     fs.symlinkSync(path.join(theme, 'node_modules'), path.join(site, 'node_modules'), 'dir')
     fs.writeFileSync(path.join(site, 'package.json'), JSON.stringify(sitePackage))
     const config = structuredClone(base)
-    if (variant !== 'default') Object.assign(config.theme_config, structuredClone(components))
+    const basic = ['default', 'development'].includes(variant)
+    if (!basic) Object.assign(config.theme_config, structuredClone(components))
     if (variant === 'subpath') {
       config.root = '/blog/'
       config.url += '/blog'
@@ -44,6 +45,11 @@ try {
     if (variant === 'navigation-off') {
       config.theme_config.navigation.enable = false
       config.theme_config.CDN = { internal_provider: 'local', third_party_provider: 'local' }
+    }
+    if (variant === 'cdn-modules' || variant === 'development') {
+      config.theme_config.CDN.internal_provider = 'custom'
+      config.theme_config.CDN.internal_custom_format = 'https://dragonfly-assets.test/${file}'
+      config.theme_config.CDN.development = variant === 'development'
     }
     if (process.env.TEST_PROVIDER) config.theme_config.CDN.third_party_provider = process.env.TEST_PROVIDER
     fs.writeFileSync(path.join(site, '_config.yml'), JSON.stringify(config))
@@ -54,7 +60,7 @@ try {
     // Home stays tall enough to exercise scroll restoration without personal posts.
     for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(site, 'source/_posts', `post-${i}.md`), `---\ntitle: Post ${i}\ndate: 2025-01-01\n---\nTest post ${i}.`)
     const fixture = fs.readFileSync(path.join(__dirname, 'fixtures/components.md'), 'utf8')
-    for (const engine of variant === 'default' ? [] : ['katex', 'mathjax']) for (const encrypted of [false, true]) {
+    for (const engine of basic ? [] : ['katex', 'mathjax']) for (const encrypted of [false, true]) {
       const slug = `${engine === 'katex' ? 'component-test' : 'ssr-mathjax'}-${encrypted ? 'private' : 'public'}`
       let content = fixture.replace(/^abbrlink:.*$/m, `slug: ${slug}\nmath: ${engine}`)
         .replace(/^title:.*$/m, `title: ${engine === 'mathjax' ? 'Server MathJax ' + (encrypted ? 'private' : 'public') : encrypted ? 'Component integration test' : 'Public Component integration test <T>'}`)
@@ -64,7 +70,7 @@ try {
     }
     console.log('Testing:', variant)
     run([require.resolve('hexo/bin/hexo'), 'generate'], site)
-    run([path.join(__dirname, variant === 'default' || variant === 'navigation-off' ? 'smoke.cjs' : 'browser.cjs'), path.join(site, 'public')], site, {
+    run([path.join(__dirname, basic || variant === 'navigation-off' ? 'smoke.cjs' : 'browser.cjs'), path.join(site, 'public')], site, {
       TEST_ROOT: config.root, TEST_VARIANT: variant, MOCK_VISITOR_COUNTER: '1', TEST_MATHJAX: '1'
     })
   }

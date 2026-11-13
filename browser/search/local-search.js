@@ -249,7 +249,7 @@ class LocalSearch {
   }
 }
 
-window.addEventListener('load', () => {
+const initLocalSearch = () => {
   // Search
   const { path, top_n_per_article, languages, pagination } = GLOBAL_CONFIG.localSearch
   const enablePagination = pagination && pagination.enable
@@ -567,4 +567,7 @@ window.addEventListener('load', () => {
     localSearch.highlightSearchWords(document.getElementById('article-container'))
     searchClickFn()
   })
-})
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLocalSearch, { once: true })
+else initLocalSearch()

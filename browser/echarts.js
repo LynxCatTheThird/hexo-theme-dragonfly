@@ -1,6 +1,6 @@
 (() => {
-  const src = document.currentScript.dataset.echartsSrc
-  const config = JSON.parse(document.currentScript.dataset.echartsConfig)
+  const src = document.querySelector('script[data-echarts-src]').dataset.echartsSrc
+  const config = JSON.parse(document.querySelector('script[data-echarts-src]').dataset.echartsConfig)
   const charts = new Map()
   let generation = 0
   const dispose = () => {

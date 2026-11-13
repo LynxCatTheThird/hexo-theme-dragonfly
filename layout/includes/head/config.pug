@@ -87,6 +87,7 @@ script(data-swup-theme).
     },
     copyright: !{copyright},
     lightbox: '!{ theme.lightbox || 'null' }',
+    lightboxSrc: '!{theme.lightbox ? url_for(theme.asset[theme.lightbox]) : ''}',
     lightboxOptions: !{JSON.stringify(theme.lightbox_options || {}).replace(/</g, '\\u003c')},
     infinitegrid: {
       js: '!{url_for(theme.asset.egjs_infinitegrid)}',

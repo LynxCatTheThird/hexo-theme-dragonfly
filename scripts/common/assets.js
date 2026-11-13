@@ -38,7 +38,7 @@ const resolveAssets = (config, thirdParty, internal = internalAssets) => {
       // Site-dependent Stylus output and development code always stay local.
       result[key] = data.file + (cdn.version ? `?v=${data.version}` : '')
     } else {
-      const file = own ? `source/${data.file}` : data.file
+      const file = own ? (data.package_file || `source/${data.file}`) : data.file
       const cdnjsFile = data.cdnjs_file || data.file.replace(/^(?:lib|dist|browser)\//, '')
       const values = {
         name: data.name, version: data.version, file,

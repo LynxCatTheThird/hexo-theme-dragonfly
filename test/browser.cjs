@@ -98,10 +98,12 @@ const server = http.createServer((req, res) => {
     const page = await context.newPage()
     const errors = [], forbiddenRequests = []
     let chartRequests = 0
+    const moduleRequests = new Map()
     page.on('pageerror', e => errors.push(e.message))
     page.on('request', r => {
       if (forbidden.test(r.url())) forbiddenRequests.push(r.url())
       if (/\/echarts(?:\/|@)/.test(r.url())) chartRequests++
+      if (/\/js\/build\/.*\.js(?:\?|$)/.test(r.url())) moduleRequests.set(r.url(), (moduleRequests.get(r.url()) || 0) + 1)
     })
     await page.route('**/*', r => r.request().resourceType() === 'image' ? r.abort() : r.fallback())
     await page.addInitScript(() => {
@@ -208,6 +210,7 @@ const server = http.createServer((req, res) => {
     const homeMeta = await meta()
     const baseline = await page.evaluate(() => window.__resizeListeners.size)
     assert.equal(chartRequests, 0, 'Home must not load the chart library')
+    assert.ok(![...moduleRequests.keys()].some(url => /(?:article-|media-|gallery-|echarts_runtime-)/.test(url)), 'Home must not load article, media, gallery or chart modules')
     await go(chartPath)
     await ready()
     if (process.env.MOCK_VISITOR_COUNTER) {
@@ -226,6 +229,7 @@ const server = http.createServer((req, res) => {
       await go(chartPath)
       await ready()
     }
+    assert.deepEqual(errors, [])
     await checkCopy(page)
     console.log('PASS: built-in TeX copying, rich HTML, partial selection, chemistry, copyright and disabled states')
     const outerTabs = page.locator('#article-container > .tabs > .nav-tabs > button')
@@ -260,6 +264,8 @@ const server = http.createServer((req, res) => {
     await go(chartPath); await ready(); await checkCopy(page); await go('/')
     assert.equal(await page.evaluate(() => window.__resizeListeners.size), baseline, 'Navigation must not accumulate resize listeners')
     assert.equal(chartRequests, 1, 'Only one download across page visits')
+    assert.ok([...moduleRequests.values()].every(count => count === 1), 'Repeated navigation must reuse ESM modules')
+    console.log(`PASS: ${moduleRequests.size} internal modules reused across navigation`)
     await page.evaluate(() => window.scrollTo(0, 500))
     const savedScroll = await page.evaluate(() => window.scrollY)
     await go('/tags/')

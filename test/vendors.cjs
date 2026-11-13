@@ -9,6 +9,11 @@ module.exports = async context => {
   if (process.env.TEST_REAL_CDN) return
   await context.route('**/*', async route => {
     const url = new URL(route.request().url())
+    if (url.hostname === 'dragonfly-assets.test') {
+      const file = path.resolve(__dirname, '..', url.pathname.slice(1))
+      if (!file.startsWith(path.resolve(__dirname, '../dist/source') + path.sep)) throw new Error(`Invalid internal asset ${url}`)
+      return route.fulfill({ contentType: types[path.extname(file)] || 'application/octet-stream', headers: { 'access-control-allow-origin': '*' }, body: fs.readFileSync(file) })
+    }
     let match
     if (url.hostname === 'registry.npmmirror.com') match = url.pathname.match(/^\/(@[^/]+\/[^/]+|[^/]+)\/[^/]+\/files\/(.+)$/)
     else if (['cdn.jsdelivr.net', 'unpkg.com'].includes(url.hostname)) match = url.pathname.match(/^\/(?:npm\/)?(@[^/]+\/[^/@]+|[^/@]+)(?:@[^/]+)?\/(.+)$/)

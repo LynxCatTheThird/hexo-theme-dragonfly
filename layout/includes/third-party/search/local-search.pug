@@ -21,4 +21,4 @@
     #local-search-stats
 
   #search-mask
-  script(src=url_for(theme.asset.local_search))
+  script(type="application/json" data-dragonfly-module="local_search" data-src=url_for(theme.asset.local_search))

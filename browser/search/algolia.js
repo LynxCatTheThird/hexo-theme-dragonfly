@@ -1,5 +1,5 @@
 // Modified in this fork.
-window.addEventListener('load', () => {
+const initAlgolia = () => {
   const { algolia } = GLOBAL_CONFIG
   const { appId, apiKey, indexName, hitsPerPage = 5, languages } = algolia
 
@@ -466,4 +466,7 @@ window.addEventListener('load', () => {
     if (!btf.isHidden($searchMask)) closeSearch()
     searchClickFn()
   })
-})
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAlgolia, { once: true })
+else initAlgolia()

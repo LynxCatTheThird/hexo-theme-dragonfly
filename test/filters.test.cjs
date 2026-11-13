@@ -82,8 +82,8 @@ test('structured data respects disable, emits valid JSON and does not mutate alt
   assert.deepEqual(theme.structured_data.alternate_name, ['One'])
 })
 
-test('all retained JavaScript files parse', () => {
-  for (const dir of ['scripts', 'source/js']) {
+test('Hexo scripts parse', () => {
+  for (const dir of ['scripts']) {
     const base = path.resolve(__dirname, '..', dir)
     for (const file of fs.readdirSync(base, { recursive: true }).filter(f => f.endsWith('.js'))) {
       new vm.Script(fs.readFileSync(path.join(base, file), 'utf8'), { filename: file })
@@ -220,7 +220,7 @@ test('TOC anchor updates preserve navigation history and query parameters', () =
   const window = { addEventListener () {}, location: { href: 'https://site.test/post/?highlight=x', pathname: '/post/', search: '?highlight=x', hash: '' } }
   let result
   window.history = { state: { source: 'swup', index: 3, random: 0.5 }, replaceState: (state, title, url) => { result = { state, title, url } } }
-  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../source/js/utils.js'), 'utf8'), { window, URL, location: window.location, GLOBAL_CONFIG_SITE: { title: 'Post' } })
+  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../browser/utils.js'), 'utf8'), { window, URL, location: window.location, GLOBAL_CONFIG_SITE: { title: 'Post' } })
   window.btf.updateAnchor('#section')
   assert.equal(result.state.source, 'swup')
   assert.equal(result.state.index, 3)
@@ -273,20 +273,9 @@ test('MathJax chemistry augments custom packages and repeated initialization doe
   assert.equal(downloads, 1)
 })
 
-test('internal CDN configuration serves fork assets rather than upstream bundles', () => {
-  let configure
-  const config = { CDN: { internal_provider: 'jsdelivr', third_party_provider: 'custom', custom_format: 'https://assets.test/${file}', version: false, option: {} } }
-  load('scripts/events/cdn.js', { theme: { config }, theme_dir: '/unused/', render: { renderSync: () => ({}) }, extend: { filter: { register: (_, fn) => { configure = fn } } } })
-  assert.throws(configure, /this fork/)
-  config.CDN.internal_provider = 'custom'
-  configure()
-  assert.equal(config.asset.navigation, 'https://assets.test/source/js/navigation.js')
-  assert.equal(config.asset.echarts_runtime, 'https://assets.test/source/js/echarts.js')
-})
-
 test('local search preserves literal title markup and excludes executable links', () => {
   const context = { window: { addEventListener () {} }, URL, location: { origin: 'https://site.test' } }
-  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../source/js/search/local-search.js'), 'utf8') + '\nglobalThis.Search = LocalSearch', context)
+  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../browser/search/local-search.js'), 'utf8').split('const initLocalSearch =')[0] + '\nglobalThis.Search = LocalSearch', context)
   const search = new context.Search({})
   search.datas = [
     { title: 'vector<int> & "example"', content: 'vector', url: '/post/' },

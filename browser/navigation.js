@@ -1,5 +1,5 @@
 (() => {
-  const settings = JSON.parse(document.currentScript.dataset.navigation)
+  const settings = JSON.parse(document.querySelector('script[data-navigation]').dataset.navigation)
   const emit = name => document.dispatchEvent(new Event(name, { bubbles: true }))
   const run = (key, clear = false) => {
     const functions = window.globalFn?.[key] || {}
