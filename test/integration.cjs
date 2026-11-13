@@ -25,11 +25,18 @@ const run = (file, args, env = process.env) => {
       fs.writeFileSync(file, encrypted ? content : content.replace(/^password:.*\n/m, ''), { flag: 'wx' })
       created.push(file)
     }
+    for (const encrypted of [false, true]) {
+      const slug = `ssr-mathjax-${encrypted ? 'private' : 'public'}-${process.pid}`
+      const content = fixture.replace(/^abbrlink:.*$/m, `abbrlink: ${slug}\nmath: mathjax`)
+        .replace(/^title:.*$/m, `title: Server MathJax ${encrypted ? 'private' : 'public'}`)
+      const file = path.join(site, 'source/_posts', `${slug}.md`)
+      fs.writeFileSync(file, encrypted ? content : content.replace(/^password:.*\n/m, ''), { flag: 'wx' })
+      created.push(file)
+    }
     const output = path.join(temp, 'public')
     const config = path.join(temp, 'config.json')
     fs.writeFileSync(config, JSON.stringify({
       public_dir: output,
-      markdown: { katex: { mhchem: true, macros: { '\\AuditSymbol': '\\mathbf{X}' } } },
       theme_config: {
         navigation: { enable: true, cache: true, preload: true, exclude: ['/policy/'] },
         visitor_counter: { site_uv: true, site_pv: true, page_pv: true, element_id: { site_uv: 'custom-uv', site_pv: 'custom-site-pv', page_pv: 'custom-page-pv' }, element_class: { site_uv: 'custom-count', site_pv: 'custom-count', page_pv: 'custom-count' } },
@@ -40,7 +47,7 @@ const run = (file, args, env = process.env) => {
         echarts: { enable: true, height: 320, init_options: { renderer: 'svg' } },
         chartjs: { enable: true, options: { animation: false } },
         mermaid: { enable: true, options: { fontFamily: 'monospace' } },
-        math: { use: 'katex', per_page: true, katex: { copy_tex: true } }
+        math: { use: 'katex', per_page: true, mathjax: { mhchem: true, tex: { macros: { AuditSymbol: '\\mathbf{X}' } } }, katex: { copy_tex: true, mhchem: true, options: { macros: { '\\AuditSymbol': '\\mathbf{X}' } } } }
       }
     }))
     run(path.join(site, 'node_modules/.bin/hexo'), ['generate', '--config', `${path.join(site, '_config.yml')},${config}`])

@@ -38,6 +38,32 @@ const server = http.createServer((req, res) => {
   const origin = `http://127.0.0.1:${server.address().port}`
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined })
   try {
+    const nojs = await browser.newContext({ javaScriptEnabled: false })
+    for (const engine of ['katex', 'mathjax']) {
+      const file = engine === 'katex' ? chartFile : htmlFiles.find(file => file.startsWith('article/ssr-mathjax-public'))
+      assert.ok(file, `Missing public ${engine} fixture`)
+      const staticPage = await nojs.newPage()
+      await staticPage.route('**/*', route => route.request().resourceType() === 'image' ? route.abort() : route.fallback())
+      const requests = []
+      staticPage.on('request', request => requests.push(request.url()))
+      await staticPage.goto(origin + '/' + file, { waitUntil: 'networkidle' })
+      for (const width of [1280, 390]) {
+        await staticPage.setViewportSize({ width, height: 900 })
+        const formula = staticPage.locator(engine === 'katex' ? '#article-container .katex-html' : '#article-container mjx-container svg').first()
+        assert.ok(await formula.isVisible(), `${engine} must be visible without JavaScript`)
+        if (engine === 'katex') {
+          assert.match(await formula.evaluate(el => getComputedStyle(el.parentElement).fontFamily), /KaTeX/)
+        }
+        if (process.env.TEST_SCREENSHOTS) {
+          fs.mkdirSync(process.env.TEST_SCREENSHOTS, { recursive: true })
+          await staticPage.screenshot({ fullPage: true, path: path.join(process.env.TEST_SCREENSHOTS, `${engine}-nojs-${width}.png`) })
+        }
+      }
+      assert.ok(!requests.some(url => /\/(mathjax|katex)\/.*\.js/.test(url)), 'SSR must not download a math runtime')
+      await staticPage.close()
+    }
+    await nojs.close()
+    console.log('PASS: KaTeX and MathJax visible without JavaScript at desktop and mobile widths')
     const context = await browser.newContext()
     let counterCalls = 0
     if (process.env.MOCK_VISITOR_COUNTER) {
@@ -191,6 +217,20 @@ const server = http.createServer((req, res) => {
     }
     await checkCopy(page)
     console.log('PASS: built-in TeX copying, rich HTML, partial selection, chemistry, copyright and disabled states')
+    const outerTabs = page.locator('#article-container > .tabs > .nav-tabs > button')
+    await outerTabs.first().focus()
+    await page.keyboard.press('ArrowRight')
+    assert.equal(await outerTabs.nth(1).getAttribute('aria-selected'), 'true')
+    assert.equal(await outerTabs.first().getAttribute('tabindex'), '-1')
+    const nested = page.locator('.tab-item-content .tabs .nav-tabs > button')
+    await nested.first().focus()
+    await page.keyboard.press('End')
+    assert.equal(await nested.nth(1).getAttribute('aria-selected'), 'true')
+    assert.equal(await outerTabs.nth(1).getAttribute('aria-selected'), 'true')
+    await outerTabs.nth(1).focus()
+    await page.keyboard.press('Home')
+    assert.equal(await outerTabs.first().getAttribute('aria-selected'), 'true')
+    console.log('PASS: keyboard tabs, roving focus, ARIA state and nested isolation')
     const chartMeta = await meta()
     assert.ok(chartMeta.canonical.includes(chartPath))
     assert.equal(chartMeta.json[0]['@type'], 'BlogPosting')
@@ -321,6 +361,29 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => { delete window.globalFn.encrypt.testPersistent })
     console.log('PASS: prefetch, focus, native links, anchors, search and callback scopes')
 
+    for (const variant of ['public', 'private']) {
+      const file = htmlFiles.find(file => file.startsWith('article/ssr-mathjax-' + variant))
+      if (!file) continue
+      const mathPage = await context.newPage()
+      const mathRequests = []
+      mathPage.on('request', request => { if (/\/mathjax\//.test(request.url())) mathRequests.push(request.url()) })
+      await mathPage.goto(origin + '/' + file.replace(/index\.html$/, ''), { waitUntil: 'networkidle' })
+      if (variant === 'private') {
+        assert.equal(await mathPage.locator('mjx-container').count(), 0)
+        await mathPage.locator('input[type=password]').fill('component-test-only')
+        await mathPage.locator('input[type=password]').press('Enter')
+      }
+      await mathPage.locator('mjx-container svg').first().waitFor()
+      assert.equal(await mathPage.locator('.katex, [data-mjx-error], .math-source').count(), 0)
+      assert.deepEqual(mathRequests, [])
+      const assistive = mathPage.locator('mjx-assistive-mml').first()
+      assert.ok(await assistive.locator('math').count())
+      assert.ok(await assistive.evaluate(el => el.getBoundingClientRect().width <= 1))
+      assert.equal(await mathPage.evaluate(() => typeof window.MathJax), 'undefined')
+      await mathPage.close()
+    }
+    console.log('PASS: per-article MathJax SVG, encrypted SSR, and zero browser math runtime')
+
     if (process.env.TEST_MATHJAX) {
       const math = await context.newPage()
       const mathErrors = []
@@ -398,9 +461,10 @@ const server = http.createServer((req, res) => {
       await encrypted.locator('input[type=password]').press('Enter')
       await encrypted.waitForFunction(() => {
         const chart = document.querySelector('.echarts-container')
-        return chart && typeof window.echarts?.getInstanceByDom === 'function' && window.echarts.getInstanceByDom(chart) && document.querySelector('.chartjs-wrap canvas') && typeof window.Chart?.getChart === 'function' && window.Chart.getChart(document.querySelector('.chartjs-wrap canvas')) && document.querySelector('.mermaid-wrap svg') && document.querySelector('.katex-show')
+        return chart && typeof window.echarts?.getInstanceByDom === 'function' && window.echarts.getInstanceByDom(chart) && document.querySelector('.chartjs-wrap canvas') && typeof window.Chart?.getChart === 'function' && window.Chart.getChart(document.querySelector('.chartjs-wrap canvas')) && document.querySelector('.mermaid-wrap svg') && document.querySelector('.katex')
       })
       assert.equal(await encrypted.locator('.katex-error').count(), 0)
+      assert.ok(await encrypted.locator('.katex-html').first().isVisible())
       await checkCopy(encrypted)
       assert.equal(await encrypted.locator('.katex mark, .mermaid-wrap mark, .echarts-container mark, .chartjs-src mark').count(), 0)
       assert.ok((await encrypted.locator('.katex').first().textContent()).includes('X'), 'KaTeX macro from site config must render')

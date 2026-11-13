@@ -18,16 +18,31 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/LynxCatTheThird/hexo-theme-butterfly.git"
+    "url": "https://github.com/LynxCatTheThird/hexo-theme-dragonfly.git"
   },
   "bugs": {
-    "url": "https://github.com/LynxCatTheThird/hexo-theme-butterfly/issues"
+    "url": "https://github.com/LynxCatTheThird/hexo-theme-dragonfly/issues"
   },
   "dependencies": {
     "hexo-renderer-pug": "^3.0.0",
     "hexo-renderer-stylus": "^3.0.1",
     "hexo-util": "^4.0.0",
-    "moment-timezone": "^0.6.6"
+    "moment-timezone": "^0.6.6",
+    "@mdit/plugin-abbr": "^1.1.2",
+    "@mdit/plugin-dl": "^1.1.2",
+    "@mdit/plugin-footnote": "^1.1.2",
+    "@mdit/plugin-ins": "^2.1.2",
+    "@mdit/plugin-mark": "^2.1.2",
+    "@mdit/plugin-spoiler": "^2.1.2",
+    "@mdit/plugin-sub": "^1.1.2",
+    "@mdit/plugin-sup": "^1.1.2",
+    "@mdit/plugin-tasklist": "^1.1.3",
+    "katex": "^0.19.0",
+    "markdown-it": "^15.0.3",
+    "markdown-it-anchor": "^10.0.0",
+    "@mdit/plugin-tex": "^1.1.2",
+    "@mathjax/src": "^4.1.3",
+    "@mathjax/mathjax-mhchem-font-extension": "^4.1.3"
   },
   "homepage": "https://butterfly.js.org/",
   "author": "Jerry <my@crazywong.com>",

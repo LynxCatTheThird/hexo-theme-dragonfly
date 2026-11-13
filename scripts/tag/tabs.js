@@ -2,9 +2,13 @@
  * Tabs
  * transplant from hexo-theme-next
  * modify by Jerry
+ * Modified in Dragonfly.
  */
 
 'use strict'
+
+const { createHash } = require('node:crypto')
+let sequence = 0
 
 const postTabs = (args, content) => {
   const tabBlock = /<!--\s*tab (.*?)\s*-->\n([\w\W\s\S]*?)<!--\s*endtab\s*-->/g
@@ -17,6 +21,7 @@ const postTabs = (args, content) => {
   let tabNav = ''
   let tabContent = ''
   let noDefault = true
+  const group = `tabs-${createHash('sha256').update(content).digest('hex').slice(0, 10)}-${++sequence}`
 
   while ((match = tabBlock.exec(content)) !== null) {
     matches.push(match[1], match[2])
@@ -35,12 +40,14 @@ const postTabs = (args, content) => {
 
     if (isActive) noDefault = false
 
-    tabNav += `<button type="button" class="tab${isActive}">${iconHtml}${caption.trim()}</button>`
-    tabContent += `<div class="tab-item-content${isActive}">${postContent}</div>`
+    tabNav += `<button type="button" class="tab${isActive}" role="tab" id="${group}-tab-${tabId}" aria-controls="${group}-panel-${tabId}" aria-selected="${Boolean(isActive)}" tabindex="${isActive ? 0 : -1}">${iconHtml}${caption.trim()}</button>`
+    tabContent += `<div class="tab-item-content${isActive}" role="tabpanel" id="${group}-panel-${tabId}" aria-labelledby="${group}-tab-${tabId}"${isActive ? '' : ' hidden'}>${postContent}</div>`
   }
 
+  if (noDefault) tabNav = tabNav.replace('tabindex="-1"', 'tabindex="0"')
+
   const toTop = '<div class="tab-to-top"><button type="button" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div>'
-  tabNav = `<div class="nav-tabs${noDefault ? ' no-default' : ''}">${tabNav}</div>`
+  tabNav = `<div class="nav-tabs${noDefault ? ' no-default' : ''}" role="tablist">${tabNav}</div>`
   tabContent = `<div class="tab-contents">${tabContent}</div>`
 
   return `<div class="tabs">${tabNav}${tabContent}${toTop}</div>`

@@ -56,7 +56,7 @@
 在 Hexo 根目錄安裝本分支：
 
 ```bash
-git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-butterfly.git themes/butterfly
+git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-dragonfly.git themes/butterfly
 ```
 
 ### ⚙️ 啟用與設定
@@ -83,6 +83,7 @@ git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-butterf
 
    ```bash
    npm install hexo-renderer-pug hexo-renderer-stylus --save
+   npm install --prefix themes/butterfly --omit=dev --no-package-lock
    hexo clean && hexo s
    ```
 
@@ -228,11 +229,11 @@ git pull
 
 ## 分支配置與測試
 
-`navigation` 控制切頁、快取與預載，`visitor_counter` 控制訪問計數。元件選項位於各自配置段；KaTeX 建置選項位於站點的 `markdown.katex`。
+`navigation` 控制切頁、快取與預載，`visitor_counter` 控制訪問計數。元件選項位於各自配置段；KaTeX 建置選項位於站點的 `math.katex.options`。
 
 首次初始化使用 `DOMContentLoaded`；後續切頁會觸發 `theme:page-load`，替換內容前觸發 `theme:page-leave`。`btf.addPageFn` 註冊頁面範圍的回調，`pageCleanup` 用於釋放元件資源。
 
-以下命令在主題目錄執行。整合測試使用 web-v3 的渲染器與加密外掛，測試文章會自動清理。
+以下命令在主題目錄執行。整合測試使用主題渲染器與站點的加密外掛，測試文章會自動清理。
 
 ```sh
 npm install --no-package-lock
@@ -241,4 +242,6 @@ npx playwright install chromium
 TEST_MATHJAX=1 npm run test:integration -- /path/to/web-v3
 ```
 
-KaTeX 在站點建置時渲染；`markdown.katex.mhchem: true` 啟用化學公式，無需瀏覽器端擴展。`math.katex.copy_tex: true` 使用主題內建的公式源碼複製。MathJax 仍在瀏覽器渲染，`math.mathjax.mhchem: true` 才載入化學擴展；同一頁面不重複排版。
+KaTeX 在站點建置時渲染；`math.katex.mhchem: true` 啟用化學公式，無需瀏覽器端擴展。`math.katex.copy_tex: true` 使用主題內建的公式源碼複製。MathJax 預設建置 SVG，`math.mathjax.render: client` 選擇瀏覽器渲染，`math.mathjax.mhchem: true` 啟用化學擴展。文章的 `math: katex`、`math: mathjax` 或 `math: false` 選擇引擎或停用公式。
+
+在站點 `theme_config.markdown.renderer`（或 `_config.butterfly.yml`）設定 Markdown 所有權。`auto` 僅在未安裝 Markdown 渲染器時使用主題內建渲染器；`theme` 明確選用內建渲染器；`external` 保留站點渲染。內建數學選項與 Markdown 擴展僅適用於主題渲染器；外部渲染器自行處理公式解析。

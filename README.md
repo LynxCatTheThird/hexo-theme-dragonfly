@@ -56,7 +56,7 @@ A modern, elegant, and feature-rich theme for Hexo
 Install this fork from the Hexo site directory:
 
 ```bash
-git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-butterfly.git themes/butterfly
+git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-dragonfly.git themes/butterfly
 ```
 
 ### ⚙️ Enable & Configure
@@ -83,6 +83,7 @@ git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-butterf
 
    ```bash
    npm install hexo-renderer-pug hexo-renderer-stylus --save
+   npm install --prefix themes/butterfly --omit=dev --no-package-lock
    hexo clean && hexo s
    ```
 
@@ -228,11 +229,11 @@ Thanks to everyone who has contributed to Butterfly — your support keeps the t
 
 ## Fork configuration and tests
 
-`navigation` controls page changes, caching and preloading. `visitor_counter` controls visit counts. Component options live in their respective config sections; KaTeX build options live in the site's `markdown.katex`.
+`navigation` controls page changes, caching and preloading. `visitor_counter` controls visit counts. Component options live in their respective config sections; KaTeX build options live in the site's `math.katex.options`.
 
 Use `DOMContentLoaded` for initial setup, `theme:page-load` after navigation and `theme:page-leave` before replacement. `btf.addPageFn` registers page-scoped callbacks; `pageCleanup` releases component resources.
 
-Run these commands in the theme directory. Integration tests use web-v3's renderer and encryption plugin and clean up their temporary posts.
+Run these commands in the theme directory. Integration tests use the theme renderer and the site's encryption plugin and clean up their temporary posts.
 
 ```sh
 npm install --no-package-lock
@@ -241,4 +242,6 @@ npx playwright install chromium
 TEST_MATHJAX=1 npm run test:integration -- /path/to/web-v3
 ```
 
-KaTeX renders at site build time; `markdown.katex.mhchem: true` enables chemistry without a browser extension. `math.katex.copy_tex: true` uses the built-in TeX copy handler. MathJax renders in the browser and loads chemistry only with `math.mathjax.mhchem: true`; each page is typeset once.
+KaTeX renders at site build time; `math.katex.mhchem: true` enables chemistry without a browser extension. `math.katex.copy_tex: true` uses the built-in TeX copy handler. MathJax builds SVG by default; `math.mathjax.render: client` selects browser rendering. `math.mathjax.mhchem: true` enables chemistry. Article front matter `math: katex`, `math: mathjax`, or `math: false` selects one engine or disables math.
+
+Markdown ownership is configured in the site's `theme_config.markdown.renderer` (or `_config.butterfly.yml`). `auto` uses the built-in renderer only when no Markdown renderer is installed; `theme` explicitly selects it; `external` preserves site rendering. Built-in math options and Markdown extensions apply only to the theme renderer; external renderers own their math parsing.

@@ -1,11 +1,7 @@
-case theme.math.use
+case math_engine(page)
   when 'mathjax'
-    if (theme.math.per_page && (['post','page'].includes(globalPageType))) || page.mathjax
+    if theme.math.mathjax.render === 'client'
       include ./mathjax.pug
-
-  when 'katex'
-    if (theme.math.per_page && (['post','page'].includes(globalPageType))) || page.katex
-      include ./katex.pug
 
 if theme.mermaid.enable
   include ./mermaid.pug

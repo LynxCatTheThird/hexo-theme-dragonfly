@@ -52,6 +52,9 @@ if (theme.pwa && theme.pwa.enable)
 link(data-swup-theme rel='stylesheet', href=url_for(theme.asset.main_css))
 link(data-swup-theme rel='stylesheet', href=url_for(theme.asset.fontawesome))
 
+if math_engine(page) === 'katex'
+  link(data-swup-theme rel='stylesheet' href=url_for(theme.asset.katex))
+
 if theme.lightbox === 'fancybox'
   link(data-swup-theme rel='stylesheet' href=url_for(theme.asset.fancybox_css) media="print" onload="this.media='all'")
 

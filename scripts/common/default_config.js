@@ -250,11 +250,13 @@ module.exports = {
     element_id: { site_uv: null, site_pv: null, page_pv: null },
     element_class: { site_uv: null, site_pv: null, page_pv: null }
   },
+  markdown: { renderer: 'auto' },
   math: {
     use: null,
     per_page: true,
     hide_scrollbar: false,
     mathjax: {
+      render: 'server',
       mhchem: false,
       enableMenu: true,
       tags: 'none',
@@ -265,6 +267,8 @@ module.exports = {
       options: { lazyMargin: '200px' }
     },
     katex: {
+      mhchem: false,
+      options: {},
       copy_tex: false
     }
   },

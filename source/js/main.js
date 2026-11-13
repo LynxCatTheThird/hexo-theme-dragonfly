@@ -850,7 +850,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!$article.querySelector('.tabs')) return
 
     const setActiveClass = (elements, activeIndex) => {
-      elements.forEach((el, index) => el.classList.toggle('active', index === activeIndex))
+      elements.forEach((el, index) => {
+        const active = index === activeIndex
+        el.classList.toggle('active', active)
+        if (el.getAttribute('role') === 'tab') {
+          el.setAttribute('aria-selected', active)
+          el.tabIndex = active ? 0 : -1
+        } else el.hidden = !active
+      })
     }
 
     const handleClick = e => {
@@ -880,6 +887,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btf.addPageEventListener($article, 'click', handleClick)
+    btf.addPageEventListener($article, 'keydown', event => {
+      const tab = event.target.closest('.nav-tabs > button')
+      if (!tab) return
+      const tabs = [...tab.parentElement.children]
+      const index = tabs.indexOf(tab)
+      const offsets = { ArrowLeft: -1, ArrowRight: 1, Home: -index, End: tabs.length - 1 - index }
+      if (!(event.key in offsets)) return
+      event.preventDefault()
+      const next = tabs[(index + offsets[event.key] + tabs.length) % tabs.length]
+      next.focus()
+      next.click()
+    })
   }
 
   const toggleCardCategory = () => {

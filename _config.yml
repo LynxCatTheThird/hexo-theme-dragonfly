@@ -443,9 +443,13 @@ visitor_counter:
 # Math
 # --------------------------------------
 
-# About the per_page
-# if you set it to true, it will load mathjax/katex script in each page
-# if you set it to false, it will load mathjax/katex script according to your setting (add the 'mathjax: true' or 'katex: true' in page's front-matter)
+# Per-article override: math: katex / mathjax / false.
+# per_page renders all posts/pages; false requires an article override.
+# Markdown ownership: auto preserves an installed renderer; theme explicitly selects the built-in renderer.
+# Configure this in the site theme_config or _config.butterfly.yml.
+markdown:
+  renderer: auto # auto / theme / external
+
 math:
   # Choose: mathjax, katex
   # Leave it empty if you don't need math
@@ -454,6 +458,8 @@ math:
   hide_scrollbar: false
 
   mathjax:
+    # server: build SVG; client: browser rendering with loader/CHTML options.
+    render: server
     # Load chemical equation support only when enabled.
     mhchem: false
     # Enable the contextual menu
@@ -470,6 +476,9 @@ math:
       lazyMargin: 200px
 
   katex:
+    # Build-time chemistry and KaTeX options.
+    mhchem: false
+    options: {}
     # Enable the copy KaTeX formula
     copy_tex: false
 

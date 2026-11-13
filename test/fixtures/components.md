@@ -13,6 +13,8 @@ $$\AuditSymbol + x^2$$
 
 Inline $x^2$ and chemistry $\ce{H2O}$.
 
+$$\ce{CO2 + H2O -> H2CO3}$$
+
 ## ECharts
 
 ```echarts
@@ -37,3 +39,22 @@ flowchart LR
 ## Image
 
 ![Pixel](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==)
+
+## Tabs
+
+{% tabs keyboard %}
+<!-- tab First -->
+First panel.
+<!-- endtab -->
+<!-- tab Second -->
+Second panel.
+{% subtabs nested %}
+<!-- tab Nested first -->
+Inner first.
+<!-- endtab -->
+<!-- tab Nested second -->
+Inner second.
+<!-- endtab -->
+{% endsubtabs %}
+<!-- endtab -->
+{% endtabs %}
