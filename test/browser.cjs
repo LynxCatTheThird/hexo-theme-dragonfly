@@ -21,7 +21,9 @@ let headHelper
 require('node:vm').runInNewContext(fs.readFileSync(path.join(__dirname, '../scripts/helpers/inject_head_js.js'), 'utf8'), {
   hexo: { theme: { config: mathTheme }, extend: { helper: { register: (_, fn) => { headHelper = fn } } } }
 })
-const mathFixture = '<html><head><meta name="theme-color" content="#fff">' + headHelper.call({ theme: mathTheme }) + '</head><body><div id="article-container"><script type="math/tex; mode=display">\\Probe + x^2 + \\ce{H2O}</script></div>' + require('pug').renderFile(path.join(__dirname, '../layout/includes/third-party/math/mathjax.pug'), { theme: mathTheme, url_for: v => v }) + '</body></html>'
+const longClientMath = '<script type="math/tex">' + Array.from({ length: 35 }, (_, i) => `x_{${i}}`).join(' + ') + '</script>'
+const clientBlocks = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map(tag => `<${tag}>Formula ${longClientMath}</${tag}>`).join('') + `<ul><li>${longClientMath}</li></ul><div class="note"><p>${longClientMath}</p></div><div class="table-wrap"><table><tr><td>${longClientMath}</td></tr></table></div>`
+const mathFixture = '<html><head><meta name="theme-color" content="#fff"><link rel="stylesheet" href="/css/index.css">' + headHelper.call({ theme: mathTheme }) + '</head><body><div id="article-container"><script type="math/tex; mode=display">\\Probe + x^2 + \\ce{H2O}</script>' + clientBlocks + '</div>' + require('pug').renderFile(path.join(__dirname, '../layout/includes/third-party/math/mathjax.pug'), { theme: mathTheme, url_for: v => v }) + '</body></html>'
 const server = http.createServer((req, res) => {
   if (req.url === '/__mathjax_test__/') { res.setHeader('Content-Type', 'text/html'); res.end(mathFixture); return }
   let file = path.join(root, decodeURIComponent(new URL(req.url, 'http://localhost').pathname))
@@ -53,6 +55,17 @@ const server = http.createServer((req, res) => {
         assert.ok(await formula.isVisible(), `${engine} must be visible without JavaScript`)
         if (engine === 'katex') {
           assert.match(await formula.evaluate(el => getComputedStyle(el.parentElement).fontFamily), /KaTeX/)
+        } else {
+          const overflow = await staticPage.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth, blocks: [...document.querySelectorAll('#article-container, #article-container > *')].map(el => ({ tag: el.tagName, cls: el.className, width: el.clientWidth, scroll: el.scrollWidth, overflow: getComputedStyle(el).overflowX })) }))
+          assert.ok(overflow.scroll <= width + 1, 'Long formulas must not widen the page: ' + JSON.stringify(overflow))
+          for (const tag of ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', '.note p', 'td']) {
+            const math = staticPage.locator(`#article-container ${tag} mjx-container:not([display])`).last()
+            assert.equal(await math.evaluate(el => getComputedStyle(el).display), 'inline')
+            assert.equal(await math.evaluate(el => getComputedStyle(el).whiteSpace), 'nowrap')
+            assert.ok((await math.boundingBox()).height < 100, `${tag} formula must stay on one line`)
+          }
+          assert.equal(await staticPage.locator('#article-container li:has(mjx-container)').last().evaluate(el => getComputedStyle(el).listStylePosition), 'inside')
+          assert.ok(await staticPage.locator('#article-container code').filter({ hasText: '$literal$' }).count())
         }
         if (process.env.TEST_SCREENSHOTS) {
           fs.mkdirSync(process.env.TEST_SCREENSHOTS, { recursive: true })
@@ -392,6 +405,12 @@ const server = http.createServer((req, res) => {
       await math.waitForSelector('#article-container mjx-container', { timeout: 45000 })
       assert.ok(await math.locator('mjx-container mjx-mi').count() > 0)
       assert.equal(await math.locator('mjx-merror').count(), 0)
+      for (const width of [1280, 390]) {
+        await math.setViewportSize({ width, height: 900 })
+        assert.ok(await math.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Client MathJax must not widen the page')
+        assert.ok(await math.locator('mjx-container:not([display])').evaluateAll(els => els.length >= 10 && els.every(el => getComputedStyle(el).display === 'inline' && getComputedStyle(el).whiteSpace === 'nowrap' && el.getBoundingClientRect().height < 100)))
+        if (process.env.TEST_SCREENSHOTS) await math.screenshot({ fullPage: true, path: path.join(process.env.TEST_SCREENSHOTS, `mathjax-client-${width}.png`) })
+      }
       assert.deepEqual(mathErrors, [])
       await math.close()
       console.log('PASS: MathJax client options and real CHTML rendering')

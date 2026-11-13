@@ -27,7 +27,7 @@ const run = (file, args, env = process.env) => {
     }
     for (const encrypted of [false, true]) {
       const slug = `ssr-mathjax-${encrypted ? 'private' : 'public'}-${process.pid}`
-      const content = fixture.replace(/^abbrlink:.*$/m, `abbrlink: ${slug}\nmath: mathjax`)
+      const content = (fixture + fs.readFileSync(path.join(__dirname, 'fixtures/math-layout.md'), 'utf8')).replace(/^abbrlink:.*$/m, `abbrlink: ${slug}\nmath: mathjax`)
         .replace(/^title:.*$/m, `title: Server MathJax ${encrypted ? 'private' : 'public'}`)
       const file = path.join(site, 'source/_posts', `${slug}.md`)
       fs.writeFileSync(file, encrypted ? content : content.replace(/^password:.*\n/m, ''), { flag: 'wx' })
@@ -54,6 +54,7 @@ const run = (file, args, env = process.env) => {
     run(process.execPath, [path.join(__dirname, 'browser.cjs'), output], { ...process.env, MOCK_VISITOR_COUNTER: '1' })
   } finally {
     created.forEach(file => fs.unlinkSync(file))
-    fs.rmSync(temp, { recursive: true, force: true })
+    if (process.env.TEST_KEEP_OUTPUT) console.log('Test output:', temp)
+    else fs.rmSync(temp, { recursive: true, force: true })
   }
 })().catch(error => { console.error(error); process.exitCode = 1 })

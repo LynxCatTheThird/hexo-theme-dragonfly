@@ -216,36 +216,65 @@ if hexo-config('chartjs.enable')
     canvas
       display: inline-block !important
 
-if hexo-config('math.use')
-  .katex-display
-    overflow: auto hidden
-    padding: 5px
+.katex-display
+  overflow: auto hidden
+  padding: 5px
 
-  if hexo-config('math.hide_scrollbar')
-    .katex-display,
-    mjx-container
-      scrollbar-width: none
-
-      &::-webkit-scrollbar
-        display: none
-
-  // Mathjax
+if hexo-config('math.hide_scrollbar')
+  .katex-display,
   mjx-container
-    overflow-x: auto
-    overflow-y: hidden
-    padding-bottom: 4px
-    max-width: 100%
+    scrollbar-width: none
 
-    &[display]
-      display: block !important
-      min-width: auto !important
+    &::-webkit-scrollbar
+      display: none
 
-    &:not([display])
-      display: inline-grid !important
+// Mathjax
+mjx-container
+  overflow-x: auto
+  overflow-y: hidden
+  padding-bottom: 4px
+  max-width: 100%
 
-  mjx-assistive-mml
-    right: 0
-    bottom: 0
+  &[display]
+    display: block !important
+    min-width: auto !important
+
+  &:not([display])
+    display: inline !important
+    white-space: nowrap
+
+    mjx-break
+      white-space: nowrap !important
+
+// Keep MathJax 4 SVG chunks inline and scroll their block parent.
+#article-container :is(p, h1, h2, h3, h4, h5, h6):has(mjx-container:not([display]))
+  max-width: 100%
+  overflow-x: auto
+
+#article-container li:has(mjx-container:not([display]))
+  overflow-x: auto
+  list-style-position: inside
+
+#article-container .note:has(> mjx-container:not([display]))
+  overflow-x: auto
+
+#article-container table:has(mjx-container)
+  display: block
+  max-width: 100%
+  overflow-x: auto
+
+@css {
+  @supports not selector(:has(a)) {
+    mjx-container:not([display]) {
+      display: inline-grid !important;
+      white-space: normal;
+    }
+  }
+}
+
+mjx-assistive-mml
+  right: 0
+  bottom: 0
 
 .abc-music-sheet
   margin: 0 0 20px
