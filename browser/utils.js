@@ -129,6 +129,11 @@
       const isNavFixed = document.getElementById('page-header').classList.contains('fixed')
       if (currentPos > pos || isNavFixed) pos = pos - 70
 
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        window.scrollTo({ top: pos, behavior: 'instant' })
+        return
+      }
+
       if ('scrollBehavior' in document.documentElement.style) {
         window.scrollTo({
           top: pos,
@@ -152,7 +157,7 @@
 
     animateIn: (ele, animation) => {
       ele.style.display = 'block'
-      ele.style.animation = animation
+      ele.style.animation = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '' : animation
     },
 
     animateOut: (ele, animation) => {
@@ -161,6 +166,7 @@
         ele.style.animation = ''
         ele.removeEventListener('animationend', handleAnimationEnd)
       }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return handleAnimationEnd()
       ele.addEventListener('animationend', handleAnimationEnd)
       ele.style.animation = animation
     },
