@@ -176,6 +176,18 @@ waline:
 
 ## CDN、子路径与开发模式
 
+主题在构建时解析资源 URL：`plugins.yml` 提供第三方包名、版本与文件路径，构建清单提供主题入口和 chunk，`CDN` 配置决定最终地址。生成器仍会输出本地主题资源；远程资源的上传和 CDN 服务由部署端管理。
+
+自定义 URL 有三种入口，都位于主题配置的 `CDN` 段：
+
+| 配置 | 用途 | 生效条件 |
+| --- | --- | --- |
+| `custom_format` | 批量生成第三方资源的完整 URL | `third_party_provider: custom` |
+| `internal_custom_format` | 为主题内部 JS 使用独立 URL 模板 | `internal_provider: custom` |
+| `option.<资源键>` | 直接指定单个文件的完整 URL | 对应项填写非空地址；开发模式忽略内部项 |
+
+内部 provider 为 `custom` 且独立模板为空时，会回退到 `custom_format`。主题代码通常与 npm 镜像采用不同的目录布局，自建 CDN 时宜明确填写独立模板。完整逐项覆盖清单已列在 [_config.yml](../_config.yml) 的 `CDN.option` 下，取消所需行的注释即可填写。
+
 内部资源支持 `local`、`custom`；第三方支持 `local`、`jsdelivr`、`unpkg`、`cdnjs`、`custom`。本地第三方文件放在站点 `source/pluginsSrc/<包名>/<文件路径>`，版本和路径见 [plugins.yml](../plugins.yml)。仅选择 `local` 不会下载这些组件。
 
 ```yaml
@@ -185,6 +197,19 @@ CDN:
   version: true
   custom_format: https://registry.npmmirror.com/${name}/${version}/files/${file}
 ```
+
+下面是自建主题 CDN、并为一个第三方组件单独指定地址的片段。示例域名需替换为实际托管地址：
+
+```yaml
+CDN:
+  internal_provider: custom
+  internal_custom_format: https://cdn.example.com/dragonfly/${version}/${file}
+  third_party_provider: jsdelivr
+  option:
+    fontawesome: https://cdn.example.com/fontawesome/css/all.min.css
+```
+
+主题内部脚本需要连同其引用的全部 chunk 一起上传；字体样式表还需要能访问相对路径下的字体文件。页面、文章图片及 `inject` 中手写的 URL 不经过这套资源映射，按各自配置设置地址。
 
 单项 `CDN.option` 优先于 provider；开发模式强制内部资源使用本地构建，并忽略其单项覆盖。生产模式下，站点生成的 CSS 默认使用本地地址，显式的 `CDN.option.main_css` 可指定其他地址。`cdnjs` 对 `plugins.yml` 中标记 `cdnjs: false` 的资源回退到 unpkg。
 
