@@ -10,7 +10,7 @@
 [![许可证](https://img.shields.io/github/license/LynxCatTheThird/hexo-theme-dragonfly)](LICENSE)
 [![星标](https://img.shields.io/github/stars/LynxCatTheThird/hexo-theme-dragonfly?style=social)](https://github.com/LynxCatTheThird/hexo-theme-dragonfly)
 
-[配置指南](docs/configuration.md) · [开发与分发](docs/development.md) · [迁移说明](docs/migration.md) · [报告问题](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/issues)
+[配置指南](docs/configuration.md) · [文章写作](docs/writing.md) · [开发与分发](docs/development.md) · [迁移说明](docs/migration.md) · [报告问题](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/issues)
 
 ## 安装
 

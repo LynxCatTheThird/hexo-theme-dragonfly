@@ -11,6 +11,7 @@ export const createPageScriptsPlugin = timeout => new class extends SwupScriptsP
       if (type && !['module', 'text/javascript', 'application/javascript'].includes(type)) continue
       const script = super.runScript(old)
       if ((script.src || type === 'module') && !script.hasAttribute('async')) {
+        // 只等待顺序脚本；结束等待或离页不会取消已经插入的全局脚本下载。
         await new Promise(resolve => {
           const signal = dragonfly.pageSignal
           const finish = () => { clearTimeout(timer); signal.removeEventListener('abort', finish); script.onload = script.onerror = null; resolve() }

@@ -9,6 +9,7 @@ hexo.extend.filter.register('before_generate', () => {
   const manifest = build({ development: hexo.theme.config.CDN.development })
   hexo.theme.config.browser_manifest = manifest
   const internal = { ...internalAssets }
+  // 内部 CDN 的版本标识对应源码摘要；file 保留归档内目录，便于上传整套产物。
   for (const [key, file] of Object.entries(manifest.entries)) internal[key] = { name: 'hexo-theme-dragonfly', version: manifest.sourceHash.slice(0, 12), file, package_file: `dist/source/${file}` }
   hexo.theme.config.asset = resolveAssets(hexo.theme.config.CDN, plugins, internal)
 })

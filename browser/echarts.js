@@ -5,6 +5,7 @@
   const config = JSON.parse(document.querySelector('script[data-echarts-src]').dataset.echartsConfig)
   const charts = new Map()
   let generation = 0
+  // generation 同时使离页前尚未完成的异步初始化失效。
   const dispose = () => {
     generation++
     charts.forEach(({ chart, observer }) => {

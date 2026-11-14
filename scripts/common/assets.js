@@ -34,10 +34,11 @@ const resolveAssets = (config, thirdParty, internal = internalAssets) => {
     const own = key in internal
     const provider = own ? cdn.internal_provider : cdn.third_party_provider
     const override = overrides[key]
+    // 生产环境允许逐项覆盖；开发环境的内部代码固定走本地，防止调试旧 CDN 产物。
     if (override != null && !(own && cdn.development)) {
       result[key] = validURL(override, `option.${key}`)
     } else if (own && (data.generated || cdn.development)) {
-      // 站点专属样式和开发代码始终使用本地地址。
+      // 未显式覆盖时，站点专属样式和开发代码使用本地地址。
       result[key] = data.file + (cdn.version ? `?v=${data.version}` : '')
     } else {
       const file = own ? (data.package_file || `source/${data.file}`) : data.file
@@ -70,6 +71,7 @@ const resolveAssets = (config, thirdParty, internal = internalAssets) => {
 }
 
 const preconnect = (html, urls, siteURL) => {
+  // 仅为当前 HTML 实际引用的远端建立连接提示，避免启用无关组件的网络开销。
   const origins = new Set()
   const content = unescapeHTML(html)
   const siteOrigin = siteURL && new URL(siteURL).origin

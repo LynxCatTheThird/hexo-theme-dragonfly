@@ -58,6 +58,7 @@ import { createPageScriptsPlugin } from './page-scripts.js'
       run('navigationStart')
     })
     swup.hooks.before('content:replace', async () => {
+      // 清理回调仍需访问旧页面及其 signal；资源释放完成后再切换页面 scope。
       emit('theme:page-leave')
       await run('pageCleanup', true)
       dragonfly.resetPageScope()

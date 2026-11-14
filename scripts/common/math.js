@@ -3,6 +3,7 @@
 const { escapeHTML } = require('hexo-util')
 
 const engineFor = (page, math) => {
+  // 显式关闭优先于引擎选择；旧式 katex/mathjax 标记继续参与逐页覆盖。
   if (page.math === false) return null
   if (['katex', 'mathjax'].includes(page.math)) return page.math
   if (page.katex) return 'katex'
@@ -25,6 +26,7 @@ const createMathjax = config => {
     require('@mathjax/src/js/input/tex/mhchem/MhchemConfiguration.js')
     packages.push('mhchem')
   }
+  // 每个 SVG 自带字形，独立展示时无需共享字体缓存节点。
   const output = new SVG({ fontCache: 'none' })
   if (config.mhchem) {
     output.font.addExtension(require('@mathjax/mathjax-mhchem-font-extension/js/svg.js').MathJaxMhchemFontExtension)
@@ -33,6 +35,7 @@ const createMathjax = config => {
   const handler = RegisterHTMLHandler(adaptor)
   require('@mathjax/src/js/a11y/assistive-mml.js').AssistiveMmlHandler(handler)
   return async sources => {
+    // 同一文章的公式一起处理，使编号与宏定义共享本次渲染上下文。
     const html = sources.map(({ source, display }) => `<div>${display ? '\\[' : '\\('}${escapeHTML(source)}${display ? '\\]' : '\\)'}</div>`).join('')
     const document = mathjax.document(html, {
       InputJax: new TeX({ tags: config.tags, ...config.tex, packages }),
@@ -45,6 +48,7 @@ const createMathjax = config => {
 }
 
 const renderMath = async (data, math) => {
+  // 只消费内置渲染器生成的占位节点，代码字面量和外部渲染器输出保持原样。
   const pattern = /<span class="math-source" data-display="([01])" data-tex="([^"]*)">[\s\S]*?<\/span>/g
   const matches = [...data.content.matchAll(pattern)]
   if (!matches.length) return data

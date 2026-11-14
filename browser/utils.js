@@ -330,6 +330,7 @@
     })(),
 
     addPageEventListener: (ele, event, fn, option = false) => {
+      // 调用方取消与离页取消均能解绑；节流回调还需清理自身排队的任务。
       const options = typeof option === 'boolean' ? { capture: option } : option
       const signal = options.signal && AbortSignal.any ? AbortSignal.any([options.signal, dragonfly.pageSignal]) : dragonfly.pageSignal
       if (options.signal?.aborted) return

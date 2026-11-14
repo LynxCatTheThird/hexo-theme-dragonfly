@@ -11,6 +11,7 @@ const createRenderer = () => {
   }
   md.use(require('markdown-it-anchor'), { level: 1, permalink: false })
   md.use(tex, {
+    // Markdown 阶段尚未选择文章引擎，先保留 TeX 与行内/块级信息。
     delimiters: 'all',
     render: (source, display) => `<span class="math-source" data-display="${Number(display)}" data-tex="${encodeURIComponent(source)}">${escapeHTML(source)}</span>`
   })

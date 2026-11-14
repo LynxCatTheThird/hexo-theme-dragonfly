@@ -291,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const mountedArticles = new WeakSet()
+  // 解密和页面挂载都可能进入这里：文章交互只挂载一次，新增媒体可再次扫描。
   const forPostFn = () => {
     const article = document.getElementById('article-container')
     if (!article || article.querySelector('.hbe-container')) return

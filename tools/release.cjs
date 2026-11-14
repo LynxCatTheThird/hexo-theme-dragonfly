@@ -17,6 +17,7 @@ if (process.env.RELEASE_TAG && run('git', ['rev-parse', `${process.env.RELEASE_T
 if (process.env.RELEASE_TAG && run('git', ['status', '--porcelain'])) throw new Error('Release requires a clean checkout')
 const manifest = build()
 fs.mkdirSync(output, { recursive: true })
+// 已完成构建，跳过 prepack，确保 npm 包与后续资源归档使用同一组字节。
 const archive = Object.values(JSON.parse(run('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', output])))[0].filename
 const assets = `${pkg.name}-${pkg.version}-assets.tar.gz`
 run('tar', ['-czf', path.join(output, assets), 'dist/manifest-production.json', 'dist/source/js/build/production', 'dist/source/licenses/dragonfly'])

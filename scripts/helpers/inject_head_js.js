@@ -10,6 +10,7 @@ hexo.extend.helper.register('inject_head_js', function () {
   const themeColorLight = themeColor && themeColor.enable ? themeColor.meta_theme_color_light : '#ffffff'
   const themeColorDark = themeColor && themeColor.enable ? themeColor.meta_theme_color_dark : '#0d0d0d'
 
+  // 会话引导只生成一次：资源请求按 URL 复用，页面 signal 由导航层替换。
   const createCustomJs = () => `
     const saveToLocal = {
       set: (key, value, ttl) => {

@@ -16,6 +16,7 @@ function build ({ development = false } = {}) {
   const notices = ['LICENSE', 'NOTICE', ...fs.readdirSync(path.join(root, 'LICENSES')).sort().map(file => `LICENSES/${file}`)]
   const sourceHash = digest([mode, fs.readFileSync(__filename), fs.readFileSync(path.join(root, 'package.json')), ...notices.flatMap(file => [file, fs.readFileSync(path.join(root, file))]), ...sources.flatMap(file => [file, fs.readFileSync(path.join(root, 'browser', file))])].join('\0'))
   try {
+    // 输入未变仍需校验每个输出，修复被删除或被外部修改的构建文件。
     const previous = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
     if (previous.sourceHash === sourceHash && previous.files.every(file => digest(fs.readFileSync(path.join(root, 'dist/source', file.path))) === file.sha256)) return previous
   } catch {}
@@ -37,6 +38,7 @@ function build ({ development = false } = {}) {
     manifest.imports[route(file)] = info.imports.filter(item => !item.external).map(item => ({ path: route(item.path), kind: item.kind }))
   }
   if (manifest.imports[manifest.entries.utils].length) throw new Error('The synchronous dragonfly compatibility bundle must not import ESM dependencies')
+  // 清理只影响本地构建目录；部署端仍需保留供旧页面读取的历史版本。
   fs.rmSync(target, { recursive: true, force: true })
   for (const file of notices) result.outputFiles.push({ path: path.join(root, 'dist/source/licenses/dragonfly', file), contents: fs.readFileSync(path.join(root, file)) })
   for (const file of result.outputFiles) {

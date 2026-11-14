@@ -8,6 +8,7 @@ hexo.extend.filter.register('before_post_render', data => {
   if (!hexo.theme.config.echarts.enable) return data
   let index = 0
   const postId = createHash('sha256').update(data.source || data.path || '').digest('hex').slice(0, 12)
+  // 按完整围栏匹配，避免把其他语言代码块中展示的 echarts 示例当作实际图表。
   data.content = data.content.replace(/^((`|~)\2{2,})([^\r\n]*)\r?\n([\s\S]*?)(?:^\1\2*[ \t]*$|$(?![\s\S]))/gm, (match, fence, marker, language, content) => {
     if (language.trim() !== 'echarts') return match
     try {
