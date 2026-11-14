@@ -87,6 +87,7 @@ module.exports = async (browser, origin, mount = '/', provider = 'local') => {
     await opener.tap()
     const dialog = page.getByRole('dialog', { name: 'Search', exact: true })
     await dialog.waitFor()
+    await dialog.locator('input[type=search]').waitFor()
     await page.setViewportSize({ width: 390, height: 500 })
     const box = await dialog.boundingBox()
     assert.ok(box.width <= 390 && box.height <= 500)

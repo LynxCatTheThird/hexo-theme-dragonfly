@@ -26,7 +26,7 @@ const run = (args, site, env = {}) => {
   if (result.status !== 0 || /^ERROR\b/m.test((result.stdout || '') + (result.stderr || ''))) throw result.error || new Error(`Test failed in ${site}: ${result.status}`)
 }
 try {
-  for (const variant of ['default', 'components', 'subpath', 'navigation-off', 'cdn-modules', 'development', 'algolia']) {
+  for (const variant of ['default', 'components', 'subpath', 'navigation-off', 'cdn-modules', 'development', 'algolia', 'legacy-images']) {
     if (process.env.TEST_VARIANT && process.env.TEST_VARIANT !== variant) continue
     const site = path.join(temp, variant)
     fs.mkdirSync(path.join(site, 'source/_posts'), { recursive: true })
@@ -35,7 +35,7 @@ try {
     fs.symlinkSync(path.join(theme, 'node_modules'), path.join(site, 'node_modules'), 'dir')
     fs.writeFileSync(path.join(site, 'package.json'), JSON.stringify(sitePackage))
     const config = structuredClone(base)
-    const basic = ['default', 'development', 'algolia'].includes(variant)
+    const basic = ['default', 'development', 'algolia', 'legacy-images'].includes(variant)
     if (!basic) Object.assign(config.theme_config, structuredClone(components))
     if (variant === 'subpath') {
       config.root = '/blog/'
@@ -56,6 +56,7 @@ try {
       config.theme_config.search = { use: 'algolia_search' }
       config.theme_config.navigation = { enable: true }
     }
+    if (variant === 'legacy-images') config.theme_config.lazyload = { enable: true, native: false, field: 'post' }
     if (process.env.TEST_PROVIDER) config.theme_config.CDN.third_party_provider = process.env.TEST_PROVIDER
     fs.writeFileSync(path.join(site, '_config.yml'), JSON.stringify(config))
     for (const slug of ['tags', 'about', 'policy']) {
@@ -101,6 +102,18 @@ comments: false
     }
     fs.writeFileSync(path.join(site, 'source/notes-data.json'), JSON.stringify(Array.from({ length: 10 }, (_, index) => ({ date: '2026-01-01T12:00:00Z', author: 'Test author', content: `<p>Note ${index}</p>`, tags: ['test'] }))))
     fs.writeFileSync(path.join(site, 'source/links-data.json'), JSON.stringify([{ class_name: 'Test links', class_desc: 'Fixture', link_list: [{ name: 'Example', link: 'https://example.test/', avatar: config.root + 'img/favicon.ico', descr: 'Test link' }] }]))
+    fs.mkdirSync(path.join(site, 'source/img'), { recursive: true })
+    for (const scale of [1, 2]) fs.writeFileSync(path.join(site, 'source/img', `fixture${scale === 2 ? '-2x' : ''}.svg`), `<svg xmlns="http://www.w3.org/2000/svg" width="${80 * scale}" height="${40 * scale}"><rect width="100%" height="100%" fill="#368a67"/></svg>`)
+    for (const encrypted of [false, true]) fs.writeFileSync(path.join(site, 'source/_posts', `image-test-${encrypted ? 'private' : 'public'}.md`), `---
+title: Image test ${encrypted ? 'private' : 'public'}
+date: 2024-01-01
+slug: image-test-${encrypted ? 'private' : 'public'}
+comments: false
+${encrypted ? 'password: component-test-only\nautoSave: false\n' : ''}---
+<img id="critical-image" src="/img/fixture.svg" width="80" height="40" fetchpriority="high" alt="Critical image">
+<picture><source srcset="/img/fixture.svg 1x, /img/fixture-2x.svg 2x"><img id="responsive-image" src="/img/fixture.svg" srcset="/img/fixture.svg 1x, /img/fixture-2x.svg 2x" sizes="80px" width="80" height="40" alt="Responsive image"></picture>
+<img id="ordinary-image" src="/img/fixture.svg" width="80" height="40" alt="Ordinary image">
+`)
     // Home stays tall enough to exercise scroll restoration without personal posts.
     for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(site, 'source/_posts', `post-${i}.md`), `---\ntitle: Post ${i}\ndate: 2025-01-01\n---\nTest post ${i}.`)
     const fixture = fs.readFileSync(path.join(__dirname, 'fixtures/components.md'), 'utf8')

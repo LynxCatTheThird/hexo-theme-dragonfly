@@ -12,7 +12,7 @@ const server = http.createServer((req, res) => {
   if (file !== root && !file.startsWith(root + path.sep)) return res.writeHead(403).end()
   try {
     if (fs.statSync(file).isDirectory()) file = path.join(file, 'index.html')
-    res.setHeader('Content-Type', ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.xml': 'application/xml' })[path.extname(file)] || 'application/octet-stream')
+    res.setHeader('Content-Type', ({ '.svg': 'image/svg+xml', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.xml': 'application/xml' })[path.extname(file)] || 'application/octet-stream')
     res.end(fs.readFileSync(file))
   } catch { res.writeHead(404).end() }
 })
@@ -24,6 +24,11 @@ const server = http.createServer((req, res) => {
     await require('./vendors.cjs')(context)
     await context.route('https://events.vercount.one/**', route => route.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"status":"success","data":{"site_uv":1,"site_pv":1,"page_pv":1}}' }))
     const origin = `http://127.0.0.1:${server.address().port}`
+    if (process.env.TEST_VARIANT === 'legacy-images') {
+      await require('./image-checks.cjs')(browser, origin, mount, { legacy: true })
+      await context.close()
+      return
+    }
     if (process.env.TEST_VARIANT === 'algolia') {
       await require('./dialog-checks.cjs')(browser, origin, mount, 'algolia')
       await context.close()

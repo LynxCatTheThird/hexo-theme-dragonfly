@@ -207,10 +207,11 @@
           window.fancyboxRun = false
         }, 'fancybox')
         ele.forEach(i => {
-          if (i.parentNode.tagName !== 'A') {
+          const target = i.parentNode.tagName === 'PICTURE' ? i.parentNode : i
+          if (target.parentNode.tagName !== 'A') {
             const dataSrc = i.dataset.lazySrc || i.src
             const dataCaption = i.title || i.alt || ''
-            btf.wrap(i, 'a', { href: dataSrc, 'data-fancybox': 'gallery', 'data-caption': dataCaption, 'data-thumb': dataSrc })
+            btf.wrap(target, 'a', { href: dataSrc, 'data-fancybox': 'gallery', 'data-caption': dataCaption, 'data-thumb': dataSrc })
           }
         })
 

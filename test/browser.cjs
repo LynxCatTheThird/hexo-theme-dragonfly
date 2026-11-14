@@ -14,7 +14,7 @@ const chartFile = htmlFiles.find(f => /class=["']echarts-container/.test(fs.read
 assert.ok(chartFile, 'Include at least one article with an ECharts block')
 const chartPath = withRoot('/' + chartFile.replace(/index\.html$/, '').split(path.sep).join('/'))
 const forbidden = /copy-tex|\/pjax\/|instant\.page|busuanzi|googletagmanager|google-analytics|cloudflareinsights|hm\.baidu\.com|clarity\.ms|pagead2\.googlesyndication|addtoany|social-share|chatra\.io|tidio\.co|client\.crisp\.chat|trtc\.io\/knocket/
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.xml': 'application/xml', '.json': 'application/json', '.woff2': 'font/woff2' }
+const types = { '.svg': 'image/svg+xml', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.xml': 'application/xml', '.json': 'application/json', '.woff2': 'font/woff2' }
 const mathTheme = structuredClone(require('../scripts/common/default_config'))
 mathTheme.navigation.enable = true
 mathTheme.asset = { mathjax: 'https://registry.npmmirror.com/mathjax/4.1.3/files/tex-mml-chtml.js' }
@@ -669,5 +669,6 @@ const server = http.createServer((req, res) => {
     assert.deepEqual(errors, [])
     console.log('PASS: async notes and links cancel on leave, paginate, and keep listeners stable for 20 round trips')
     await require('./dialog-checks.cjs')(browser, origin, mount, 'local')
+    await require('./image-checks.cjs')(browser, origin, mount, { lightbox: true, navigation: true })
   } finally { await browser.close() }
 })().catch(e => { console.error(e); process.exitCode = 1 }).finally(() => server.close())

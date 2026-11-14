@@ -293,6 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const forPostFn = () => {
     const article = document.getElementById('article-container')
     if (!article || article.querySelector('.hbe-container')) return
+    window.lazyLoadInstance?.update()
     loadOptionalModules()
     const signal = btf.pageSignal
     let ready

@@ -459,9 +459,9 @@ module.exports = {
     exclude: null
   },
   lazyload: {
-    enable: false,
-    native: false,
-    field: 'site',
+    enable: true,
+    native: true,
+    field: 'post',
     placeholder: null,
     blur: false
   },

@@ -840,11 +840,12 @@ navigation:
 # Lazyload
 # https://github.com/verlok/vanilla-lazyload
 lazyload:
-  enable: false
-  # Use browser's native lazyload instead of vanilla-lazyload
-  native: false
+  enable: true
+  # Keep real src/srcset. Use native: false to restore the legacy plugin.
+  # Explicit loading=eager or fetchpriority=high preserves critical images.
+  native: true
   # Specify the field to use lazyload (site or post)
-  field: site
+  field: post
   placeholder:
   blur: false
 
