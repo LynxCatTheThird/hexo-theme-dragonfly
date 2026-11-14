@@ -19,6 +19,52 @@
 
 修改配置后重新运行 `npx hexo generate`。调整主题目录、渲染器或构建路径时，先运行 `npx hexo clean` 清理旧输出与数据库缓存。
 
+### 注释示例、空行与缩进
+
+配置文件中的空行用于分组，不改变 YAML 层级；层级由空格缩进决定，每级使用两个空格。使用注释示例时，只移除配置行开头的 `# `，保留其余缩进，说明文字和分组标题继续保持注释。在已有段内填写，同一层使用一个同名键。
+
+例如 CDN 中的这一行：
+
+```yaml
+CDN:
+  option:
+    # fontawesome: https://cdn.example.com/fontawesome/css/all.min.css
+```
+
+取消该配置行的注释并填写实际地址后：
+
+```yaml
+CDN:
+  option:
+    fontawesome: https://cdn.example.com/fontawesome/css/all.min.css
+
+    # 其他资源仍可保持注释。
+    # katex:
+```
+
+`katex:` 即使取消注释，留空也仍是 `null`，主题会沿用 provider 的地址。示例域名、图片路径和账号需要替换为实际值。
+
+URL 本身保持在一个物理行上；编辑器的视觉自动折行不影响文件。一个 URL 拆到多个物理行时，YAML 可能在中间插入空格，导致主题拒绝该地址。地址也可以整体放到下一行，但必须再缩进一级：
+
+```yaml
+CDN:
+  option:
+    fontawesome:
+      https://cdn.example.com/fontawesome/css/all.min.css
+```
+
+带子项的空配置使用 `menu:` 这类写法，便于直接启用下方的注释示例。原来写成 `menu: null` 时，要先删去同一行的 `null`，再添加缩进子项。`options: {}` 改为多行对象时也要移除 `{}`，例如：
+
+```yaml
+math:
+  katex:
+    options:
+      macros:
+        '\RR': '\mathbb{R}'
+```
+
+YAML 的 `>-` 会将普通换行折叠为空格。它适合将 HTML 在属性之间换行，例如站点的字体 `<link>`；单个 URL 内部的换行应避免使用这种写法。
+
 ## 站点标识、菜单与外观
 
 以下示例写入 `_config.dragonfly.yml`：
@@ -40,6 +86,8 @@ social:
 菜单项使用 `路径 || 图标`。子菜单由一层嵌套对象组成，分组名称也可附加图标；菜单只生成链接，目标页面由站点创建。社交项使用 `链接 || 描述 || 颜色`，颜色可省略。
 
 `font` 设置字体名称和字号，`blog_title_font.font_link` 可加载标题字体的样式表。正文自定义字体可通过 `inject.head` 引入自己的 CSS，并在 `font.font_family` 中填写对应名称。
+
+自定义配色的完整 `theme_color` 示例位于配置文件的“外观与布局”部分。需要时取消整个配置块的注释，设置 `enable: true`；十六进制颜色保留引号，并同时填写浅色和深色的浏览器栏颜色。
 
 `display_mode` 指定初始配色。`darkmode.autoChangeMode: 1` 跟随系统，`2` 根据页面初始化时的浏览器本地时间判断日夜。`start`、`end` 表示日间起止小时，默认 6 与 18；当前实现中值为 `0` 时也回退到默认值。手动选择的配色会优先使用。
 
