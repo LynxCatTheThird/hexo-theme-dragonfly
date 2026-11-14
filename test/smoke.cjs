@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
@@ -63,7 +65,7 @@ const server = http.createServer((req, res) => {
     await page.locator('#menu-mask').click({ position: { x: 5, y: 5 } })
     assert.ok(!await page.locator('#menu-mask').isVisible(), 'Reduced motion must close the mask without waiting for animationend')
     assert.equal(await page.evaluate(() => getComputedStyle(document.body).scrollBehavior), 'auto')
-    await page.evaluate(() => btf.scrollToDest(0))
+    await page.evaluate(() => dragonfly.scrollToDest(0))
     assert.equal(await page.evaluate(() => window.scrollY), 0)
     assert.deepEqual(errors, [])
     await context.close()

@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { serverURL, option, pageview } = theme.waline
 - const { lazyload, count, use } = theme.comments
 
@@ -37,7 +38,7 @@ script(data-swup-reload-script).
               })
             })
             const lightboxImgs = imgs.filter(img => img.closest('.wl-content') && !img.classList.contains('wl-emoji'))
-            if (lightboxImgs.length) btf.loadLightbox(lightboxImgs)
+            if (lightboxImgs.length) dragonfly.loadLightbox(lightboxImgs)
           })
           lightboxObserver.observe(wrap, { childList: true, subtree: true })
         }
@@ -50,7 +51,7 @@ script(data-swup-reload-script).
         lightboxObserver && lightboxObserver.disconnect()
         destroyWaline(waline)
       }
-      btf.addGlobalFn('pageCleanup', dispose)
+      dragonfly.addGlobalFn('pageCleanup', dispose)
 
       if (isShuoshuo) {
         window.shuoshuoComment.destroyWaline = () => {
@@ -71,7 +72,7 @@ script(data-swup-reload-script).
       }
       if (initFn) render()
       else {
-        btf.getCSS('!{url_for(theme.asset.waline_css)}')
+        dragonfly.getCSS('!{url_for(theme.asset.waline_css)}')
           .then(() => import('!{url_for(theme.asset.waline_js)}'))
           .then(({ init }) => {
             initFn = init || Waline.init
@@ -89,7 +90,7 @@ script(data-swup-reload-script).
     }
 
     if ('!{use[0]}' === 'Waline' || !!{lazyload}) {
-      if (!{lazyload}) btf.loadComment(document.getElementById('waline-wrap'),loadWaline)
+      if (!{lazyload}) dragonfly.loadComment(document.getElementById('waline-wrap'),loadWaline)
       else setTimeout(loadWaline, 0)
     } else {
       window.loadOtherComment = loadWaline

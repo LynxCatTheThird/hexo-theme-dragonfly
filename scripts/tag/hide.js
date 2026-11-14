@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * Butterfly
+ * 上游：Butterfly（Jerry 及贡献者）。
  * @example
  * hideInline
  * {% hideInline content,display,bg,color %}
- * content不能包含當引號，可用 &apos;
+ * content不能包含当引号，可用 &apos;
  * hideBlock
  * {% hideBlock display,bg,color %}
  * content

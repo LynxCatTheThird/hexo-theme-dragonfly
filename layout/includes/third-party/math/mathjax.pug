@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 -
   const mathjax = theme.math.mathjax
   const loader = { load: ['ui/lazy'], ...mathjax.loader }
@@ -16,7 +17,7 @@
   }
 script(data-swup-reload-script).
   (() => {
-    const pageSignal = btf.pageSignal
+    const pageSignal = dragonfly.pageSignal
     const rendered = new WeakSet()
     const loadMathjax = async () => {
       const article = document.getElementById('article-container')
@@ -41,7 +42,7 @@ script(data-swup-reload-script).
           },
           startup: { typeset: false }
         }
-        window.mathjaxReady = btf.getScript('!{url_for(theme.asset.mathjax)}')
+        window.mathjaxReady = dragonfly.getScript('!{url_for(theme.asset.mathjax)}')
           .then(() => MathJax.startup.promise)
           .catch(error => { delete window.mathjaxReady; throw error })
       }
@@ -56,10 +57,10 @@ script(data-swup-reload-script).
         console.error('[mathjax]', error)
       }
     }
-    btf.addGlobalFn('pageCleanup', () => {
+    dragonfly.addGlobalFn('pageCleanup', () => {
       if (typeof window.MathJax?.typesetClear === 'function') MathJax.typesetClear()
     }, 'mathjax')
-    btf.addPageFn('encrypt', loadMathjax, 'mathjax')
+    dragonfly.addPageFn('encrypt', loadMathjax, 'mathjax')
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadMathjax, { once: true })
     else loadMathjax()
   })()

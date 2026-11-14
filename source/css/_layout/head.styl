@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 #page-header
   position: relative
   width: 100%
@@ -15,7 +17,7 @@
       background-color: var(--mark-bg)
       content: ''
 
-  // index
+  // 首页。
   &.full_page
     height: $index_top_img_height
     background-attachment: fixed
@@ -76,7 +78,7 @@
       color: var(--light-grey)
       font-size: 20px
 
-  // page
+  // 独立页面。
   &.not-home-page
     height: 400px
 
@@ -92,7 +94,7 @@
     +maxWidth768()
       top: 140px
 
-  // post
+  // 文章页。
   &.post-bg
     height: 400px
 
@@ -212,7 +214,7 @@
     font-weight: bold
     font-size: 2em
 
-// for not top_img
+// 无顶部封面时的布局。
 #post
   & > #post-info
     margin-bottom: 30px

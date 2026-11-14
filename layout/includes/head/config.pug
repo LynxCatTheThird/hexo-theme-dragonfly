@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 -
   let algolia = 'undefined'
   if (theme.search.use === 'algolia_search') {
@@ -9,7 +10,7 @@
       apiKey: ALGOLIA_API_KEY || apiKey,
       indexName: ALGOLIA_INDEX_NAME || indexName,
       hitsPerPage: theme.search.algolia_search.hitsPerPage,
-      // search languages
+      // 搜索提示文案。
       languages: {
         hits_empty: _p("search.algolia_search.hits_empty"),
         hits_stats: _p("search.algolia_search.hits_stats"),
@@ -29,7 +30,7 @@
         hitsPerPage: pagination.hitsPerPage
       },
       languages: {
-        // search languages
+        // 搜索提示文案。
         retry: _p("search.retry"),
         hits_empty: _p("search.local_search.hits_empty"),
         hits_stats: _p("search.local_search.hits_stats"),

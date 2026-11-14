@@ -1,10 +1,11 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 script.
   window.paceOptions = {
     restartOnPushState: false
   }
 
-  btf.addGlobalFn('navigationStart', () => {
+  dragonfly.addGlobalFn('navigationStart', () => {
     Pace.restart()
   }, 'pace_restart')
 

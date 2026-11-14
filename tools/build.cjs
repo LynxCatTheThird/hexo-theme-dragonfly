@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const fs = require('node:fs')
 const path = require('node:path')
 const crypto = require('node:crypto')
@@ -11,7 +13,8 @@ function build ({ development = false } = {}) {
   const target = path.join(root, 'dist/source/js/build', mode)
   const manifestPath = path.join(root, 'dist', `manifest-${mode}.json`)
   const sources = fs.readdirSync(path.join(root, 'browser'), { recursive: true }).filter(file => file.endsWith('.js')).sort()
-  const sourceHash = digest([mode, fs.readFileSync(__filename), fs.readFileSync(path.join(root, 'package.json')), ...sources.flatMap(file => [file, fs.readFileSync(path.join(root, 'browser', file))])].join('\0'))
+  const notices = ['LICENSE', 'NOTICE', ...fs.readdirSync(path.join(root, 'LICENSES')).sort().map(file => `LICENSES/${file}`)]
+  const sourceHash = digest([mode, fs.readFileSync(__filename), fs.readFileSync(path.join(root, 'package.json')), ...notices.flatMap(file => [file, fs.readFileSync(path.join(root, file))]), ...sources.flatMap(file => [file, fs.readFileSync(path.join(root, 'browser', file))])].join('\0'))
   try {
     const previous = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
     if (previous.sourceHash === sourceHash && previous.files.every(file => digest(fs.readFileSync(path.join(root, 'dist/source', file.path))) === file.sha256)) return previous
@@ -21,7 +24,8 @@ function build ({ development = false } = {}) {
     entryPoints: Object.fromEntries(Object.entries(entries).map(([name, file]) => [name, `browser/${file}`])),
     outdir: target, entryNames: '[name]-[hash]', chunkNames: 'chunks/[name]-[hash]',
     bundle: true, splitting: true, format: 'esm', platform: 'browser', target: 'es2020',
-    minify: !development, sourcemap: true, metafile: true, write: false, legalComments: 'eof'
+    minify: !development, sourcemap: true, metafile: true, write: false, legalComments: 'eof',
+    banner: { js: '/*! Dragonfly | Apache-2.0；原作者与第三方许可见随附 licenses/dragonfly/NOTICE。 */' }
   })
   const route = file => path.relative(path.join(root, 'dist/source'), path.resolve(root, file)).split(path.sep).join('/')
   const manifest = { package: 'hexo-theme-dragonfly', version: require('../package.json').version, mode, sourceHash, entries: {}, files: [], imports: {} }
@@ -32,8 +36,9 @@ function build ({ development = false } = {}) {
     }
     manifest.imports[route(file)] = info.imports.filter(item => !item.external).map(item => ({ path: route(item.path), kind: item.kind }))
   }
-  if (manifest.imports[manifest.entries.utils].length) throw new Error('The synchronous btf compatibility bundle must not import ESM dependencies')
+  if (manifest.imports[manifest.entries.utils].length) throw new Error('The synchronous dragonfly compatibility bundle must not import ESM dependencies')
   fs.rmSync(target, { recursive: true, force: true })
+  for (const file of notices) result.outputFiles.push({ path: path.join(root, 'dist/source/licenses/dragonfly', file), contents: fs.readFileSync(path.join(root, file)) })
   for (const file of result.outputFiles) {
     fs.mkdirSync(path.dirname(file.path), { recursive: true })
     fs.writeFileSync(file.path, file.contents)

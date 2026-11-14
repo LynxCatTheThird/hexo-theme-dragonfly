@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const { url_for } = require('hexo-util')
@@ -56,7 +58,7 @@ test('cdnjs metadata preserves package aliases and explicitly falls back for uns
   const assets = resolveAssets({ third_party_provider: 'cdnjs' }, plugins)
   assert.equal(assets.chartjs, `https://cdnjs.cloudflare.com/ajax/libs/Chart.js/${plugins.chartjs.version}/chart.umd.min.js`)
   assert.equal(assets.swup_head, `https://unpkg.com/@swup/head-plugin@${plugins.swup_head.version}/dist/index.umd.js`)
-  const example = fs.readFileSync(path.join(__dirname, '../_config.yml'), 'utf8').match(/# Example: (https:\/\/registry\.npmmirror[^\r\n]+)/)[1]
+  const example = fs.readFileSync(path.join(__dirname, '../_config.yml'), 'utf8').match(/# 示例：(https:\/\/registry\.npmmirror[^\r\n]+)/)[1]
   assert.equal(resolveAssets({ third_party_provider: 'custom', custom_format: example }, plugins).katex, `https://registry.npmmirror.com/katex/${plugins.katex.version}/files/dist/katex.min.css`)
 })
 

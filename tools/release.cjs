@@ -1,4 +1,6 @@
-// Prepare one package and its identical browser assets; never publish here.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 生成同源的 npm 包、浏览器资源和校验和。
 const fs = require('node:fs')
 const path = require('node:path')
 const crypto = require('node:crypto')
@@ -17,7 +19,7 @@ const manifest = build()
 fs.mkdirSync(output, { recursive: true })
 const archive = Object.values(JSON.parse(run('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', output])))[0].filename
 const assets = `${pkg.name}-${pkg.version}-assets.tar.gz`
-run('tar', ['-czf', path.join(output, assets), 'dist/manifest-production.json', 'dist/source/js/build/production'])
+run('tar', ['-czf', path.join(output, assets), 'dist/manifest-production.json', 'dist/source/js/build/production', 'dist/source/licenses/dragonfly'])
 const release = { package: pkg.name, version: pkg.version, commit, archive, assets, sourceHash: manifest.sourceHash, files: manifest.files }
 fs.writeFileSync(path.join(output, 'release.json'), JSON.stringify(release, null, 2) + '\n')
 fs.writeFileSync(path.join(output, 'SHA256SUMS'), [archive, assets, 'release.json'].map(file => `${crypto.createHash('sha256').update(fs.readFileSync(path.join(output, file))).digest('hex')}  ${file}`).join('\n') + '\n')

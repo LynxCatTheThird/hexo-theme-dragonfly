@@ -1,6 +1,7 @@
-// Modified in Dragonfly.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const addCopyHandler = () => {
-  btf.addAppEventListener(document, 'copy', event => {
+  dragonfly.addAppEventListener(document, 'copy', event => {
     const selection = window.getSelection()
     if (event.defaultPrevented || !event.clipboardData || !selection?.rangeCount || selection.isCollapsed) return
     if (event.target.closest?.('input, textarea, [contenteditable]:not([contenteditable="false"])')) return

@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0 AND MIT
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * Tabs
- * transplant from hexo-theme-next
- * modify by Jerry
- * Modified in Dragonfly.
+ * 标签页。
+ * 来源：hexo-theme-next。
+ * 上游修改：Jerry。
  */
 
 'use strict'

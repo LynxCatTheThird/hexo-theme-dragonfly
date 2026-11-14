@@ -1,6 +1,7 @@
-// Modified in this fork.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 (() => {
-  const btfFn = {
+  const dragonflyMethods = {
     debounce: (func, wait = 0, immediate = false) => {
       let timeout
       const debounced = (...args) => {
@@ -108,7 +109,7 @@
     },
 
     loadComment: (dom, callback) => {
-      const signal = btf.pageSignal
+      const signal = dragonfly.pageSignal
       if (!dom || signal.aborted) return
       if ('IntersectionObserver' in window) {
         const observerItem = new IntersectionObserver(entries => {
@@ -146,7 +147,7 @@
       const animate = currentTime => {
         const timeElapsed = currentTime - startTime
         const progress = Math.min(timeElapsed / time, 1)
-        const easedProgress = 1 - Math.pow(1 - progress, 4) // easeOutQuart
+        const easedProgress = 1 - Math.pow(1 - progress, 4) // 四次方缓出曲线。
         window.scrollTo(0, currentPos + (pos - currentPos) * easedProgress)
         if (progress < 1) {
           requestAnimationFrame(animate)
@@ -185,11 +186,11 @@
     getEleTop: ele => ele.getBoundingClientRect().top + window.scrollY,
 
     loadLightbox: async ele => {
-      const signal = btf.pageSignal
+      const signal = dragonfly.pageSignal
       const service = GLOBAL_CONFIG.lightbox
       if (!ele.length || !['medium_zoom', 'fancybox'].includes(service)) return
       try {
-        await btf.getScript(GLOBAL_CONFIG.lightboxSrc)
+        await dragonfly.getScript(GLOBAL_CONFIG.lightboxSrc)
       } catch (error) { console.error('[lightbox]', error); return }
       if (signal.aborted) return
       ele = [...ele].filter(element => element.isConnected)
@@ -200,7 +201,7 @@
         const zoom = window.mediumZoomInstance || (window.mediumZoomInstance = mediumZoom({ background: 'var(--zoom-bg)', ...GLOBAL_CONFIG.lightboxOptions }))
         zoom.attach(ele)
 
-        btf.addGlobalFn('pageCleanup', () => {
+        dragonfly.addGlobalFn('pageCleanup', () => {
           window.mediumZoomInstance && window.mediumZoomInstance.detach()
         }, 'mediumZoom')
         return
@@ -208,7 +209,7 @@
 
       if (service === 'fancybox') {
         if (typeof window.Fancybox?.bind !== 'function') return
-        btf.addGlobalFn('pageCleanup', () => {
+        dragonfly.addGlobalFn('pageCleanup', () => {
           Fancybox.destroy()
           window.fancyboxRun = false
         }, 'fancybox')
@@ -217,7 +218,7 @@
           if (target.parentNode.tagName !== 'A') {
             const dataSrc = i.dataset.lazySrc || i.src
             const dataCaption = i.title || i.alt || ''
-            btf.wrap(target, 'a', { href: dataSrc, 'data-fancybox': 'gallery', 'data-caption': dataCaption, 'data-thumb': dataSrc })
+            dragonfly.wrap(target, 'a', { href: dataSrc, 'data-fancybox': 'gallery', 'data-caption': dataCaption, 'data-thumb': dataSrc })
           }
         })
 
@@ -293,7 +294,7 @@
 
       window.addEventListener('resize', () => {
         cache = new WeakMap()
-      }, { signal: window.btf?.appSignal })
+      }, { signal: window.dragonfly?.appSignal })
 
       return (currentTop, ele, useDocHeight = ele === document.body) => {
         const eleHeight = ele.clientHeight
@@ -330,16 +331,16 @@
 
     addPageEventListener: (ele, event, fn, option = false) => {
       const options = typeof option === 'boolean' ? { capture: option } : option
-      const signal = options.signal && AbortSignal.any ? AbortSignal.any([options.signal, btf.pageSignal]) : btf.pageSignal
+      const signal = options.signal && AbortSignal.any ? AbortSignal.any([options.signal, dragonfly.pageSignal]) : dragonfly.pageSignal
       if (options.signal?.aborted) return
       ele.addEventListener(event, fn, { ...options, signal })
       if (fn.cancel) signal.addEventListener('abort', fn.cancel, { once: true })
-      if (options.signal && !AbortSignal.any) options.signal.addEventListener('abort', () => ele.removeEventListener(event, fn, options), { once: true, signal: btf.pageSignal })
+      if (options.signal && !AbortSignal.any) options.signal.addEventListener('abort', () => ele.removeEventListener(event, fn, options), { once: true, signal: dragonfly.pageSignal })
     },
 
     addAppEventListener: (ele, event, fn, option = false) => {
       const options = typeof option === 'boolean' ? { capture: option } : option
-      ele.addEventListener(event, fn, { ...options, signal: btf.appSignal })
+      ele.addEventListener(event, fn, { ...options, signal: dragonfly.appSignal })
     },
 
     switchComments: (el = document, path) => {
@@ -356,9 +357,9 @@
           loadOtherComment(el, path)
         }
       }
-      btf.addPageEventListener(switchBtn, 'click', handleSwitchBtn)
+      dragonfly.addPageEventListener(switchBtn, 'click', handleSwitchBtn)
     }
   }
 
-  Object.assign(window.btf || (window.btf = {}), btfFn)
+  Object.assign(window.dragonfly || (window.dragonfly = {}), dragonflyMethods)
 })()

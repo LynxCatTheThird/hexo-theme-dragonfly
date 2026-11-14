@@ -1,3 +1,5 @@
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 -
   const returnTopImg = img => img !== false ? img || theme.default_top_img : false
   const isFixedClass = theme.nav.fixed ? ' fixed' : ''
@@ -47,6 +49,6 @@ header#page-header(class=`${headerClassName + isFixedClass}` style=bg_img)
       #page-site-info
         h1#site-title=page.title || page.tag || page.category
   else
-    //- improve seo
+    //- 搜索引擎可见的页面标题。
     if globalPageType !== 'post'
       h1.title-seo=page.title || page.tag || page.category || config.title

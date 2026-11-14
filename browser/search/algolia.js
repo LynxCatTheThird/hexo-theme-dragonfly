@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 import { createSearchDialog } from './dialog.js'
 
-// Modified in this fork.
 const initAlgolia = () => {
   const { algolia } = GLOBAL_CONFIG
   const { appId, apiKey, indexName, hitsPerPage = 5, languages } = algolia
@@ -16,7 +17,7 @@ const initAlgolia = () => {
     attributesToHighlight: ['title', 'content', 'contentStrip', 'contentStripTruncate']
   }
 
-  // Pre-compiled regex for tag balancing (reused across cutContent calls)
+  // 复用标签匹配表达式，修复截断后的 HTML。
   const TAG_REGEX = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*\/?>/g
 
   const $searchDialog = document.querySelector('#algolia-search .search-dialog')
@@ -39,11 +40,11 @@ const initAlgolia = () => {
   })
 
   const searchClickFn = () => {
-    btf.addPageEventListener(document.querySelector('#search-button > .search'), 'click', openSearch)
+    dragonfly.addPageEventListener(document.querySelector('#search-button > .search'), 'click', openSearch)
   }
 
   const searchFnOnce = () => {
-    btf.addAppEventListener(document.querySelector('#algolia-search .search-close-button'), 'click', closeSearch)
+    dragonfly.addAppEventListener(document.querySelector('#algolia-search .search-close-button'), 'click', closeSearch)
   }
 
   const extractContentStr = content => {
@@ -101,7 +102,7 @@ const initAlgolia = () => {
 
     let substr = contentStr.substring(start, end)
 
-    // Remove incomplete tags at boundaries
+    // 移除截断边界处的不完整标签。
     const firstCloseBracket = substr.indexOf('>')
     const firstOpenBracket = substr.indexOf('<')
     if (firstCloseBracket !== -1 && (firstOpenBracket === -1 || firstCloseBracket < firstOpenBracket)) {
@@ -114,7 +115,7 @@ const initAlgolia = () => {
       substr = substr.substring(0, lastOpenBracket)
     }
 
-    // Balance tags using regex
+    // 补齐截断内容中的标签。
     const tagStack = []
     let balancedStr = ''
     let lastIndex = 0
@@ -126,15 +127,15 @@ const initAlgolia = () => {
       const tagName = match[1]
       const tagStart = match.index
 
-      // Append text before this tag
+      // 追加当前标签前的文本。
       balancedStr += substr.substring(lastIndex, tagStart)
 
       if (fullTag.startsWith('</')) {
-        // Closing tag - remove matching opening tag from stack
+        // 遇到闭合标签时移除对应的起始标签。
         const idx = tagStack.lastIndexOf(tagName)
         if (idx !== -1) tagStack.splice(idx, 1)
       } else if (!fullTag.endsWith('/>') && !fullTag.startsWith('<!')) {
-        // Opening tag (not self-closing or comment)
+        // 记录需要闭合的起始标签。
         tagStack.push(tagName)
       }
       balancedStr += fullTag
@@ -142,12 +143,12 @@ const initAlgolia = () => {
     }
     balancedStr += substr.substring(lastIndex)
 
-    // Close unclosed tags
+    // 闭合剩余标签。
     for (let i = tagStack.length - 1; i >= 0; i--) {
       balancedStr += `</${tagStack[i]}>`
     }
 
-    // Check if we cut a mark tag at the beginning
+    // 修复摘要开头被截断的 mark 标签。
     if (start > 0 || pre) {
       const checkStart = Math.max(0, start - 30)
       const actualFirstOpenBracket = contentStr.indexOf('<', checkStart)
@@ -175,7 +176,7 @@ const initAlgolia = () => {
   }
 
   let currentQuery = ''
-  let searchRequestId = 0 // Race condition guard
+  let searchRequestId = 0 // 查询序号，用于忽略过期响应。
 
   const toggleResultsVisibility = hasResults => {
     $pagination.style.display = hasResults ? '' : 'none'
@@ -198,14 +199,14 @@ const initAlgolia = () => {
       const link = hit.permalink || (GLOBAL_CONFIG.root + hit.path)
       const result = hit._highlightResult || hit
 
-      // Content extraction - try highlight result first, then raw hit
+      // 优先读取高亮摘要，其次使用原始正文。
       let content = ''
       for (const field of CONTENT_FIELDS) {
         if (result[field]) { content = cutContent(result[field]); break }
         if (hit[field]) { content = cutContent(hit[field]); break }
       }
 
-      // Title handling - try highlight result first, then raw hit
+      // 优先读取高亮标题，其次使用原始标题。
       let title = 'no-title'
       const titleSource = result.title || hit.title
       if (titleSource) {
@@ -245,20 +246,20 @@ const initAlgolia = () => {
     const isFirstPage = page === 0
     const isLastPage = page === nbPages - 1
 
-    // Responsive page display
+    // 按屏幕宽度控制页码数量。
     const isMobile = window.innerWidth < 768
     const maxVisiblePages = isMobile ? 3 : 5
     let startPage = Math.max(0, page - Math.floor(maxVisiblePages / 2))
     const endPage = Math.min(nbPages - 1, startPage + maxVisiblePages - 1)
 
-    // Adjust starting page to maintain max visible pages
+    // 调整起始页码，保持可见页数稳定。
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(0, endPage - maxVisiblePages + 1)
     }
 
     const parts = []
 
-    // Only add ellipsis and first page when there are many pages
+    // 省略前段页码时保留首页入口。
     if (nbPages > maxVisiblePages && startPage > 0) {
       parts.push('<li class="ais-Pagination-item ais-Pagination-item--page"><a class="ais-Pagination-link" aria-label="Page 1" href="#" data-page="0">1</a></li>')
       if (startPage > 1) {
@@ -266,7 +267,7 @@ const initAlgolia = () => {
       }
     }
 
-    // Add middle page numbers
+    // 生成当前页附近的页码。
     for (let i = startPage; i <= endPage; i++) {
       if (i === page) {
         parts.push(`<li class="ais-Pagination-item ais-Pagination-item--page ais-Pagination-item--selected"><span class="ais-Pagination-link" aria-label="Page ${i + 1}">${i + 1}</span></li>`)
@@ -275,7 +276,7 @@ const initAlgolia = () => {
       }
     }
 
-    // Only add ellipsis and last page when there are many pages
+    // 省略后段页码时保留末页入口。
     if (nbPages > maxVisiblePages && endPage < nbPages - 1) {
       if (endPage < nbPages - 2) {
         parts.push('<li class="ais-Pagination-item ais-Pagination-item--ellipsis"><span class="ais-Pagination-link">...</span></li>')
@@ -283,7 +284,7 @@ const initAlgolia = () => {
       parts.push(`<li class="ais-Pagination-item ais-Pagination-item--page"><a class="ais-Pagination-link" aria-label="Page ${nbPages}" href="#" data-page="${nbPages - 1}">${nbPages}</a></li>`)
     }
 
-    // Build prev/next links
+    // 生成上一页和下一页入口。
     const prevLink = isFirstPage
       ? '<span class="ais-Pagination-link ais-Pagination-link--disabled" aria-label="Previous Page"><i class="fas fa-angle-left"></i></span>'
       : `<a class="ais-Pagination-link" aria-label="Previous Page" href="#" data-page="${page - 1}"><i class="fas fa-angle-left"></i></a>`
@@ -328,7 +329,7 @@ const initAlgolia = () => {
       let result
 
       if (searchClient && typeof searchClient.search === 'function') {
-        // v5 multi-index search
+        // Algolia v5 多索引搜索。
         const searchResult = await searchClient.search([{
           indexName,
           query: trimmedQuery,
@@ -336,14 +337,14 @@ const initAlgolia = () => {
         }])
         result = searchResult.results[0]
       } else if (searchClient && typeof searchClient.initIndex === 'function') {
-        // v4 single-index search
+        // Algolia v4 单索引搜索。
         const index = searchClient.initIndex(indexName)
         result = await index.search(trimmedQuery, { page, hitsPerPage, ...HIGHLIGHT_PARAMS })
       } else {
         throw new Error('Algolia: No compatible search method available')
       }
 
-      // Discard stale results from superseded searches
+      // 忽略已被新查询替代的结果。
       if (requestId !== searchRequestId) return
 
       renderHits(result.hits || [], trimmedQuery, page)
@@ -355,7 +356,7 @@ const initAlgolia = () => {
       const hasResults = result.hits && result.hits.length > 0
       toggleResultsVisibility(hasResults)
 
-      // Refresh Pjax links
+      // 刷新搜索结果链接。
     } catch (error) {
       if (requestId !== searchRequestId) return
       console.error('Algolia search error:', error)
@@ -372,7 +373,7 @@ const initAlgolia = () => {
   let searchTimeout
   const debouncedSearch = (query, delay = 300) => {
     clearTimeout(searchTimeout)
-    // Empty query: clear results immediately without debounce delay
+    // 查询为空时立即清空结果。
     if (!query.trim()) {
       performSearch(query)
       return
@@ -384,20 +385,20 @@ const initAlgolia = () => {
     showLoading(false)
 
     if ($searchInput) {
-      btf.addAppEventListener($searchInput, 'input', e => {
+      dragonfly.addAppEventListener($searchInput, 'input', e => {
         debouncedSearch(e.target.value)
       })
     }
 
     if ($searchForm) {
-      btf.addAppEventListener($searchForm, 'submit', e => {
+      dragonfly.addAppEventListener($searchForm, 'submit', e => {
         e.preventDefault()
         performSearch($searchInput ? $searchInput.value : '')
       })
     }
 
-    // Pagination event delegation
-    btf.addAppEventListener($pagination, 'click', e => {
+    // 分页事件委托。
+    dragonfly.addAppEventListener($pagination, 'click', e => {
       e.preventDefault()
       const link = e.target.closest('a[data-page]')
       if (link) {
@@ -408,7 +409,7 @@ const initAlgolia = () => {
       }
     })
 
-    // Initial state
+    // 初始化搜索状态。
     toggleResultsVisibility(false)
   }
 
@@ -416,7 +417,7 @@ const initAlgolia = () => {
   searchClickFn()
   searchFnOnce()
 
-  btf.addAppEventListener(window, 'theme:page-load', () => {
+  dragonfly.addAppEventListener(window, 'theme:page-load', () => {
     closeSearch()
     searchClickFn()
   })

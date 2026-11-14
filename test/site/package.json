@@ -1,7 +1,10 @@
 {
+  "_comment": "Dragonfly 项目修改；采用 Apache-2.0，来源与原作者署名见 NOTICE。",
   "name": "dragonfly-test-site",
   "private": true,
-  "hexo": { "version": "8.1.2" },
+  "hexo": {
+    "version": "8.1.2"
+  },
   "dependencies": {
     "hexo-generator-index": "^4.0.0",
     "hexo-generator-searchdb": "^1.5.0",

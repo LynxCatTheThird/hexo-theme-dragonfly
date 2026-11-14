@@ -1,8 +1,12 @@
-// Modified in this fork.
-// Butterfly 主題默認配置
-// Default configuration for Butterfly theme
-
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// Dragonfly 默认配置，与 _config.yml 的分组顺序一致。
 module.exports = {
+  favicon: '/img/favicon.svg',
+  avatar: {
+    img: '/img/dragonfly.svg',
+    effect: false
+  },
   nav: {
     logo: null,
     display_title: true,
@@ -10,127 +14,36 @@ module.exports = {
     fixed: false
   },
   menu: null,
-  code_blocks: {
-    theme: 'light',
-    macStyle: false,
-    height_limit: false,
-    word_wrap: false,
-    copy: true,
-    language: true,
-    shrink: false,
-    fullpage: false
-  },
   social: null,
-  favicon: '/img/favicon.png',
-  avatar: {
-    img: '/img/butterfly-icon.png',
-    effect: false
+  display_mode: 'light',
+  darkmode: {
+    enable: true,
+    button: true,
+    autoChangeMode: false,
+    start: null,
+    end: null
   },
-  disable_top_img: false,
-  default_top_img: null,
-  index_img: null,
-  archive_img: null,
-  tag_img: null,
-  tag_per_img: null,
-  category_img: null,
-  category_per_img: null,
-  footer_img: false,
   background: null,
-  cover: {
-    index_enable: true,
-    aside_enable: true,
-    archives_enable: true,
-    default_cover: null
+  font: {
+    global_font_size: null,
+    code_font_size: null,
+    font_family: null,
+    code_font_family: null
   },
-  error_img: {
-    flink: '/img/friend_404.gif',
-    post_page: '/img/404.jpg'
+  blog_title_font: {
+    font_link: null,
+    font_family: null
   },
-  error_404: {
-    enable: false,
-    subtitle: 'Page Not Found',
-    background: '/img/error-page.png'
+  rounded_corners_ui: true,
+  text_align_justify: false,
+  mask: {
+    header: true,
+    footer: true
   },
-  post_meta: {
-    page: {
-      date_type: 'created',
-      date_format: 'date',
-      categories: true,
-      tags: false,
-      label: true
-    },
-    post: {
-      position: 'left',
-      date_type: 'both',
-      date_format: 'date',
-      categories: true,
-      tags: true,
-      label: true
-    }
-  },
-  index_site_info_top: null,
-  index_top_img_height: null,
-  subtitle: {
-    enable: false,
-    effect: true,
-    typed_option: null,
-    source: false,
-    sub: null
-  },
-  index_layout: 3,
-  index_post_content: {
-    method: 3,
-    length: 500
-  },
-  toc: {
-    post: true,
-    page: false,
-    number: true,
-    expand: false,
-    style_simple: false,
-    scroll_percent: true
-  },
-  post_copyright: {
+  hr_icon: {
     enable: true,
-    decode: false,
-    author_href: null,
-    license: 'CC BY-NC-SA 4.0',
-    license_url: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
-  },
-  reward: {
-    enable: false,
-    text: null,
-    QR_code: null
-  },
-  post_edit: {
-    enable: false,
-    url: null
-  },
-  related_post: {
-    enable: true,
-    limit: 6,
-    date_type: 'created'
-  },
-  post_pagination: 1,
-  noticeOutdate: {
-    enable: false,
-    style: 'flat',
-    limit_day: 365,
-    position: 'top',
-    message_prev: 'It has been',
-    message_next: 'days since the last update, the content of the article may be outdated.'
-  },
-  footer: {
-    nav: null,
-    owner: {
-      enable: true,
-      since: 2025
-    },
-    copyright: {
-      enable: true,
-      version: true
-    },
-    custom_text: null
+    icon: null,
+    icon_top: null
   },
   aside: {
     enable: true,
@@ -207,15 +120,19 @@ module.exports = {
       runtime_date: null
     }
   },
-  rightside_bottom: null,
-  readmode: true,
-  darkmode: {
-    enable: true,
-    button: true,
-    autoChangeMode: false,
-    start: null,
-    end: null
+  footer: {
+    nav: null,
+    owner: {
+      enable: true,
+      since: 2025
+    },
+    copyright: {
+      enable: true,
+      version: true
+    },
+    custom_text: null
   },
+  rightside_bottom: null,
   rightside_scroll_percent: false,
   rightside_item_order: {
     enable: false,
@@ -223,11 +140,86 @@ module.exports = {
     show: null
   },
   rightside_config_animation: true,
+  disable_top_img: false,
+  default_top_img: null,
+  index_img: null,
+  archive_img: null,
+  tag_img: null,
+  tag_per_img: null,
+  category_img: null,
+  category_per_img: null,
+  footer_img: false,
+  cover: {
+    index_enable: true,
+    aside_enable: true,
+    archives_enable: true,
+    default_cover: null
+  },
+  error_img: {
+    flink: '/img/friend_404.gif',
+    post_page: '/img/404.jpg'
+  },
+  error_404: {
+    enable: false,
+    subtitle: 'Page Not Found',
+    background: '/img/error-page.png'
+  },
+  photofigcaption: false,
+  lazyload: {
+    enable: true,
+    native: true,
+    field: 'post',
+    placeholder: null,
+    blur: false
+  },
+  lightbox: null,
+  lightbox_options: {},
+  index_site_info_top: null,
+  index_top_img_height: null,
+  index_layout: 3,
+  index_post_content: {
+    method: 3,
+    length: 500
+  },
+  subtitle: {
+    enable: false,
+    effect: true,
+    typed_option: null,
+    source: false,
+    sub: null
+  },
+  category_ui: null,
+  tag_ui: null,
+  post_meta: {
+    page: {
+      date_type: 'created',
+      date_format: 'date',
+      categories: true,
+      tags: false,
+      label: true
+    },
+    post: {
+      position: 'left',
+      date_type: 'both',
+      date_format: 'date',
+      categories: true,
+      tags: true,
+      label: true
+    }
+  },
+  toc: {
+    post: true,
+    page: false,
+    number: true,
+    expand: false,
+    style_simple: false,
+    scroll_percent: true
+  },
+  readmode: true,
   anchor: {
     auto_update: false,
     click_to_scroll: false
   },
-  photofigcaption: false,
   copy: {
     enable: true,
     copyright: {
@@ -235,22 +227,55 @@ module.exports = {
       limit_count: 150
     }
   },
+  post_copyright: {
+    enable: true,
+    decode: false,
+    author_href: null,
+    license: 'CC BY-NC-SA 4.0',
+    license_url: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+  },
+  post_edit: {
+    enable: false,
+    url: null
+  },
+  reward: {
+    enable: false,
+    text: null,
+    QR_code: null
+  },
+  related_post: {
+    enable: true,
+    limit: 6,
+    date_type: 'created'
+  },
+  post_pagination: 1,
+  noticeOutdate: {
+    enable: false,
+    style: 'flat',
+    limit_day: 365,
+    position: 'top',
+    message_prev: 'It has been',
+    message_next: 'days since the last update, the content of the article may be outdated.'
+  },
   wordcount: {
     enable: false,
     post_wordcount: true,
     min2read: true,
     total_wordcount: true
   },
-  visitor_counter: {
-    site_uv: true,
-    site_pv: true,
-    page_pv: true,
-    api_url: 'https://events.vercount.one/api/v2/log',
-    timeout: 5000,
-    element_id: { site_uv: null, site_pv: null, page_pv: null },
-    element_class: { site_uv: null, site_pv: null, page_pv: null }
+  markdown: {
+    renderer: 'auto'
   },
-  markdown: { renderer: 'auto' },
+  code_blocks: {
+    theme: 'light',
+    macStyle: false,
+    height_limit: false,
+    word_wrap: false,
+    copy: true,
+    language: true,
+    shrink: false,
+    fullpage: false
+  },
   math: {
     use: null,
     per_page: true,
@@ -263,13 +288,80 @@ module.exports = {
       loader: {},
       output: {},
       tex: {},
-      chtml: { scale: 1.1 },
-      options: { lazyMargin: '200px' }
+      chtml: {
+        scale: 1.1
+      },
+      options: {
+        lazyMargin: '200px'
+      }
     },
     katex: {
       mhchem: false,
       options: {},
       copy_tex: false
+    }
+  },
+  beautify: {
+    enable: false,
+    field: 'post',
+    title_prefix_icon: null,
+    title_prefix_icon_color: null
+  },
+  series: {
+    enable: false,
+    orderBy: 'title',
+    order: 1,
+    number: true
+  },
+  note: {
+    style: 'flat',
+    icons: true,
+    border_radius: 3,
+    light_bg_offset: 0
+  },
+  abcjs: {
+    enable: false,
+    per_page: true
+  },
+  mermaid: {
+    enable: false,
+    code_write: false,
+    theme: {
+      light: 'default',
+      dark: 'dark'
+    },
+    open_in_new_tab: true,
+    zoom_pan: true,
+    options: {}
+  },
+  echarts: {
+    enable: true,
+    height: 400,
+    init_options: {
+      renderer: 'canvas'
+    },
+    theme: {
+      light: null,
+      dark: 'dark'
+    },
+    option: {
+      animation: false
+    }
+  },
+  chartjs: {
+    enable: false,
+    options: {},
+    fontColor: {
+      light: 'rgba(0, 0, 0, 0.8)',
+      dark: 'rgba(255, 255, 255, 0.8)'
+    },
+    borderColor: {
+      light: 'rgba(0, 0, 0, 0.1)',
+      dark: 'rgba(255, 255, 255, 0.2)'
+    },
+    scale_ticks_backdropColor: {
+      light: 'transparent',
+      dark: 'transparent'
     }
   },
   search: {
@@ -301,10 +393,11 @@ module.exports = {
     count: false,
     card_post_count: false
   },
-  waline: {
-    serverURL: null,
-    bg: null,
-    pageview: false,
+  artalk: {
+    server: null,
+    site: null,
+    visitor: false,
+    vote: false,
     option: null
   },
   twikoo: {
@@ -313,21 +406,37 @@ module.exports = {
     visitor: false,
     option: null
   },
-  artalk: {
-    server: null,
-    site: null,
-    visitor: false,
-    vote: false,
+  waline: {
+    serverURL: null,
+    bg: null,
+    pageview: false,
     option: null
   },
+  visitor_counter: {
+    site_uv: true,
+    site_pv: true,
+    page_pv: true,
+    api_url: 'https://events.vercount.one/api/v2/log',
+    timeout: 5000,
+    element_id: {
+      site_uv: null,
+      site_pv: null,
+      page_pv: null
+    },
+    element_class: {
+      site_uv: null,
+      site_pv: null,
+      page_pv: null
+    }
+  },
   site_verification: null,
-  category_ui: null,
-  tag_ui: null,
-  rounded_corners_ui: true,
-  text_align_justify: false,
-  mask: {
-    header: true,
-    footer: true
+  Open_Graph_meta: {
+    enable: true,
+    option: null
+  },
+  structured_data: {
+    enable: false,
+    alternate_name: null
   },
   preloader: {
     enable: false,
@@ -335,28 +444,6 @@ module.exports = {
     pace_css_url: null
   },
   enter_transitions: true,
-  display_mode: 'light',
-  beautify: {
-    enable: false,
-    field: 'post',
-    title_prefix_icon: null,
-    title_prefix_icon_color: null
-  },
-  font: {
-    global_font_size: null,
-    code_font_size: null,
-    font_family: null,
-    code_font_family: null
-  },
-  blog_title_font: {
-    font_link: null,
-    font_family: null
-  },
-  hr_icon: {
-    enable: true,
-    icon: null,
-    icon_top: null
-  },
   activate_power_mode: {
     enable: false,
     colorful: true,
@@ -399,92 +486,12 @@ module.exports = {
     random: false,
     mobile: false
   },
-  lightbox: null,
-  lightbox_options: {},
-  series: {
-    enable: false,
-    orderBy: 'title',
-    order: 1,
-    number: true
-  },
-  abcjs: {
-    enable: false,
-    per_page: true
-  },
-  mermaid: {
-    enable: false,
-    code_write: false,
-    theme: {
-      light: 'default',
-      dark: 'dark'
-    },
-    open_in_new_tab: true,
-    zoom_pan: true,
-    options: {}
-  },
-  echarts: {
-    enable: true,
-    height: 400,
-    init_options: { renderer: 'canvas' },
-    theme: { light: null, dark: 'dark' },
-    option: { animation: false }
-  },
-  chartjs: {
-    enable: false,
-    options: {},
-    fontColor: {
-      light: 'rgba(0, 0, 0, 0.8)',
-      dark: 'rgba(255, 255, 255, 0.8)'
-    },
-    borderColor: {
-      light: 'rgba(0, 0, 0, 0.1)',
-      dark: 'rgba(255, 255, 255, 0.2)'
-    },
-    scale_ticks_backdropColor: {
-      light: 'transparent',
-      dark: 'transparent'
-    }
-  },
-  note: {
-    style: 'flat',
-    icons: true,
-    border_radius: 3,
-    light_bg_offset: 0
-  },
   navigation: {
     enable: false,
     cache: true,
     preload: false,
     timeout: 10000,
     exclude: null
-  },
-  lazyload: {
-    enable: true,
-    native: true,
-    field: 'post',
-    placeholder: null,
-    blur: false
-  },
-  pwa: {
-    enable: false,
-    manifest: null,
-    apple_touch_icon: null,
-    favicon_32_32: null,
-    favicon_16_16: null,
-    mask_icon: null
-  },
-  Open_Graph_meta: {
-    enable: true,
-    option: null
-  },
-  structured_data: {
-    enable: false,
-    alternate_name: null
-  },
-  css_prefix: true,
-  inject: {
-    head: null,
-    bottom: null
   },
   CDN: {
     internal_provider: 'local',
@@ -494,5 +501,18 @@ module.exports = {
     custom_format: null,
     internal_custom_format: null,
     option: null
+  },
+  css_prefix: true,
+  pwa: {
+    enable: false,
+    manifest: null,
+    apple_touch_icon: null,
+    favicon_32_32: null,
+    favicon_16_16: null,
+    mask_icon: null
+  },
+  inject: {
+    head: null,
+    bottom: null
   }
 }

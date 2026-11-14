@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 (() => {
   const src = document.querySelector('script[data-echarts-src]').dataset.echartsSrc
   const config = JSON.parse(document.querySelector('script[data-echarts-src]').dataset.echartsConfig)
@@ -15,10 +17,10 @@
   const init = async () => {
     const elements = [...document.querySelectorAll('#article-container .echarts-container')]
     if (!elements.length) return
-    const signal = btf.pageSignal
+    const signal = dragonfly.pageSignal
     const current = generation
     try {
-      if (typeof window.echarts?.init !== 'function') await btf.getScript(src)
+      if (typeof window.echarts?.init !== 'function') await dragonfly.getScript(src)
       if (signal.aborted || current !== generation) return
       elements.forEach(el => {
         if (!el.isConnected) return
@@ -60,13 +62,13 @@
   }
 
   const refresh = () => {
-    btf.addPageFn('themeChange', init, 'echarts')
-    btf.addPageFn('encrypt', init, 'echarts')
+    dragonfly.addPageFn('themeChange', init, 'echarts')
+    dragonfly.addPageFn('encrypt', init, 'echarts')
     return init()
   }
-  // Register cleanup once: it must also cancel a download during fast navigation.
-  btf.addAppEventListener(document, 'theme:page-leave', dispose)
-  btf.addAppEventListener(document, 'theme:page-load', refresh)
+  // 统一注册清理函数，切页时也能取消尚未完成的下载。
+  dragonfly.addAppEventListener(document, 'theme:page-leave', dispose)
+  dragonfly.addAppEventListener(document, 'theme:page-load', refresh)
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh, { once: true })
   else refresh()
 })()

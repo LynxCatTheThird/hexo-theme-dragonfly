@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 #article-container
   .shuoshuo-item
     @extend .cardHover
@@ -134,7 +136,7 @@
       &::placeholder
         color: transparent
 
-    /* 隱藏 number 輸入框的上下箭頭 */
+    /* 隐藏 number 输入框的上下箭头 */
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button
       margin: 0
@@ -143,7 +145,7 @@
     /* Firefox */
     -moz-appearance: textfield
 
-    /* 當作為頁碼按鈕時的樣式 */
+    /* 当作为页码按钮时的样式 */
     &.shuoshuo-page-num
       min-width: 40px
       width: 40px
@@ -158,14 +160,14 @@
         background: var(--white)
         color: #333
 
-    /* 超出範圍時的紅色樣式 */
+    /* 超出范围时的红色样式 */
     &.invalid
       border-color: #ff4757
       background-color: #ffeaea
       color: #ff4757
       animation: shake .5s ease-in-out
 
-  /* 震動動畫 */
+  /* 震动动画 */
   @keyframes shake
     0%,
     100%

@@ -1,4 +1,4 @@
-# Modified in this fork.
+# Dragonfly 项目修改；许可与来源见 LICENSE 和 NOTICE。
 .DS_Store
 node_modules/
 /package-lock.json

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 :root
   --global-font-size: $font-size
   --global-bg: $body-bg
@@ -39,7 +41,7 @@
   --zoom-bg: #fff
   --mark-bg: alpha($dark-black, .3)
 
-// tags plugin
+// 标签插件。
 :root
   --btn-color: $btn-color
   --btn-default-color: $btn-default-color
@@ -114,13 +116,13 @@ body
     user-select: none
     -webkit-user-select: none
 
-// scrollbar - firefox
+// Firefox 滚动条。
 @-moz-document url-prefix()
   *
     scrollbar-width: thin
     scrollbar-color: var(--scrollbar-color) transparent
 
-// scrollbar - chrome/safari
+// Chrome 与 Safari 滚动条。
 *::-webkit-scrollbar
   width: 5px
   height: 5px
@@ -131,7 +133,7 @@ body
 *::-webkit-scrollbar-track
   background-color: transparent
 
-// make the scrollbar transparent when fancybox is open
+// 灯箱打开时使用透明滚动条。
 html.with-fancybox
   --scrollbar-color: transparent
 
@@ -233,7 +235,7 @@ a
   &:hover
     color: $light-blue
 
-// font
+// 字体。
 if $site-name-font
   #site-title,
   #site-subtitle,
@@ -253,7 +255,7 @@ img
   &:not([src])
     opacity: 0
 
-// lazyload blur
+// 懒加载模糊效果。
 if hexo-config('lazyload.enable') && hexo-config('lazyload.blur') && !hexo-config('lazyload.placeholder')
   img
     &[data-lazy-src]:not(.loaded)

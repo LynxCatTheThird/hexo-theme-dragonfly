@@ -1,4 +1,6 @@
-// Run against a generated Hexo site: npm run test:browser -- /path/to/public
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 验证已生成站点：npm run test:browser -- /path/to/public。
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
@@ -312,7 +314,7 @@ const server = http.createServer((req, res) => {
     assert.deepEqual(forbiddenRequests, [])
     console.log('PASS: first navigation, metadata, dark mode, disposal, repeated navigation, direct load, decryption init, removed integrations')
 
-    // Pending and failed downloads must not render into a page that has been left.
+    // 待完成或失败的下载不得写入已离开的页面。
     const race = await context.newPage()
     await race.route('**/*', r => r.request().resourceType() === 'image' ? r.abort() : r.fallback())
     let release
@@ -393,8 +395,8 @@ const server = http.createServer((req, res) => {
     assert.equal(new URL(page.url()).pathname, chartPath)
     assert.deepEqual(errors, [])
     await page.evaluate(() => {
-      btf.addGlobalFn('encrypt', () => { window.__persistentCalls = (window.__persistentCalls || 0) + 1 }, 'testPersistent')
-      btf.addPageFn('encrypt', () => { window.__pageCalls = (window.__pageCalls || 0) + 1 }, 'testScoped')
+      dragonfly.addGlobalFn('encrypt', () => { window.__persistentCalls = (window.__persistentCalls || 0) + 1 }, 'testPersistent')
+      dragonfly.addPageFn('encrypt', () => { window.__pageCalls = (window.__pageCalls || 0) + 1 }, 'testScoped')
     })
     await go('/about/')
     await page.evaluate(() => window.dispatchEvent(new Event('hexo-blog-decrypt')))

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const { Parser } = require('htmlparser2')
 const { escapeHTML } = require('hexo-util')
 const escapeAttribute = value => escapeHTML(value).replace(/&#x2F;/g, '/')
@@ -8,6 +10,7 @@ const setAttribute = (tag, name, value) => {
 }
 const rootURL = (url, root) => url.startsWith('/') && !url.startsWith('//') && root !== '/' && !url.startsWith(root) ? root + url.slice(1) : url
 const srcsetURL = (source, root) => {
+  // data URL 也可包含逗号，先读取完整候选地址，再处理描述符。
   const changes = []
   let pos = 0
   while (pos < source.length) {
@@ -53,6 +56,7 @@ const rewriteImages = (html, { native = true, root = '/', placeholder = '' } = {
     onclosetag () { stack.pop() }
   }, { decodeEntities: true })
   parser.end(html)
+  // 从后向前替换标签，保持解析器记录的原始偏移有效。
   for (const change of changes.reverse()) html = html.slice(0, change.start) + change.value + html.slice(change.end)
   return html
 }

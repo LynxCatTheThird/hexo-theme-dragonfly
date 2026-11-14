@@ -1,4 +1,6 @@
-// Modified in Dragonfly. Keep native script insertion, with ordered page initialization.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 保留原生脚本插入行为，按顺序完成页面初始化。
 export const createPageScriptsPlugin = timeout => new class extends SwupScriptsPlugin {
   async runScripts (visit) {
     const scope = this.getScope(this.options)
@@ -10,7 +12,7 @@ export const createPageScriptsPlugin = timeout => new class extends SwupScriptsP
       const script = super.runScript(old)
       if ((script.src || type === 'module') && !script.hasAttribute('async')) {
         await new Promise(resolve => {
-          const signal = btf.pageSignal
+          const signal = dragonfly.pageSignal
           const finish = () => { clearTimeout(timer); signal.removeEventListener('abort', finish); script.onload = script.onerror = null; resolve() }
           const timer = timeout ? setTimeout(() => {
             console.warn('Page script timed out:', script.src)

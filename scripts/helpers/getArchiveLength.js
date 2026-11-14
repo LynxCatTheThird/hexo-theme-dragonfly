@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 hexo.extend.helper.register('getArchiveLength', function () {
   const archiveGenerator = hexo.config.archive_generator
   const posts = this.site.posts
@@ -5,10 +7,9 @@ hexo.extend.helper.register('getArchiveLength', function () {
   const { yearly, monthly, daily } = archiveGenerator
   const { year, month, day } = this.page
 
-  // Archives Page
+  // 归档页。
   if (!year) return posts.length
 
-  // Create a map to count posts per period
   const mapData = this.fragment_cache('createArchiveObj', () => {
     const map = new Map()
     posts.forEach(post => {
@@ -17,7 +18,7 @@ hexo.extend.helper.register('getArchiveLength', function () {
       const m = date.month() + 1
       const d = date.date()
 
-      // Always track year so year archive pages can be counted
+      // 同时记录年份，供年度归档页使用。
       const keyYear = `${y}`
       map.set(keyYear, (map.get(keyYear) || 0) + 1)
 
@@ -34,12 +35,10 @@ hexo.extend.helper.register('getArchiveLength', function () {
     return map
   })
 
-  // Determine the appropriate key to fetch based on current page context
   let key
   if (yearly || monthly || daily) key = `${year}`
   if ((monthly || daily) && month) key = `${year}-${month}`
   if (daily && day) key = `${year}-${month}-${day}`
 
-  // Return the count for the current period or default to the total posts
   return mapData.get(key) || posts.length
 })

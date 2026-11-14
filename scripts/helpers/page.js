@@ -1,4 +1,5 @@
-// Modified in this fork.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 'use strict'
 
 const { truncateContent, postDesc } = require('../common/postDesc')
@@ -125,16 +126,16 @@ hexo.extend.helper.register('getBgPath', function (path) {
 hexo.extend.helper.register('shuoshuoFN', (data, page) => {
   const { limit } = page
 
-  // Shallow copy to avoid mutating original data
+  // 复制列表，保留原始数据顺序。
   let processedData = data.map(item => ({ ...item }))
 
-  // Check if limit.value is a valid date
+  // 检查时间范围的起始日期。
   const isValidDate = date => !isNaN(Date.parse(date))
 
-  // order by date
+  // 按日期排序。
   processedData.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
 
-  // Apply number limit or time limit conditionally
+  // 按配置应用数量或时间范围限制。
   if (limit && limit.type === 'num' && limit.value > 0) {
     processedData = processedData.slice(0, limit.value)
   } else if (limit && limit.type === 'date' && isValidDate(limit.value)) {
@@ -142,8 +143,7 @@ hexo.extend.helper.register('shuoshuoFN', (data, page) => {
     processedData = processedData.filter(item => Date.parse(item.date) >= limitDate)
   }
 
-  // This is a hack method, because hexo treats time as UTC time
-  // so you need to manually convert the time zone
+  // Hexo 已将时间解析为 UTC，需要按站点时区还原。
   const timezone = hexo.config.timezone
   processedData.forEach(item => {
     const parsed = moment.utc(item.date)
@@ -151,7 +151,7 @@ hexo.extend.helper.register('shuoshuoFN', (data, page) => {
       ? moment.tz(parsed.format('YYYY-MM-DD HH:mm:ss'), timezone).format('YYYY-MM-DD HH:mm:ss')
       : parsed.format('YYYY-MM-DD HH:mm:ss')
 
-    // Render the content using Hexo's rendering engine to process any tags or markdown
+    // 交由 Hexo 渲染标签插件和 Markdown。
     const mockPost = {
       content: item.content,
       source: item.source || page.source || '',
@@ -165,7 +165,7 @@ hexo.extend.helper.register('shuoshuoFN', (data, page) => {
     try {
       hexo.execFilterSync('before_post_render', mockPost, { context: hexo })
     } catch (e) {
-      // ignore third-party plugin errors, fallback to markdown-only rendering
+      // 插件渲染失败时回退到 Markdown。
     }
     item.content = mockPost.content
 
@@ -178,7 +178,7 @@ hexo.extend.helper.register('shuoshuoFN', (data, page) => {
     try {
       item.content = hexo.extend.tag.env.renderString(item.content, {})
     } catch (e) {
-      // ignore tag plugin errors, fallback to markdown-only rendering
+      // 标签渲染失败时回退到 Markdown。
     }
 
     item.content = hexo.render.renderSync({ text: item.content, engine: 'markdown' })
@@ -208,7 +208,7 @@ hexo.extend.helper.register('getVersion', () => {
 })
 
 hexo.extend.helper.register('safeJSON', data => {
-  // Safely serialize JSON for embedding in <script> tags
+  // 转义脚本结束标签，安全嵌入 JSON。
   return JSON.stringify(data)
     .replace(/</g, '\\u003c')
     .replace(/>/g, '\\u003e')

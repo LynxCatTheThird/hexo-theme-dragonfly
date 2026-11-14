@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const fs = require('node:fs')
 const path = require('node:path')
 const { load: loadYAML } = require('js-yaml')
 const plugins = loadYAML(fs.readFileSync(path.join(__dirname, '../plugins.yml'), 'utf8'))
 const types = { '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.svg': 'image/svg+xml' }
 
-// Serve the real installed distributions while retaining their public URL shapes.
+// 将公开资源地址映射到本地安装的真实发行文件。
 module.exports = async (context, { allowCustom = false } = {}) => {
   if (process.env.TEST_REAL_CDN) return
   await context.route('**/*', async route => {
@@ -27,7 +29,7 @@ module.exports = async (context, { allowCustom = false } = {}) => {
     const [, name, asset] = match
     if (allowCustom && !Object.values(plugins).some(plugin => plugin.name === name)) return route.fallback()
     let file = path.resolve(__dirname, '../node_modules', name, asset)
-    // jsDelivr synthesizes .min JS/CSS URLs when the package ships only source.
+    // jsDelivr 可以为未附带压缩版的 JS 和 CSS 生成 .min 地址。
     if (['cdn.jsdelivr.net', 'cdnjs.cloudflare.com'].includes(url.hostname) && !fs.existsSync(file)) file = file.replace(/\.min\.(js|css)$/, '.$1')
     const base = path.resolve(__dirname, '../node_modules', name) + path.sep
     if (!file.startsWith(base) || !fs.existsSync(file)) throw new Error(`Missing test vendor: ${name}/${asset}`)

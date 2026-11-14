@@ -1,9 +1,10 @@
-// Modified in Dragonfly.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const addRuntime = () => {
   const $runtimeCount = document.getElementById('runtimeshow')
   if ($runtimeCount) {
     const publishDate = $runtimeCount.getAttribute('data-publishDate')
-    $runtimeCount.textContent = `${btf.diffDate(publishDate)} ${GLOBAL_CONFIG.runtime}`
+    $runtimeCount.textContent = `${dragonfly.diffDate(publishDate)} ${GLOBAL_CONFIG.runtime}`
   }
 }
 
@@ -11,7 +12,7 @@ const addLastPushDate = () => {
   const $lastPushDateItem = document.getElementById('last-push-date')
   if ($lastPushDateItem) {
     const lastPushDate = $lastPushDateItem.getAttribute('data-lastPushDate')
-    $lastPushDateItem.textContent = btf.diffDate(lastPushDate, true)
+    $lastPushDateItem.textContent = dragonfly.diffDate(lastPushDate, true)
   }
 }
 
@@ -20,7 +21,7 @@ const addPostOutdateNotice = () => {
   if (!ele) return
 
   const { limitDay, messagePrev, messageNext, postUpdate } = JSON.parse(ele.getAttribute('data'))
-  const diffDay = btf.diffDate(postUpdate)
+  const diffDay = dragonfly.diffDate(postUpdate)
   if (diffDay >= limitDay) {
     ele.textContent = `${messagePrev} ${diffDay} ${messageNext}`
     ele.hidden = false
@@ -29,7 +30,7 @@ const addPostOutdateNotice = () => {
 
 const relativeDate = selector => {
   selector.forEach(item => {
-    item.textContent = btf.diffDate(item.getAttribute('datetime'), true)
+    item.textContent = dragonfly.diffDate(item.getAttribute('datetime'), true)
     item.style.display = 'inline'
   })
 }

@@ -1,3 +1,4 @@
+# Dragonfly 项目修改；许可与来源见 LICENSE 和 NOTICE。
 node_modules/
 /package-lock.json
 /test/

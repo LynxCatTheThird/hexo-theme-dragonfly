@@ -1,11 +1,6 @@
-//- Modified in this fork.
-//- - author:
-//-   avatar:
-//-   date:
-//-   content:
-//-   tags:
-//-     - tag1
-//-     - tag2
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+//- 说说数据包含 author、avatar、date、content 和 tags 字段。
 
 - page.toc = false
 
@@ -38,7 +33,7 @@
               ele.classList.remove('no-comment')
               ele.innerHTML = commentDiv
               const key = `${location.pathname.replace(/\/$/, '')}?key=${ele.getAttribute('data-key')}`
-              btf.switchComments(ele, key)
+              dragonfly.switchComments(ele, key)
               shuoshuoComment.loadComment && shuoshuoComment.loadComment(ele, key)
             }
           }
@@ -53,7 +48,7 @@
     - const { enable, native, placeholder, field } = theme.lazyload
     script(data-swup-reload-script).
       (() => {
-        const pageSignal = btf.pageSignal
+        const pageSignal = dragonfly.pageSignal
         const article = document.getElementById('article-container')
         const delay = (fn, ms) => {
           const cancel = () => clearTimeout(timer)
@@ -152,7 +147,7 @@
                     <div class="shuoshuo-info">
                       <div class="shuoshuo-author">${item.author ? escapeHtml(item.author) : !{JSON.stringify(config.author || '')}}</div>
                       <time class="shuoshuo-date" title="${formattedDate}">
-                        ${btf.diffDate(formattedDate, true)}
+                        ${dragonfly.diffDate(formattedDate, true)}
                       </time>
                     </div>
                   </div>
@@ -174,21 +169,21 @@
         }
 
         const setupNavEvents = (nav) => {
-          btf.addPageEventListener(nav.querySelector('.shuoshuo-prev-btn'), 'click', () => {
+          dragonfly.addPageEventListener(nav.querySelector('.shuoshuo-prev-btn'), 'click', () => {
             if (currentPage > 1) { currentPage--; renderPage(currentPage) }
           })
-          btf.addPageEventListener(nav.querySelector('.shuoshuo-next-btn'), 'click', () => {
+          dragonfly.addPageEventListener(nav.querySelector('.shuoshuo-next-btn'), 'click', () => {
             if (currentPage < totalPages) { currentPage++; renderPage(currentPage) }
           })
 
           const input = nav.querySelector('.shuoshuo-page-input')
 
-          btf.addPageEventListener(input, 'focus', e => { e.target.placeholder = '' })
-          btf.addPageEventListener(input, 'blur', e => {
+          dragonfly.addPageEventListener(input, 'focus', e => { e.target.placeholder = '' })
+          dragonfly.addPageEventListener(input, 'blur', e => {
             if (!e.target.value.trim()) e.target.placeholder = currentPage
           })
 
-          btf.addPageEventListener(input, 'input', e => {
+          dragonfly.addPageEventListener(input, 'input', e => {
             const value = parseInt(e.target.value) || 0
             let wasInvalid = false
 
@@ -201,7 +196,7 @@
             }
           })
 
-          btf.addPageEventListener(input, 'keydown', e => {
+          dragonfly.addPageEventListener(input, 'keydown', e => {
             const value = e.target.value + e.key
 
             if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete' ||

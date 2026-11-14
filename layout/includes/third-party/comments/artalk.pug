@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { server, site, option, vote } = theme.artalk
 - const { use, lazyload } = theme.comments
 
@@ -51,7 +52,7 @@ script(data-swup-reload-script).
       if (GLOBAL_CONFIG.lightbox !== 'null') artalkItem.on('list-loaded', () => {
         artalkItem.ctx.get('list').getCommentNodes().forEach(comment => {
           const $content = comment.getRender().$content
-          btf.loadLightbox($content.querySelectorAll('img:not([atk-emoticon])'))
+          dragonfly.loadLightbox($content.querySelectorAll('img:not([atk-emoticon])'))
         })
       })
 
@@ -65,16 +66,16 @@ script(data-swup-reload-script).
         }
       }
 
-      btf.addGlobalFn('pageCleanup', destroyArtalk, 'destroyArtalk')
-      btf.addPageFn('themeChange', artalkChangeMode, 'artalk')
+      dragonfly.addGlobalFn('pageCleanup', destroyArtalk, 'destroyArtalk')
+      dragonfly.addPageFn('themeChange', artalkChangeMode, 'artalk')
     }
 
     const loadArtalk = async (el = document, pageKey = location.pathname) => {
       const target = el.querySelector('#artalk-wrap')
       if (!target) return
       if (typeof window.Artalk?.init !== 'function') {
-        await btf.getCSS('!{url_for(theme.asset.artalk_css)}')
-        await btf.getScript('!{url_for(theme.asset.artalk_js)}')
+        await dragonfly.getCSS('!{url_for(theme.asset.artalk_css)}')
+        await dragonfly.getScript('!{url_for(theme.asset.artalk_js)}')
       }
       if (target.isConnected && el.querySelector('#artalk-wrap') === target) initArtalk(el, pageKey)
     }
@@ -87,7 +88,7 @@ script(data-swup-reload-script).
     }
 
     if ('!{use[0]}' === 'Artalk' || !!{lazyload}) {
-      if (!{lazyload}) btf.loadComment(document.getElementById('artalk-wrap'), loadArtalk)
+      if (!{lazyload}) dragonfly.loadComment(document.getElementById('artalk-wrap'), loadArtalk)
       else setTimeout(loadArtalk, 100)
     } else {
       window.loadOtherComment = loadArtalk

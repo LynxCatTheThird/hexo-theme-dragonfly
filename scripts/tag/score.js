@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * Music Score
+ * 乐谱。
  * {% score %}
  */
 
@@ -11,15 +13,15 @@ const score = (args, content) => {
   const escapeHtmlTags = s => escapeHTML(s).replace(/[{}]/g, c => c === '{' ? '&#123;' : '&#125;')
 
   const trimmed = content.trim()
-  // Split content using six dashes as a delimiter
+  // 以六个短横线分隔参数与乐谱。
   const parts = trimmed.split('------')
 
   if (parts.length < 2) {
-    // If no delimiter is found, treat the entire content as the score
+    // 未设置分隔符时，将全部内容作为乐谱。
     return `<div class="abc-music-sheet">${escapeHtmlTags(trimmed)}</div>`
   }
 
-  // First part is parameters (JSON string), the rest is the score content
+  // 首段为 JSON 参数，剩余部分为乐谱。
   const paramPart = parts[0].trim()
   const scorePart = parts.slice(1).join('------').trim()
 
@@ -30,8 +32,8 @@ const score = (args, content) => {
     console.error('Failed to parse JSON in score tag:', e)
   }
 
-  // Use double quotes for data-params attribute value,
-  // ensuring JSON internal double quotes are escaped
+  // 使用带双引号的 data-params 属性，
+  // 并转义 JSON 中的双引号。
   return `<div class="abc-music-sheet" data-params="${escapeHtmlTags(JSON.stringify(paramsObj))}">
     ${escapeHtmlTags(scorePart)}
   </div>`

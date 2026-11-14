@@ -1,257 +1,52 @@
-<div align="right">
-  <a title="繁體中文" href="./README_CN.md">繁體中文</a>
-</div>
+<!-- SPDX-License-Identifier: Apache-2.0；Dragonfly 项目修改，来源与署名见 NOTICE。 -->
+<p align="center"><img src="source/img/dragonfly.svg" width="128" height="128" alt="Dragonfly 蜻蜓标志"></p>
 
-<div align="center">
+# Dragonfly
 
-<img src="./source/img/butterfly-icon.png" width="150" height="150" alt="Butterfly Logo" />
+基于 Hexo 的静态博客主题，提供卡片布局、深色模式、搜索、数学公式与图表，并通过按需加载和页面生命周期管理控制浏览器资源。
 
-# hexo-theme-butterfly
+[![版本](https://img.shields.io/github/package-json/v/LynxCatTheThird/hexo-theme-dragonfly/dev)](package.json)
+[![测试](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/actions/workflows/test.yml/badge.svg?branch=dev)](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/actions/workflows/test.yml)
+[![许可证](https://img.shields.io/github/license/LynxCatTheThird/hexo-theme-dragonfly)](LICENSE)
+[![星标](https://img.shields.io/github/stars/LynxCatTheThird/hexo-theme-dragonfly?style=social)](https://github.com/LynxCatTheThird/hexo-theme-dragonfly)
 
-This fork modifies navigation and component integrations. Its configuration is defined in `_config.yml`.
+[配置指南](docs/configuration.md) · [开发与分发](docs/development.md) · [迁移说明](docs/migration.md) · [报告问题](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/issues)
 
-A modern, elegant, and feature-rich theme for Hexo
+## 安装
 
-![master version](https://img.shields.io/github/package-json/v/jerryc127/hexo-theme-butterfly/master?color=%231ab1ad&label=master)
-![dev version](https://img.shields.io/github/package-json/v/jerryc127/hexo-theme-butterfly/dev?label=dev)
-![npm version](https://img.shields.io/npm/v/hexo-theme-butterfly?color=%23bf00ff)
-![hexo version](https://img.shields.io/badge/hexo-5.3.0+-0e83cd)
-![license](https://img.shields.io/github/license/jerryc127/hexo-theme-butterfly?color=FF5531)
-![GitHub stars](https://img.shields.io/github/stars/jerryc127/hexo-theme-butterfly?style=social)
+使用 Node.js 22.14 或更高版本、Hexo 8；测试覆盖 Node.js 22、24。主题的兼容检查最低接受 Hexo 5.3，旧版本需自行验证所用组件。
 
-📢 **Demo**: [Official Site](https://butterfly.js.org/) | [CrazyWong's Blog](https://blog.crazywong.com/)
-
-📖 **Documentation**: [English](https://butterfly.js.org/en/posts/butterfly-docs-en-get-started/) | [中文文檔](https://butterfly.js.org/posts/21cfbf15/)
-
-![Butterfly Theme Preview](https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/theme-butterfly-readme.png)
-
-</div>
-
----
-
-## 📑 Table of Contents
-
-- [Requirements](#requirements)
-- [Quick Start](#quick-start)
-- [Upgrade](#upgrade)
-- [Theme Features](#theme-features)
-- [Screenshots](#screenshots)
-- [Get Help & Support](#get-help)
-- [License](#license)
-
-<a id="requirements"></a>
-
-## 📋 Requirements
-
-- **Hexo**: 5.3.0 or later
-- **Node.js**: 18 or later (`hexo-util` 4.x requires it)
-- **Git**: only needed for Git installs
-
-<a id="quick-start"></a>
-
-## 🚀 Quick Start
-
-### 💾 Installation
-
-Install this fork from the Hexo site directory:
-
-```bash
-git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-dragonfly.git themes/butterfly
-```
-
-### ⚙️ Enable & Configure
-
-1. **Enable the theme**: set it in the `_config.yml` at your Hexo root:
-
-   ```yaml
-   theme: butterfly
-   ```
-
-2. **Copy the theme config** (recommended, so upgrades don't overwrite your settings):
-
-   ```bash
-   # Git install
-   cp themes/butterfly/_config.yml _config.butterfly.yml
-
-   ```
-
-   > Hexo 5+ loads `_config.butterfly.yml` from the site directory.
-   >
-   > ⚠️ After this, edit only `_config.butterfly.yml`. Don't delete the theme's own `_config.yml`, and keep custom files and images out of the theme's `source/` folder — upgrades may overwrite them.
-
-3. **Install the renderers and preview locally**:
-
-   ```bash
-   npm install hexo-renderer-pug hexo-renderer-stylus --save
-   npm install --prefix themes/butterfly --omit=dev --no-package-lock
-   hexo clean && hexo s
-   ```
-
-<a id="upgrade"></a>
-
-## 🔄 Upgrade
-
-**Git install**
-
-```bash
-cd themes/butterfly
-git pull
-```
-
-Before upgrading, back up your config. After upgrading, check [Releases](https://github.com/jerryc127/hexo-theme-butterfly/releases) for `_config` changes and merge them into `_config.butterfly.yml`.
-
-<a id="theme-features"></a>
-
-## ✨ Theme Features
-
-> 💡 All features can be configured in `_config.butterfly.yml`. See the [theme configuration docs](https://butterfly.js.org/en/posts/butterfly-docs-en-theme-config/) for details.
-
-### 🎨 Design
-- ✅ **Card-based design** — Modern card layout
-- ✅ **Rounded or square corners** — Configurable corner radius
-- ✅ **Responsive layout** — Looks great on any screen size
-- ✅ **Two-column layout** — Optimized for reading
-- ✅ **Dark mode** — Easy on the eyes at night
-
-### 📝 Content
-- ✅ **Multi-level menu** — Nested navigation menus
-- ✅ **Reading mode** — Distraction-free reading
-- ✅ **Table of contents** — Available on desktop and mobile
-- ✅ **Word count** — Shows the word count and estimated reading time
-- ✅ **Related posts** — Smart recommendations at the end of a post
-- ✅ **Outdated post warning** — Alerts readers when a post may be out of date
-- ✅ **Tag plugins** — Extra tags for richer content
-
-### 🔍 Search & Navigation
-- ✅ **Multiple search options** — Algolia, local search, or DocSearch
-- ✅ **Built-in 404 page** — A polished error page
-- ✅ **Swup** — Smooth page transitions
-
-### 🎨 Code Display
-- ✅ **Syntax highlighting** — Several built-in themes (darker, pale night, light, ocean)
-- ✅ **Code block tools** — Language labels, folding, copy button, word wrap
-- ✅ **Math formulas** — MathJax and KaTeX support
-
-### 💬 Social Interaction
-- ✅ **Multiple comment systems** — Artalk, Twikoo and Waline
-- ✅ **Two comment systems at once** — Use two systems side by side
-
-### 📊 Analytics & Statistics
-- ✅ **Visit counter** — Vercount API with custom element IDs
-- ✅ **Search engine verification** — Google and Baidu
-
-### 🎪 Visual Effects
-- ✅ **Typing effects** — activate_power_mode animations
-- ✅ **Background effects** — Static, dynamic, or fluttering ribbons, plus Canvas Nest
-- ✅ **Mouse effects** — Fireworks, hearts, and text on click
-- ✅ **Loading animations** — Preloader or a pace.js progress bar
-- ✅ **Image lightbox** — medium-zoom or Fancybox
-- ✅ **Lazy loading** — Images load as they enter the viewport
-
-### 🛠️ Advanced Features
-- ✅ **PWA** — Progressive Web App support
-- ✅ **Copy protection** — Disable copying or append a copyright notice
-- ✅ **Theme customization** — Custom color schemes
-- ✅ **Charts** — ECharts, Mermaid and Chart.js
-- ✅ **Music notation** — ABCJS support
-- ✅ **Post series** — Group posts into series
-
-## 🤝 Contributors
-
-Thanks to everyone who has contributed to Butterfly!
-
-[![Contributors](https://contrib.rocks/image?repo=jerryc127/hexo-theme-butterfly)](https://github.com/jerryc127/hexo-theme-butterfly/graphs/contributors)
-
-<a id="screenshots"></a>
-
-## 📸 Screenshots
-
-<div align="center">
-  <table>
-    <tr>
-      <td><a href="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-1.jpg"><img src="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-1.jpg" alt="Light homepage on desktop, tablet and phone" width="440" loading="lazy" /></a></td>
-      <td><a href="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-2.jpg"><img src="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-2.jpg" alt="Light article page with a full-screen cover" width="440" loading="lazy" /></a></td>
-    </tr>
-    <tr>
-      <td><a href="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-3.jpg"><img src="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-3.jpg" alt="Dark mode homepage on desktop, tablet and phone" width="440" loading="lazy" /></a></td>
-      <td><a href="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-4.jpg"><img src="https://cdn.jsdelivr.net/gh/jerryc127/CDN@m2/img/butterfly-readme-screenshots-4.jpg" alt="Dark mode article page with a full-screen cover" width="440" loading="lazy" /></a></td>
-    </tr>
-  </table>
-</div>
-
-## ⭐ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=jerryc127/hexo-theme-butterfly&type=Date)](https://star-history.com/#jerryc127/hexo-theme-butterfly&Date)
-
-<a id="get-help"></a>
-
-## 🤝 Building a Better Theme Together
-
-We believe open source thrives on participation. Whether you're a developer, a designer, or a user, you can help make Butterfly better.
-
-### 💬 Get Help & Support
-
-- 🐛 **Found a bug?** → [Open an issue](https://github.com/jerryc127/hexo-theme-butterfly/issues) and let's fix it together.
-- 💡 **Have an idea?** → [Start a discussion](https://github.com/jerryc127/hexo-theme-butterfly/discussions) to share it.
-- 📚 **New to Butterfly?** → Read the [documentation](https://butterfly.js.org/).
-- ❓ **Stuck?** → Check the [FAQ](https://butterfly.js.org/en/posts/butterfly-docs-en-theme-question/) for common problems and fixes.
-- 📦 **What's new?** → See [Releases](https://github.com/jerryc127/hexo-theme-butterfly/releases) for version notes and `_config` changes.
-- 💬 **Want to chat?** → Join the [Telegram group](https://t.me/bu2fly).
-
-### 🎯 Contributing
-
-Want to help? Contributions of every kind are welcome:
-
-- **Code** — Fix bugs, add features, improve performance
-- **Documentation** — Improve docs, translate pages, write tutorials
-- **Design** — UI/UX improvements, color schemes, icons
-- **Testing** — Try new features, report issues, share feedback
-- **Funding** — [Sponsor the project](https://buy.stripe.com/3cs6rP6YA91sbbG5kk) to support ongoing development
-
-<a id="license"></a>
-
-## 📄 License
-
-This project is licensed under the [Apache 2.0 License](LICENSE).
-
-## 🙏 Acknowledgments
-
-This theme is based on [hexo-theme-melody](https://github.com/Molunerfinn/hexo-theme-melody). Thanks to its author for the inspiration and solid foundation.
-
-Thanks to everyone who has contributed to Butterfly — your support keeps the theme moving forward.
-
----
-
-<div align="center">
-
-**✨ If you find this theme useful, please give it a ⭐ star! ✨**
-</div>
-
-## Fork configuration and tests
-
-`navigation` controls page changes, caching and preloading. `visitor_counter` controls visit counts. Component options live in their respective config sections; KaTeX build options live in the site's `math.katex.options`.
-
-Use `DOMContentLoaded` for initial setup, `theme:page-load` after navigation and `theme:page-leave` before replacement. `btf.addPageFn` registers page-scoped callbacks; `pageCleanup` releases component resources. Capture `btf.pageSignal` for asynchronous page work, and use `btf.addAppEventListener` for persistent listeners.
-
-Run these commands in the theme directory. Integration tests create an isolated consumer with local component assets and remove temporary output.
+在站点根目录执行：
 
 ```sh
-npm install --no-package-lock
-npm test
-npx playwright install chromium
-npm run test:integration
-# Optional: check an existing consumer site
-npm run test:site -- /path/to/site
+git clone -b dev --depth 1 https://github.com/LynxCatTheThird/hexo-theme-dragonfly.git themes/dragonfly
+npm install --prefix themes/dragonfly --omit=dev --no-package-lock
+cp themes/dragonfly/_config.yml _config.dragonfly.yml
 ```
 
-KaTeX renders at site build time; `math.katex.mhchem: true` enables chemistry without a browser extension. `math.katex.copy_tex: true` uses the built-in TeX copy handler. MathJax builds SVG by default; `math.mathjax.render: client` selects browser rendering. `math.mathjax.mhchem: true` enables chemistry. Article front matter `math: katex`, `math: mathjax`, or `math: false` selects one engine or disables math.
+在站点 `_config.yml` 中设置 `theme: dragonfly`，随后运行 `npx hexo generate` 或 `npx hexo server`。日常设置写入根目录的 `_config.dragonfly.yml`，站点内容和自定义资源放在站点的 `source/` 中。
 
-Markdown ownership is configured in the site's `theme_config.markdown.renderer` (or `_config.butterfly.yml`). `auto` uses the built-in renderer only when no Markdown renderer is installed; `theme` explicitly selects it; `external` preserves site rendering. Built-in math options and Markdown extensions apply only to the theme renderer; external renderers own their math parsing.
+分发包名为 `hexo-theme-dragonfly`。公开 npm 发布完成前，使用上述 Git 安装方式；归档安装与发布步骤见[开发文档](docs/development.md)。
 
-Page scripts must opt in to navigation execution with `data-swup-reload-script`. A module URL runs once per session; register an explicit `pageLoad` callback for subsequent mounts.
+## 常用功能
 
-Dragonfly packages use `hexo-theme-dragonfly` (`theme: dragonfly` for npm installation). Node 22.14+ is required; CI checks Node 22 and 24. Git installs may keep the `themes/butterfly` directory.
+- 布局：响应式页面、侧栏、文章目录、阅读模式与深色模式。
+- 内容：代码工具栏、标签插件、KaTeX 与 MathJax 预渲染、ECharts、Chart.js、Mermaid 和 ABCJS。
+- 交互：Swup 导航、本地搜索、Algolia、DocSearch、原生图片懒加载与图片灯箱。
+- 站点：Artalk、Twikoo、Waline 评论，访问统计、结构化数据与 CDN 配置。
 
-`npm run release:prepare` creates the npm archive, complete browser assets, source commit and SHA-256 checksums in `dist/release/`. `npm run test:package -- /path/to/archive.tgz` verifies a clean production installation. The release workflow accepts an existing `vX.Y.Z` tag matching the package version; manual runs prepare artifacts by default. Publishing requires the explicit publish input or a published GitHub release and npm trusted-publisher configuration.
+具体开关、默认值和第三方服务参数以 [_config.yml](_config.yml) 为准。更新前保存站点配置，更新后按[迁移说明](docs/migration.md)核对公开接口。
 
-For a custom CDN, upload the entire assets archive under an immutable version prefix before switching `CDN.internal_custom_format`. Serve JavaScript with a JavaScript MIME type and cross-origin access; use long immutable caching only for versioned assets. Keep old chunks available for cached pages; HTML, mutable manifests and site-generated CSS must revalidate. Roll back the whole asset version together.
+## 贡献与来源
+
+欢迎通过 [Issue](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/issues) 或 Pull Request 提交问题、改进和测试结果。
+
+Dragonfly 基于 Jerry（CrazyWong）及贡献者维护的 [Butterfly](https://github.com/jerryc127/hexo-theme-butterfly)，其历史基础是 Molunerfinn 的 [Melody](https://github.com/Molunerfinn/hexo-theme-melody)。感谢原作者与各项目贡献者提供的基础。Dragonfly 独立维护，问题反馈请使用本仓库的入口。
+
+主题采用 [Apache License 2.0](LICENSE)，原始来源、保留署名和第三方许可见 [NOTICE](NOTICE) 与 [LICENSES](LICENSES)。站点文章的版权设置独立于主题代码许可。
+
+蜻蜓标志采用 Lorc 的 [Dragonfly](https://game-icons.net/1x1/lorc/dragonfly.html)，按 [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) 使用，调整了配色和显示尺寸。
+
+## 星标历史
+
+[![Dragonfly 星标历史](https://api.star-history.com/svg?repos=LynxCatTheThird/hexo-theme-dragonfly&type=Date)](https://star-history.com/#LynxCatTheThird/hexo-theme-dragonfly&Date)

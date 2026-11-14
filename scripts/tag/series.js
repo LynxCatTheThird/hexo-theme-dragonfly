@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * series plugin
- * Syntax:
- *  {% series [series name] %}
- * Usage:
+ * 文章系列标签。
+ * 语法：
+ * {% series [series name] %}
+ * 用法：
  * {% series %}
  * {% series series1 %}
  */
@@ -11,8 +13,8 @@
 
 const urlFor = require('hexo-util').url_for.bind(hexo)
 
-// Iterate all posts once and group by series name.
-// Result is stored on hexo._seriesGroups, shared by both tag and helper.
+// 遍历文章一次，按系列名称分组。
+// 结果存入 hexo._seriesGroups，供标签和辅助函数共用。
 function buildSeriesGroups () {
   const groups = {}
   const posts = hexo.model('Post').toArray()
@@ -30,8 +32,8 @@ function buildSeriesGroups () {
   return groups
 }
 
-// Build once before the first render (hexo generate / hexo server initial load).
-// before_generate runs after tag rendering, so we need this as a fallback.
+// 首次渲染前生成系列分组。
+// before_generate 晚于标签渲染，因此首次读取时也要建立分组。
 hexo.extend.filter.register('before_post_render', data => {
   if (!hexo.theme.config.series.enable) return data
   if (!hexo._seriesGroups) {
@@ -40,7 +42,7 @@ hexo.extend.filter.register('before_post_render', data => {
   return data
 })
 
-// Rebuild after each generate cycle in hexo server to reflect latest post data.
+// 每轮生成后重建分组，供预览服务读取最新文章。
 hexo.extend.filter.register('before_generate', () => {
   if (!hexo.theme.config.series.enable) return
   hexo._seriesGroups = buildSeriesGroups()
@@ -71,7 +73,7 @@ function series (args) {
   const isAsc = (series.order || 1) === 1
   const isSortByTitle = series.orderBy === 'title'
 
-  // .slice() to copy before sorting, so we don't mutate the shared data
+  // 复制后再排序，保留共享分组的顺序。
   const seriesArr = source.slice().sort((a, b) => {
     const itemA = isSortByTitle ? a.title.toUpperCase() : a.date
     const itemB = isSortByTitle ? b.title.toUpperCase() : b.date

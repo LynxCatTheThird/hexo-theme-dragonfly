@@ -1,7 +1,8 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 script(data-swup-reload-script).
   (() => {
-    const pageSignal = btf.pageSignal
+    const pageSignal = dragonfly.pageSignal
     const parseViewBox = viewBox => {
       if (!viewBox) return null
       const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
@@ -13,12 +14,12 @@ script(data-swup-reload-script).
       const attr = parseViewBox(svg.getAttribute('viewBox'))
       if (attr) return attr
 
-      // Fallback: use bbox to build a viewBox
+      // 缺少 viewBox 时使用图形边界。
       try {
         const bbox = svg.getBBox()
         if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
       } catch (e) {
-        // getBBox may fail on some edge cases; ignore
+        // 忽略尚不可测量的图形。
       }
 
       const w = Number(svg.getAttribute('width')) || 0
@@ -56,7 +57,7 @@ script(data-swup-reload-script).
       if (!clone.getAttribute('xmlns:xlink') && clone.innerHTML.includes('xlink:')) {
         clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
       }
-      // inject background to match current theme
+      // 导出时补上当前配色的背景。
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
       const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
       if (!clone.style.background) clone.style.background = bg
@@ -100,7 +101,7 @@ script(data-swup-reload-script).
       }
     }
 
-    // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+    // 以 SVG 视口中的指定点为缩放中心。
     const zoomAtPoint = (vb, factor, px, py) => {
       const w = vb[2] * factor
       const h = vb[3] * factor
@@ -110,7 +111,7 @@ script(data-swup-reload-script).
     }
 
     const initMermaidGestures = wrap => {
-      // Clean up previous event listeners and pending frames
+      // 清理旧监听器与待执行的动画帧。
       if (wrap.__mermaidAbortController) {
         wrap.__mermaidAbortController.abort()
         if (wrap.__mermaidRafId) cancelAnimationFrame(wrap.__mermaidRafId)
@@ -121,15 +122,15 @@ script(data-swup-reload-script).
       const svg = wrap.querySelector('svg')
       if (!svg) return
 
-      // Ensure viewBox exists so gestures always work
+      // 补齐手势缩放所需的 viewBox。
       const initVb = getSvgViewBox(svg)
       wrap.__mermaidInitViewBox = initVb
       wrap.__mermaidCurViewBox = initVb.slice()
       setSvgViewBox(svg, initVb)
-      // Disable default gestures to prevent scroll chaining and pinch-zoom penetration in Chrome
+      // 由图表接管手势，避免拖动和缩放传递给页面。
       svg.style.touchAction = 'none'
 
-      // Cache BoundingClientRect, throttled on scroll to reduce reflow
+      // 缓存图形位置，在滚动时节流更新。
       let cachedRect = svg.getBoundingClientRect()
       let rectDirty = false
       const markRectDirty = () => { rectDirty = true }
@@ -143,7 +144,7 @@ script(data-swup-reload-script).
         return cachedRect
       }
 
-      // Precompute clamp bounds from initial viewBox
+      // 根据初始 viewBox 计算缩放边界。
       const minW = initVb[2] * 0.1
       const maxW = initVb[2] * 10
       const minH = initVb[3] * 0.1
@@ -155,7 +156,7 @@ script(data-swup-reload-script).
         return out
       }
 
-      // Throttle DOM updates using requestAnimationFrame
+      // 将位置更新合并到下一动画帧。
       let pendingVb = null
       let rafId = null
       const applyVb = () => {
@@ -233,7 +234,7 @@ script(data-swup-reload-script).
       }
 
       const onPointerUpOrCancel = e => {
-        // Release PointerCapture to avoid event capture anomalies
+        // 结束拖动时释放指针捕获。
         if (svg.hasPointerCapture && svg.hasPointerCapture(e.pointerId)) {
           svg.releasePointerCapture(e.pointerId)
         }
@@ -249,15 +250,15 @@ script(data-swup-reload-script).
       }
 
       const onWheel = e => {
-        // Prevent event bubbling from triggering external scroll
+        // 阻止图表滚动传递给页面。
         e.preventDefault()
         e.stopPropagation()
-        // Normalize deltaY across deltaMode (Chrome uses pixels, Safari uses lines)
+        // 统一不同滚轮事件的位移单位。
         let delta = e.deltaY
         if (e.deltaMode === 1) delta *= 16
         else if (e.deltaMode === 2) delta *= 400
 
-        // Continuous zoom factor: smoother than fixed 1.1/0.9 steps
+        // 按滚轮位移连续缩放。
         const zoomFactor = Math.pow(1.001, delta)
 
         const curVb = wrap.__mermaidCurViewBox
@@ -294,7 +295,7 @@ script(data-swup-reload-script).
         item.__mermaidRenderKey = renderKey
         item.__mermaidPending = true
         const renderId = item.__mermaidRenderId = (item.__mermaidRenderId || 0) + 1
-        // Clean up event listeners and stale content before re-rendering
+        // 重新渲染前清理监听器和旧内容。
         if (item.__mermaidAbortController) {
           item.__mermaidAbortController.abort()
         }
@@ -336,7 +337,7 @@ script(data-swup-reload-script).
 
         try {
           const renderFn = mermaid.render(mermaidID, mermaidDefinition)
-          // mermaid v9 and v10 compatibility
+          // 兼容 Mermaid v9 与 v10 的渲染接口。
           if (typeof renderFn === 'string') {
             renderMermaid(renderFn)
           } else {
@@ -373,13 +374,13 @@ script(data-swup-reload-script).
       if ($mermaid.length === 0) return
 
       const runMermaidFn = () => { if (!pageSignal.aborted) runMermaid($mermaid) }
-      btf.addPageFn('themeChange', runMermaidFn, 'mermaid')
-      typeof window.mermaid?.render === 'function' ? runMermaidFn() : btf.getScript('!{url_for(theme.asset.mermaid)}').then(runMermaidFn)
+      dragonfly.addPageFn('themeChange', runMermaidFn, 'mermaid')
+      typeof window.mermaid?.render === 'function' ? runMermaidFn() : dragonfly.getScript('!{url_for(theme.asset.mermaid)}').then(runMermaidFn)
     }
 
-    btf.addGlobalFn('pageCleanup', () => {
+    dragonfly.addGlobalFn('pageCleanup', () => {
       document.querySelectorAll('.mermaid-wrap').forEach(item => item.__mermaidAbortController?.abort())
     }, 'mermaid')
-    btf.addPageFn('encrypt', loadMermaid, 'mermaid')
+    dragonfly.addPageFn('encrypt', loadMermaid, 'mermaid')
     document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', loadMermaid, { once: true }) : loadMermaid()
   })()

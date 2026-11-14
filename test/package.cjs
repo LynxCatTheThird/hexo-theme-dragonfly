@@ -1,4 +1,6 @@
-// Exercise the actual tarball in a consumer with its own production dependencies.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 使用真实归档和独立生产依赖验证安装。
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const os = require('node:os')

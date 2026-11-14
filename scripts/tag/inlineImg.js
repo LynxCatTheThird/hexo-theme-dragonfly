@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
  * inlineImg
- * @param {Array} args - Image name and height
- * @param {string} args[0] - Image name
- * @param {number} args[1] - Image height
- * @returns {string} - Image tag
+ * @param {Array} args - 图片名称与高度。
+ * @param {string} args[0] - 图片名称。
+ * @param {number} args[1] - 图片高度。
+ * @returns {string} - 图片标签。
  */
 
 'use strict'

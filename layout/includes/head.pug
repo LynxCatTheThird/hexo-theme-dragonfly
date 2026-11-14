@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - var pageTitle
 - globalPageType === 'archive' ? page.title = findArchivesTitle(page, theme.menu, date) : ''
 case globalPageType
@@ -29,23 +30,23 @@ meta(name="copyright" content=pageCopyright)
 meta(name ="format-detection" content="telephone=no")
 meta(data-swup-theme name="theme-color" content=themeColor)
 
-//- Open_Graph
+//- Open Graph 元信息。
 include ./head/Open_Graph.pug
 
-//- Structured Data
+//- 结构化数据。
 include ./head/structured_data.pug
 
 !=favicon_tag(theme.favicon || config.favicon)
 link(rel="canonical" href=urlNoIndex(null,config.pretty_urls.trailing_index,config.pretty_urls.trailing_html))
 
-//- 網站驗證
+//- 网站验证
 !=partial('includes/head/site_verification', {}, {cache: true})
 
 //- PWA
 if (theme.pwa && theme.pwa.enable)
   !=partial('includes/head/pwa', {}, {cache: true})
 
-//- main css
+//- 主题样式。
 link(data-swup-theme rel='stylesheet', href=url_for(theme.asset.main_css))
 link(data-swup-theme rel='stylesheet', href=url_for(theme.asset.fontawesome))
 
@@ -57,11 +58,11 @@ if theme.lightbox === 'fancybox'
 
 !=fragment_cache('injectHeadJs', function(){return inject_head_js()})
 
-//- font
+//- 字体。
 if theme.blog_title_font && theme.blog_title_font.font_link
   link(data-swup-theme rel='stylesheet' href=url_for(theme.blog_title_font.font_link) media="print" onload="this.media='all'")
 
-//- global config
+//- 浏览器配置。
 !=partial('includes/head/config', {}, {cache: true})
 
 include ./head/config_site.pug

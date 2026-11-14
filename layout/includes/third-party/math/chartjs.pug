@@ -1,9 +1,10 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { fontColor, borderColor, scale_ticks_backdropColor } = theme.chartjs
 
 script(data-swup-reload-script).
   (() => {
-    const pageSignal = btf.pageSignal
+    const pageSignal = dragonfly.pageSignal
     const applyThemeDefaultsConfig = theme => {
       if (theme === 'dark-mode') {
         Chart.defaults.color = "!{fontColor.dark}"
@@ -16,18 +17,18 @@ script(data-swup-reload-script).
       }
     }
 
-    // Recursively traverse the config object and automatically apply theme-specific color schemes
+    // 递归应用当前配色模式的图表参数。
     const applyThemeConfig = (obj, theme) => {
       if (typeof obj !== 'object' || obj === null) return
 
       Object.keys(obj).forEach(key => {
         const value = obj[key]
-        // If the property is an object and has theme-specific options, apply them
+        // 选择对象中与当前配色模式匹配的值。
         if (typeof value === 'object' && value !== null) {
           if (theme in value) {
-            obj[key] = value[theme] // Apply the value for the current theme
+            obj[key] = value[theme] // 应用当前配色的值。
           } else {
-            // Recursively process child objects
+            // 递归处理子对象。
             applyThemeConfig(value, theme)
           }
         }
@@ -44,7 +45,7 @@ script(data-swup-reload-script).
         if (pageSignal.aborted || !item.isConnected) return
         const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
         const chartSrc = item.firstElementChild
-        const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+        const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // 优先使用指定的图表 ID。
         const width = item.getAttribute('data-width')
         const existingCanvas = document.getElementById(chartID)
 
@@ -54,7 +55,7 @@ script(data-swup-reload-script).
           return
         }
 
-        // If a canvas already exists, destroy its chart and remove it to avoid rendering duplicates
+        // 重新挂载前释放已有图表与画布。
         if (existingCanvas) {
           destroyChart(existingCanvas)
           existingCanvas.parentNode.remove()
@@ -80,10 +81,10 @@ script(data-swup-reload-script).
         config.options = { ...!{JSON.stringify(theme.chartjs.options || {}).replace(/</g, '\\u003c')}, ...config.options }
 
 
-        // Set default styles (initial setup)
+        // 初始化默认配色。
         applyThemeDefaultsConfig(theme)
 
-        // Automatically traverse the config and apply dual-mode color schemes
+        // 应用浅色或深色配色。
         applyThemeConfig(config, theme)
 
         new Chart(ctx, config)
@@ -97,17 +98,17 @@ script(data-swup-reload-script).
       const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
       if (chartJSEle.length === 0) return
 
-      typeof window.Chart === 'function' ? runChartJS(chartJSEle) : btf.getScript('!{url_for(theme.asset.chartjs)}').then(() => runChartJS(chartJSEle))
+      typeof window.Chart === 'function' ? runChartJS(chartJSEle) : dragonfly.getScript('!{url_for(theme.asset.chartjs)}').then(() => runChartJS(chartJSEle))
     }
 
-    // Destroy all charts before navigating away to avoid leaks
-    btf.addGlobalFn('pageCleanup', () => {
+    // 离页时释放图表实例。
+    dragonfly.addGlobalFn('pageCleanup', () => {
       document.querySelectorAll('.chartjs-wrap canvas').forEach(destroyChart)
     }, 'chartjs')
 
-    // Listen for theme change events
-    btf.addPageFn('themeChange', loadChartJS, 'chartjs')
-    btf.addPageFn('encrypt', loadChartJS, 'chartjs')
+    // 响应配色模式变化。
+    dragonfly.addPageFn('themeChange', loadChartJS, 'chartjs')
+    dragonfly.addPageFn('encrypt', loadChartJS, 'chartjs')
 
     document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', loadChartJS, { once: true }) : loadChartJS()
   })()

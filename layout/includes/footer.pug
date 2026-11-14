@@ -1,3 +1,5 @@
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { nav, owner, copyright, custom_text } = theme.footer
 
 if nav
@@ -34,6 +36,6 @@ if nav
         a(href='https://hexo.io')= `Hexo${ v ? ' ' + v.hexo : '' }`
         span.footer-separator |
         span= _p('footer.theme') + ' '
-        a(href='https://github.com/jerryc127/hexo-theme-butterfly')= `Butterfly${ v ? ' ' + v.theme : '' }`
+        a(href='https://github.com/LynxCatTheThird/hexo-theme-dragonfly')= `Dragonfly${ v ? ' ' + v.theme : '' }`
   if theme.footer.custom_text
     .footer_custom_text!= theme.footer.custom_text

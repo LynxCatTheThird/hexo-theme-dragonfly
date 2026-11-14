@@ -1,13 +1,15 @@
-name: Prepare and publish Dragonfly
+# SPDX-License-Identifier: Apache-2.0
+# Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+name: Dragonfly 打包与发布
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing tag matching package version (vX.Y.Z)
+        description: 与包版本一致的现有标签（vX.Y.Z）
         required: true
         type: string
       publish:
-        description: Publish the verified archive to npm
+        description: 将验证后的归档发布到 npm
         default: false
         type: boolean
   release:
@@ -34,7 +36,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:integration
       - run: npm run release:prepare
-      - name: Install and test the prepared package
+      - name: 验证归档的独立安装
         run: node test/package.cjs "dist/release/$(node -p "require('./dist/release/release.json').archive")"
       - uses: actions/upload-artifact@v4
         with:
@@ -61,5 +63,5 @@ jobs:
           node-version: '24'
           registry-url: https://registry.npmjs.org
       - run: sha256sum --check SHA256SUMS
-      - name: Publish the tested archive without rebuilding
+      - name: 发布已验证的归档
         run: npm publish "$(node -p "require('./release.json').archive")" --ignore-scripts --access public --provenance

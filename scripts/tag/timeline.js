@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * Timeline tag for Hexo
- * Syntax:
+ * 时间线标签。
+ * 语法：
  * {% timeline [headline],[color] %}
  * <!-- timeline [title] -->
  * [content]
@@ -14,16 +16,12 @@
 'use strict'
 
 const timeLineFn = (args, content) => {
-  // Use named capture groups for better readability
   const tlBlock = /<!--\s*timeline\s*(?<title>.*?)\s*-->\n(?<content>[\s\S]*?)<!--\s*endtimeline\s*-->/g
 
-  // Pre-compile markdown render function
   const renderMd = text => hexo.render.renderSync({ text, engine: 'markdown' })
 
-  // Parse arguments more efficiently
   const [text, color = ''] = args.length ? args.join(' ').split(',') : []
 
-  // Build initial headline if text exists
   const headline = text
     ? `<div class='timeline-item headline'>
         <div class='timeline-item-title'>
@@ -32,7 +30,6 @@ const timeLineFn = (args, content) => {
       </div>`
     : ''
 
-  // Match all timeline blocks in one pass and transform
   const items = Array.from(content.matchAll(tlBlock))
     .map(({ groups: { title, content } }) =>
       `<div class='timeline-item'>

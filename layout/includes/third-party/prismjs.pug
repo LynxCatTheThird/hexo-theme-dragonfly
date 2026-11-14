@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { prismjs_js, prismjs_autoloader, prismjs_lineNumber_js } = theme.asset
 - const { prismjs, syntax_highlighter } = config
 - const { enable, preprocess, line_number } = prismjs
@@ -13,13 +14,12 @@ if (syntax_highlighter === 'prismjs' || enable) && !preprocess
       window.Prism.manual = true
 
       const highlightAll = () => {
-        // window.Prism.highlightAll()
         window.Prism.highlightAllUnder($article, true)
       }
 
       window.addEventListener('load', highlightAll)
-      btf.addGlobalFn('pageLoad', highlightAll, 'prismjs')
-      btf.addGlobalFn('encrypt', highlightAll, 'prismjs')
+      dragonfly.addGlobalFn('pageLoad', highlightAll, 'prismjs')
+      dragonfly.addGlobalFn('encrypt', highlightAll, 'prismjs')
     })()
 
   script(src=url_for(prismjs_js) defer)

@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * Button
+ * 按钮。
  * {% btn url text icon option %}
- * option: color outline center block larger
- * color : default/blue/pink/red/purple/orange/green
+ * 选项：color outline center block larger。
+ * 颜色：default/blue/pink/red/purple/orange/green。
  */
 
 'use strict'

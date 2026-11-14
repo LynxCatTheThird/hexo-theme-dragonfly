@@ -1,3 +1,5 @@
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 if theme.fireworks && theme.fireworks.enable
   canvas.fireworks(mobile=`${theme.fireworks.mobile}`)
   script(src=url_for(theme.asset.fireworks))
@@ -20,7 +22,7 @@ if theme.activate_power_mode.enable
     POWERMODE.mobile = !{theme.activate_power_mode.mobile};
     document.body.addEventListener('input', POWERMODE);
 
-//- 鼠標特效
+//- 鼠标特效
 if theme.click_heart && theme.click_heart.enable
   script#click-heart(src=url_for(theme.asset.click_heart) async mobile=`${theme.click_heart.mobile}`)
 

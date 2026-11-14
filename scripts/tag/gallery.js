@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * Butterfly
- * galleryGroup and gallery
+ * 上游：Butterfly（Jerry 及贡献者）。
+ * 相册分组与图库标签。
  * {% galleryGroup [name] [descr] [url] [img] %}
  *
  * {% gallery [button],[limit],[firstLimit] %}
@@ -15,7 +17,7 @@ const DEFAULT_LIMIT = 10
 const DEFAULT_FIRST_LIMIT = 10
 const IMAGE_REGEX = /!\[(.*?)\]\(([^\s]*)\s*(?:["'](.*?)["']?)?\s*\)/g
 
-// Helper functions
+// 标签参数工具。
 const parseGalleryArgs = args => {
   const [type, ...rest] = args.join(' ').split(',').map(arg => arg.trim())
   return {
@@ -72,6 +74,6 @@ const galleryGroup = args => {
   </figure>`
 }
 
-// Register tags
+// 注册标签。
 hexo.extend.tag.register('gallery', gallery, { ends: true })
 hexo.extend.tag.register('galleryGroup', galleryGroup)

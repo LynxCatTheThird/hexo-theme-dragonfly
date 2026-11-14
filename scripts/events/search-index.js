@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 'use strict'
 
 const { stripHTML, unescapeHTML, escapeHTML } = require('hexo-util')
@@ -9,8 +11,8 @@ const searchablePost = post => {
     .replace(/<(script|style|textarea)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')))
     .replace(/\s+/g, ' ').trim()
-  // The search UI inserts highlighted snippets as HTML; keep literal code inert.
-  // Escaping also prevents a literal CDATA terminator from breaking XML indexes.
+  // 搜索摘要会作为 HTML 插入，先转义其中的代码字面量。
+  // 转义也避免 CDATA 终止符破坏 XML 索引。
   const content = escapeHTML(text)
   return {
     title: post.title,

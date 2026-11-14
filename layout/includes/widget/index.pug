@@ -1,6 +1,7 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 #aside-content.aside-content
-  //- post
+  //- 文章页。
   if globalPageType === 'post'
     - const tocStyle = page.toc_style_simple
     - const tocStyleVal = tocStyle === true || tocStyle === false ? tocStyle : theme.toc.style_simple
@@ -18,7 +19,7 @@
           include ./card_post_series.pug
         !=partial('includes/widget/card_recent_post', {}, {cache: true})
   else
-    //- page
+    //- 独立页面。
     !=partial('includes/widget/card_author', {}, {cache: true})
     !=partial('includes/widget/card_announcement', {}, {cache: true})
     !=partial('includes/widget/card_top_self', {}, {cache: true})

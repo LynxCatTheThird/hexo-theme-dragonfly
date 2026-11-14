@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 import { createPageScriptsPlugin } from './page-scripts.js'
 
 (() => {
@@ -14,8 +16,8 @@ import { createPageScriptsPlugin } from './page-scripts.js'
 
   const init = async () => {
     try {
-      await btf.getScript(settings.assets.swup)
-      await Promise.all([btf.getScript(settings.assets.head), btf.getScript(settings.assets.a11y), btf.getScript(settings.assets.scripts)])
+      await dragonfly.getScript(settings.assets.swup)
+      await Promise.all([dragonfly.getScript(settings.assets.head), dragonfly.getScript(settings.assets.a11y), dragonfly.getScript(settings.assets.scripts)])
     } catch (error) {
       console.warn('[navigation]', error)
       return
@@ -27,7 +29,7 @@ import { createPageScriptsPlugin } from './page-scripts.js'
     ]
     if (settings.preload && settings.cache) {
       try {
-        await btf.getScript(settings.assets.preload)
+        await dragonfly.getScript(settings.assets.preload)
         plugins.push(new SwupPreloadPlugin({ throttle: 2, preloadVisibleLinks: false }))
       } catch (error) {
         console.warn('[preload]', error)
@@ -58,7 +60,7 @@ import { createPageScriptsPlugin } from './page-scripts.js'
     swup.hooks.before('content:replace', async () => {
       emit('theme:page-leave')
       await run('pageCleanup', true)
-      btf.resetPageScope()
+      dragonfly.resetPageScope()
       document.body.classList.remove('read-mode')
     })
     swup.hooks.on('content:replace', visit => {
@@ -67,7 +69,7 @@ import { createPageScriptsPlugin } from './page-scripts.js'
     })
     swup.hooks.on('page:view', () => {
       emit('theme:page-load')
-      // hexo-blog-encrypt listens to this event when the replacement DOM is ready.
+      // hexo-blog-encrypt 在页面替换完成后通过此事件重新挂载。
       emit('swup:contentReplaced')
     })
     for (const hook of ['visit:end', 'visit:abort', 'visit:fail']) swup.hooks.on(hook, () => run('navigationEnd'))

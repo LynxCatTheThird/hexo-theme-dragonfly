@@ -1,8 +1,9 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { placeholder, docsearch = {} } = theme.search
 - const { appId, apiKey, indexName, indices, option } = docsearch
-//- `indices` is supported since DocSearch v4.0 (multi-index search) and required by v5 (v5 removed `indexName`).
-//- Legacy configs may still use the removed `indexName`; map it to `indices`.
+//- DocSearch v4 起使用 indices；v5 已移除 indexName。
+//- 将旧配置的 indexName 映射到 indices。
 - const indexList = Array.isArray(indices) ? indices : (indices ? [indices] : [])
 - const docsearchIndices = indexList.length > 0 ? indexList : (indexName ? [indexName] : [])
 - const docsearchOptions = Object.assign({ appId, apiKey, container: '#docsearch', placeholder: placeholder || _p('search.input_placeholder') }, option, { indices: docsearchIndices })
@@ -16,7 +17,7 @@
       const options = !{JSON.stringify(docsearchOptions)}
 
       if (typeof docsearch !== 'function' || options.indices.length === 0) {
-        console.warn('[Butterfly] DocSearch: please configure `search.docsearch.appId`, `apiKey` and `indices`.')
+        console.warn('[Dragonfly] DocSearch: please configure `search.docsearch.appId`, `apiKey` and `indices`.')
         return
       }
 
@@ -27,7 +28,7 @@
       }
 
       const searchClickFn = () => {
-        btf.addPageEventListener(document.querySelector('#search-button > .search'), 'click', handleClick)
+        dragonfly.addPageEventListener(document.querySelector('#search-button > .search'), 'click', handleClick)
       }
 
       searchClickFn()

@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /**
- * Random cover for posts
+ * 文章随机封面。
  */
 
 'use strict'

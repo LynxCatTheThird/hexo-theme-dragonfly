@@ -6,6 +6,8 @@ password: component-test-only
 autoSave: false
 comments: false
 ---
+<!-- SPDX-License-Identifier: Apache-2.0；Dragonfly 测试夹具，来源与署名见 NOTICE。 -->
+
 
 ## Formula
 

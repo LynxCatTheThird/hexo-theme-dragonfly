@@ -1,14 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 'use strict'
 
 const { stripHTML, truncate } = require('hexo-util')
 
-// Truncates the given content to a specified length, removing HTML tags and replacing newlines with spaces.
+// 移除 HTML 标签并截取指定长度的摘要。
 const truncateContent = (content, length, encrypt = false) => {
   if (!content || encrypt) return ''
   return truncate(stripHTML(content).replace(/\n/g, ' '), { length })
 }
 
-// Generates a post description based on the provided data and theme configuration.
+// 按文章内容和主题配置生成摘要。
 const postDesc = (data, hexo) => {
   const { description, content, postDesc, encrypt } = data
 

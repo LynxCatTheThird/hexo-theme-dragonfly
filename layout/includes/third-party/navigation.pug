@@ -1,1 +1,3 @@
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 script(type="module" src=url_for(theme.asset.navigation) defer data-navigation=JSON.stringify({cache: theme.navigation.cache, preload: theme.navigation.preload, timeout: theme.navigation.timeout, exclude: (theme.navigation.exclude || []).map(path => url_for(path)), assets: {scripts: url_for(theme.asset.swup_scripts), swup: url_for(theme.asset.swup), head: url_for(theme.asset.swup_head), a11y: url_for(theme.asset.swup_a11y), preload: url_for(theme.asset.swup_preload)}}))

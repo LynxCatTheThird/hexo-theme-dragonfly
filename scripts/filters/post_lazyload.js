@@ -1,4 +1,6 @@
-// Modified in Dragonfly. Native images keep their original source and author attributes.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 原生懒加载保留图片地址及作者设置的属性。
 const { rewriteImages } = require('../common/images')
 const urlFor = require('hexo-util').url_for.bind(hexo)
 const transform = content => {

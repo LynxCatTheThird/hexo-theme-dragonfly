@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 #aside-content
   width: 26%
 
@@ -23,8 +25,6 @@
         &:not(#card-toc)
           display: none
 
-    // &:last-child
-    //   margin-bottom: 0
 
   .card-info
     .author-info
@@ -139,7 +139,6 @@
         & > .comment
           @extend .limit-more-line
           color: var(--font-color)
-          // font-size: 95%
           line-height: 1.5
           -webkit-line-clamp: 2
 
@@ -231,7 +230,7 @@
             flex: 1
             padding-right: 20px
 
-  // toc
+  // 文章目录。
   #card-toc
     +minWidth901()
       right: 0 !important

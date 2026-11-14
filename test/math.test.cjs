@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')

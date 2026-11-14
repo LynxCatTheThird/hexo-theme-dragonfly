@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const { escapeHTML, unescapeHTML } = require('hexo-util')
 const { version } = require('../../package.json')
 
@@ -35,7 +37,7 @@ const resolveAssets = (config, thirdParty, internal = internalAssets) => {
     if (override != null && !(own && cdn.development)) {
       result[key] = validURL(override, `option.${key}`)
     } else if (own && (data.generated || cdn.development)) {
-      // Site-dependent Stylus output and development code always stay local.
+      // 站点专属样式和开发代码始终使用本地地址。
       result[key] = data.file + (cdn.version ? `?v=${data.version}` : '')
     } else {
       const file = own ? (data.package_file || `source/${data.file}`) : data.file

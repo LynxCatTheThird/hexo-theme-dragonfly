@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const vm = require('node:vm')
@@ -143,7 +145,7 @@ test('Waline preserves option overrides and destroys regular page instances once
     window: { location: { pathname: '/post/' }, walineFn: options => { config = options; return { destroy: () => destroyCount++ } } },
     document,
     GLOBAL_CONFIG_SITE: { pageType: 'post' }, GLOBAL_CONFIG: { lightbox: 'null' },
-    btf: { addGlobalFn: (key, fn) => { if (key === 'pageCleanup') cleanup = fn }, addPageFn () {} },
+    dragonfly: { addGlobalFn: (key, fn) => { if (key === 'pageCleanup') cleanup = fn }, addPageFn () {} },
     setTimeout: fn => fn()
   })
   assert.equal(config.pageview, true)
@@ -164,7 +166,7 @@ test('Artalk binds theme counters and registers cleanup without a lightbox', asy
   const functions = {}, target = { isConnected: true }
   const Artalk = { init: options => { config = options; return { destroy: () => destroyed++, setDarkMode () {} } } }
   const document = { querySelector: () => target, documentElement: { getAttribute: () => 'light' } }
-  vm.runInNewContext(script, { window: { Artalk, swup: {} }, Artalk, document, location: { pathname: '/post/' }, GLOBAL_CONFIG_SITE: { pageType: 'post' }, GLOBAL_CONFIG: { lightbox: 'null' }, btf: { addGlobalFn: (key, fn) => { functions[key] = fn }, addPageFn: (key, fn) => { functions[key] = fn } }, setTimeout: fn => fn() })
+  vm.runInNewContext(script, { window: { Artalk, swup: {} }, Artalk, document, location: { pathname: '/post/' }, GLOBAL_CONFIG_SITE: { pageType: 'post' }, GLOBAL_CONFIG: { lightbox: 'null' }, dragonfly: { addGlobalFn: (key, fn) => { functions[key] = fn }, addPageFn: (key, fn) => { functions[key] = fn } }, setTimeout: fn => fn() })
   await Promise.resolve()
   assert.equal(config.pvEl, '#ArtalkPV')
   assert.equal(config.countEl, '#ArtalkCount')
@@ -221,7 +223,7 @@ test('TOC anchor updates preserve navigation history and query parameters', () =
   let result
   window.history = { state: { source: 'swup', index: 3, random: 0.5 }, replaceState: (state, title, url) => { result = { state, title, url } } }
   vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../browser/utils.js'), 'utf8'), { window, URL, location: window.location, GLOBAL_CONFIG_SITE: { title: 'Post' } })
-  window.btf.updateAnchor('#section')
+  window.dragonfly.updateAnchor('#section')
   assert.equal(result.state.source, 'swup')
   assert.equal(result.state.index, 3)
   assert.equal(result.state.url, 'https://site.test/post/?highlight=x#section')
@@ -235,7 +237,7 @@ test('MathJax configuration forwards loader, font, TeX and document options', ()
   const html = pug.renderFile(path.resolve(__dirname, '../layout/includes/third-party/math/mathjax.pug'), { theme, url_for: value => value })
   const window = {}
   const article = { querySelector: () => null, querySelectorAll: () => [], isConnected: true }
-  vm.runInNewContext(html.match(/<script[^>]*>([\s\S]*)<\/script>/)[1], { window, document: { readyState: 'complete', getElementById: () => article }, btf: { pageSignal: new AbortController().signal, addGlobalFn () {}, addPageFn () {}, getScript: () => new Promise(() => {}) } })
+  vm.runInNewContext(html.match(/<script[^>]*>([\s\S]*)<\/script>/)[1], { window, document: { readyState: 'complete', getElementById: () => article }, dragonfly: { pageSignal: new AbortController().signal, addGlobalFn () {}, addPageFn () {}, getScript: () => new Promise(() => {}) } })
   assert.equal(window.MathJax.loader.load[0], '[tex]/physics')
   assert.equal(window.MathJax.output.font, 'mathjax-tex')
   assert.equal(window.MathJax.tex.macros.R, '\\mathbb{R}')
@@ -255,7 +257,7 @@ test('MathJax chemistry augments custom packages and repeated initialization doe
   let retry, typesets = 0, downloads = 0
   const article = { querySelector: () => null, querySelectorAll: () => [], isConnected: true }
   const context = { document: { readyState: 'complete', getElementById: () => article }, console,
-    btf: {
+    dragonfly: {
       pageSignal: new AbortController().signal,
       addGlobalFn () {}, addPageFn: (_, fn) => { retry = fn },
       getScript: async () => {

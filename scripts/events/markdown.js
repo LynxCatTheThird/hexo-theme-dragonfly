@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const MarkdownIt = require('markdown-it')
 const { tex } = require('@mdit/plugin-tex')
 const { escapeHTML } = require('hexo-util')
@@ -15,7 +17,7 @@ const createRenderer = () => {
   return data => md.render(data.text)
 }
 
-// Wait until site plugins and scripts have registered their renderers.
+// 在站点插件和脚本注册完成后选择 Markdown 渲染器。
 hexo.on('ready', () => {
   const mode = hexo.config.theme_config?.markdown?.renderer || 'auto'
   if (!['auto', 'theme', 'external'].includes(mode)) throw new Error('markdown.renderer must be auto, theme or external')

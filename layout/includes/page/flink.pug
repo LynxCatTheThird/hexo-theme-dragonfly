@@ -1,3 +1,5 @@
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 #article-container.container
   .flink
     - let { content, random, flink_url } = page
@@ -7,7 +9,7 @@
       - const linkData = flink_url ? false : site.data.link || false
       script(data-swup-reload-script).
         (()=>{
-          const signal = btf.pageSignal
+          const signal = dragonfly.pageSignal
           const container = document.querySelector(".flink")
           const replaceSymbol = (str) => {
             return str.replace(/[\p{P}\p{S}]/gu, "-")

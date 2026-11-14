@@ -1,4 +1,5 @@
-// Modified in Dragonfly.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const addHighlightTool = $article => {
   const highLight = GLOBAL_CONFIG.highlight
   if (!highLight) return
@@ -22,7 +23,7 @@ const addHighlightTool = $article => {
 
   const alertInfo = (ele, text) => {
     if (!ele.isConnected) return
-    const signal = btf.pageSignal
+    const signal = dragonfly.pageSignal
     let removeTimer
     const newEle = document.createElement('div')
     newEle.className = 'copy-notice'
@@ -33,12 +34,12 @@ const addHighlightTool = $article => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
 
-    // X-axis boundary check
+    // 限制提示框的水平边界。
     const halfWidth = newEle.offsetWidth / 2
     const centerLeft = buttonRect.left + scrollLeft + buttonRect.width / 2
     const finalLeft = Math.max(halfWidth + 10, Math.min(window.innerWidth - halfWidth - 10, centerLeft))
 
-    // Show tooltip below button if too close to top
+    // 按钮靠近页顶时，将提示框放在下方。
     const normalTop = buttonRect.top + scrollTop - 40
     const shouldShowBelow = buttonRect.top < 60 || normalTop < 10
 
@@ -79,7 +80,7 @@ const addHighlightTool = $article => {
     }
   }
 
-  // click events
+  // 点击事件。
   const highlightCopyFn = (ele, clickEle) => {
     const $buttonParent = ele.parentNode
     $buttonParent.classList.add('copy-true')
@@ -111,7 +112,7 @@ const addHighlightTool = $article => {
 
   const expandCode = e => e.currentTarget.classList.toggle('expand-done')
 
-  // 獲取隱藏狀態下元素的真實高度
+  // 获取隐藏状态下元素的真实高度
   const getActualHeight = item => {
     if (item.offsetHeight > 0) return item.offsetHeight
 
@@ -141,7 +142,7 @@ const addHighlightTool = $article => {
       const hlTools = document.createElement('div')
       hlTools.className = `highlight-tools ${highlightShrinkClass}`
       hlTools.innerHTML = highlightMacStyleEle + highlightShrinkEle + lang + highlightCopyEle + highlightFullpageEle
-      btf.addPageEventListener(hlTools, 'click', highlightToolsFn)
+      dragonfly.addPageEventListener(hlTools, 'click', highlightToolsFn)
       fragment.appendChild(hlTools)
     }
 
@@ -149,7 +150,7 @@ const addHighlightTool = $article => {
       const ele = document.createElement('div')
       ele.className = 'code-expand-btn'
       ele.innerHTML = '<i class="fas fa-angle-double-down"></i>'
-      btf.addPageEventListener(ele, 'click', expandCode)
+      dragonfly.addPageEventListener(ele, 'click', expandCode)
       fragment.appendChild(ele)
     }
 
@@ -160,7 +161,7 @@ const addHighlightTool = $article => {
     let langName = ''
     if (isNotHighlightJs) {
       const newClassName = isPrismjs ? 'prismjs' : 'default'
-      btf.wrap(item, 'figure', { class: `highlight ${newClassName}` })
+      dragonfly.wrap(item, 'figure', { class: `highlight ${newClassName}` })
     }
 
     if (!highlightLang) {
@@ -198,13 +199,13 @@ const scrollFnToDo = $article => {
       if (!target) return
 
       e.preventDefault()
-      btf.scrollToDest(btf.getEleTop(document.getElementById(decodeURI(target.getAttribute('href')).replace('#', ''))), 300)
+      dragonfly.scrollToDest(dragonfly.getEleTop(document.getElementById(decodeURI(target.getAttribute('href')).replace('#', ''))), 300)
       if (window.innerWidth < 900) {
         $cardTocLayout.classList.remove('open')
       }
     }
 
-    btf.addPageEventListener($cardToc, 'click', tocItemClickFn)
+    dragonfly.addPageEventListener($cardToc, 'click', tocItemClickFn)
 
     autoScrollToc = item => {
       const sidebarHeight = $cardToc.clientHeight
@@ -230,7 +231,7 @@ const scrollFnToDo = $article => {
 
   const updateTocUI = currentId => {
     const encodedAnchor = currentId ? '#' + encodeURI(decodeURI(currentId)) : ''
-    if (isAnchor) btf.updateAnchor(encodedAnchor)
+    if (isAnchor) dragonfly.updateAnchor(encodedAnchor)
 
     if (!isToc) return
 
@@ -283,11 +284,11 @@ const scrollFnToDo = $article => {
 
   $articleList.forEach(ele => observer.observe(ele))
 
-  const scrollHandler = btf.rafThrottle(() => {
+  const scrollHandler = dragonfly.rafThrottle(() => {
     const currentTop = window.scrollY || document.documentElement.scrollTop
 
     if (isToc && GLOBAL_CONFIG.percent.toc) {
-      $tocPercentage.textContent = btf.getScrollPercent(currentTop, $article, false)
+      $tocPercentage.textContent = dragonfly.getScrollPercent(currentTop, $article, false)
     }
 
     if (currentTop === 0) {
@@ -298,9 +299,9 @@ const scrollFnToDo = $article => {
     }
   })
 
-  btf.addPageEventListener(window, 'scroll', scrollHandler, { passive: true })
+  dragonfly.addPageEventListener(window, 'scroll', scrollHandler, { passive: true })
 
-  btf.addGlobalFn('pageCleanup', () => {
+  dragonfly.addGlobalFn('pageCleanup', () => {
     observer.disconnect()
   })
 }
@@ -311,7 +312,7 @@ const addTableWrap = $article => {
 
   $table.forEach(item => {
     if (!item.closest('.highlight')) {
-      btf.wrap(item, 'div', { class: 'table-wrap' })
+      dragonfly.wrap(item, 'div', { class: 'table-wrap' })
     }
   })
 }
@@ -327,7 +328,7 @@ const clickFnOfTagHide = $article => {
     addJustifiedGallery(button.nextElementSibling.querySelectorAll('.gallery-container'))
   }
 
-  btf.addPageEventListener($article, 'click', handleClickOfTagHide)
+  dragonfly.addPageEventListener($article, 'click', handleClickOfTagHide)
 }
 
 const tabsFn = $article => {
@@ -369,12 +370,12 @@ const tabsFn = $article => {
     }
 
     if (toTopContainer.contains(e.target) && e.target.closest('button')) {
-      btf.scrollToDest(btf.getEleTop(tabsRoot), 300)
+      dragonfly.scrollToDest(dragonfly.getEleTop(tabsRoot), 300)
     }
   }
 
-  btf.addPageEventListener($article, 'click', handleClick)
-  btf.addPageEventListener($article, 'keydown', event => {
+  dragonfly.addPageEventListener($article, 'click', handleClick)
+  dragonfly.addPageEventListener($article, 'keydown', event => {
     const tab = event.target.closest('.nav-tabs > button')
     if (!tab) return
     const tabs = [...tab.parentElement.children]

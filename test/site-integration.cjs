@@ -1,4 +1,6 @@
-// Build temporary component posts in an existing Hexo site, then run the browser checks.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 在现有站点生成临时组件文章并执行浏览器检查。
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
@@ -6,7 +8,7 @@ const { spawnSync } = require('node:child_process')
 
 if (!process.argv[2]) throw new Error('Pass the consumer site directory')
 const site = path.resolve(process.argv[2])
-const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'butterfly-test-'))
+const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'dragonfly-site-test-'))
 const created = []
 const run = (file, args, env = process.env) => {
   const result = spawnSync(file, args, { cwd: site, env, encoding: 'utf8', timeout: 120000 })

@@ -1,3 +1,5 @@
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const counter = theme.visitor_counter
 - const elements = counter.element_id || {}
 - const ids = {}
@@ -14,7 +16,7 @@ script(data-swup-reload-script).
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), !{counter.timeout})
     try {
-      // Keep the visitor flag compatible with Vercount's existing client cookie.
+      // 沿用 Vercount 的访客标记，避免重复计算独立访客。
       const cookie = 'vercount_uv_' + location.host.replace(/[^a-zA-Z0-9_-]/g, '_')
       const isNewUv = !document.cookie.split(';').some(entry => entry.trim() === cookie + '=1')
       if (isNewUv) document.cookie = cookie + '=1; path=/; max-age=31536000; samesite=lax'

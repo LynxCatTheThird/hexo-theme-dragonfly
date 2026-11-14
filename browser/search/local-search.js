@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0 AND MIT
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 import { createSearchDialog } from './dialog.js'
 
-// Modified in this fork.
 /**
- * Refer to hexo-generator-searchdb
+ * 参考 hexo-generator-searchdb。
  * https://github.com/next-theme/hexo-generator-searchdb/blob/main/dist/search.js
- * Modified by hexo-theme-butterfly
+ * 上游修改：hexo-theme-butterfly。
  */
 
 class LocalSearch {
@@ -38,7 +39,7 @@ class LocalSearch {
         startPosition = position + wordLen
       }
     })
-    // Sort index by position of keyword
+    // 按关键词在正文中的位置排序。
     index.sort((left, right) => {
       if (left.position !== right.position) {
         return left.position - right.position
@@ -48,7 +49,7 @@ class LocalSearch {
     return [index, included]
   }
 
-  // Merge hits into slices
+  // 合并相邻命中片段。
   mergeIntoSlice (start, end, index) {
     let item = index[0]
     let { position, word } = item
@@ -62,7 +63,7 @@ class LocalSearch {
       })
       const wordEnd = position + word.length
 
-      // Move to next position of hit
+      // 移到下一个命中位置。
       index.shift()
       while (index.length !== 0) {
         item = index[0]
@@ -83,7 +84,7 @@ class LocalSearch {
     }
   }
 
-  // Highlight title and content
+  // 高亮标题与正文。
   escapeHtml (text) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   }
@@ -103,15 +104,15 @@ class LocalSearch {
 
   getResultItems (keywords) {
     const resultItems = []
-    // Compute highlight param once instead of per-article
+    // 整次查询复用同一组高亮参数。
     const highlightParam = keywords.join(' ')
     this.datas.forEach(({ title, content, url }) => {
-      // The number of different keywords included in the article.
+      // 文章命中的不同关键词数量。
       const [indexOfTitle, keysOfTitle] = this.getIndexByWord(keywords, title)
       const [indexOfContent, keysOfContent] = this.getIndexByWord(keywords, content)
       const includedCount = new Set([...keysOfTitle, ...keysOfContent]).size
 
-      // Show search results
+      // 显示搜索结果。
       const hitCount = indexOfTitle.length + indexOfContent.length
       if (hitCount === 0) return
 
@@ -124,13 +125,13 @@ class LocalSearch {
       while (indexOfContent.length !== 0) {
         const item = indexOfContent[0]
         const { position } = item
-        // Cut out 120 characters. The maxlength of .search-input is 80.
+        // 截取 120 个字符作为摘要，搜索输入上限为 80 个字符。
         const start = Math.max(0, position - 20)
         const end = Math.min(content.length, position + 100)
         slicesOfContent.push(this.mergeIntoSlice(start, end, indexOfContent))
       }
 
-      // Sort slices in content by included keywords' count and hits' count
+      // 按关键词覆盖数和命中次数排序摘要。
       slicesOfContent.sort((left, right) => {
         if (left.count !== right.count) {
           return right.count - left.count
@@ -140,7 +141,7 @@ class LocalSearch {
         return left.start - right.start
       })
 
-      // Select top N slices in content
+      // 截取排名靠前的摘要。
       const upperBound = parseInt(this.top_n_per_article, 10)
       if (upperBound >= 0) {
         slicesOfContent = slicesOfContent.slice(0, upperBound)
@@ -182,7 +183,7 @@ class LocalSearch {
         return response.text()
       })
       .then(res => {
-        // Get the contents from search data
+        // 读取索引中的正文。
         this.datas = isXml
           ? [...new DOMParser().parseFromString(res, 'text/xml').querySelectorAll('entry')].map(element => ({
               title: element.querySelector('title').textContent,
@@ -191,7 +192,7 @@ class LocalSearch {
             }))
           : JSON.parse(res)
         const decoder = document.createElement('textarea')
-        // Only match articles with non-empty titles
+        // 只检索标题非空的文章。
         this.datas = this.datas.filter(data => data.title).map(data => {
           data.title = data.title.trim()
           decoder.innerHTML = data.content ? data.content.trim().replace(/<[^>]+>/g, '') : ''
@@ -200,7 +201,7 @@ class LocalSearch {
           return data
         })
         this.isfetched = true
-        // Remove loading animation
+        // 结束加载提示。
         window.dispatchEvent(new Event('search:loaded'))
       })
       .catch(error => {
@@ -213,7 +214,7 @@ class LocalSearch {
     return this.fetchPromise
   }
 
-  // Highlight by wrapping node in mark elements with the given class name
+  // 使用 mark 元素包裹匹配文本。
   highlightText (node, slice, className) {
     const val = node.nodeValue
     let index = slice.start
@@ -232,7 +233,7 @@ class LocalSearch {
     })
   }
 
-  // Highlight the search words provided in the url in the text
+  // 高亮地址中指定的搜索词。
   highlightSearchWords (body) {
     const params = new URL(location.href).searchParams.get('highlight')
     const keywords = params ? params.split(' ') : []
@@ -252,7 +253,7 @@ class LocalSearch {
 }
 
 const initLocalSearch = () => {
-  // Search
+  // 执行搜索。
   const { path, top_n_per_article, languages, pagination } = GLOBAL_CONFIG.localSearch
   const enablePagination = pagination && pagination.enable
   const localSearch = new LocalSearch({
@@ -268,7 +269,7 @@ const initLocalSearch = () => {
   const $pagination = document.getElementById('local-search-pagination')
   const $paginationList = document.querySelector('#local-search-pagination .ais-Pagination-list')
 
-  // Pagination variables (only initialize if pagination is enabled)
+  // 分页状态，仅在启用分页时初始化。
   let currentPage = 0
   const hitsPerPage = pagination.hitsPerPage || 10
 
@@ -279,26 +280,26 @@ const initLocalSearch = () => {
     currentResultItems = undefined
   }
 
-  // Show/hide search results area
+  // 切换结果区域的可见性。
   const toggleResultsVisibility = hasResults => {
     $pagination.style.display = (hasResults && enablePagination) ? '' : 'none'
   }
 
-  // Render search results for current page
+  // 渲染当前页的搜索结果。
   const renderResults = (searchText, resultItems) => {
-    // Determine items to display based on pagination mode
+    // 按分页设置选择结果。
     const itemsToDisplay = enablePagination
       ? currentResultItems.slice(currentPage * hitsPerPage, (currentPage + 1) * hitsPerPage)
       : resultItems
 
-    // Handle empty page in pagination mode
+    // 处理分页后的空结果。
     if (enablePagination && itemsToDisplay.length === 0 && currentResultItems.length > 0) {
       currentPage = 0
       renderResults(searchText, resultItems)
       return
     }
 
-    // Add numbering to items
+    // 为结果添加序号。
     const numberedItems = itemsToDisplay.map((result, index) => {
       const itemNumber = enablePagination
         ? currentPage * hitsPerPage + index + 1
@@ -311,12 +312,12 @@ const initLocalSearch = () => {
 
     $results.innerHTML = `<ol class="search-result-list">${numberedItems.join('')}</ol>`
 
-    // Update stats
+    // 更新结果计数。
     const displayCount = enablePagination ? currentResultItems.length : resultItems.length
     const stats = languages.hits_stats.replace(/\$\{hits}/, displayCount)
     $statsItem.innerHTML = `<hr><div class="search-result-stats">${stats}</div>`
 
-    // Handle pagination
+    // 更新分页状态。
     if (enablePagination) {
       const nbPages = Math.ceil(currentResultItems.length / hitsPerPage)
       renderPagination(currentPage, nbPages, searchText)
@@ -327,7 +328,7 @@ const initLocalSearch = () => {
 
   }
 
-  // Render pagination
+  // 渲染分页按钮。
   const renderPagination = (page, nbPages) => {
     if (nbPages <= 1) {
       $pagination.style.display = 'none'
@@ -338,20 +339,20 @@ const initLocalSearch = () => {
     const isFirstPage = page === 0
     const isLastPage = page === nbPages - 1
 
-    // Responsive page display
+    // 按屏幕宽度控制页码数量。
     const isMobile = window.innerWidth < 768
     const maxVisiblePages = isMobile ? 3 : 5
     let startPage = Math.max(0, page - Math.floor(maxVisiblePages / 2))
     const endPage = Math.min(nbPages - 1, startPage + maxVisiblePages - 1)
 
-    // Adjust starting page to maintain max visible pages
+    // 调整起始页码，保持可见页数稳定。
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(0, endPage - maxVisiblePages + 1)
     }
 
     const parts = []
 
-    // Only add ellipsis and first page when there are many pages
+    // 省略前段页码时保留首页入口。
     if (nbPages > maxVisiblePages && startPage > 0) {
       parts.push('<li class="ais-Pagination-item ais-Pagination-item--page"><a class="ais-Pagination-link" aria-label="Page 1" href="#" data-page="0">1</a></li>')
       if (startPage > 1) {
@@ -359,7 +360,7 @@ const initLocalSearch = () => {
       }
     }
 
-    // Add middle page numbers
+    // 生成当前页附近的页码。
     for (let i = startPage; i <= endPage; i++) {
       if (i === page) {
         parts.push(`<li class="ais-Pagination-item ais-Pagination-item--page ais-Pagination-item--selected"><span class="ais-Pagination-link" aria-label="Page ${i + 1}">${i + 1}</span></li>`)
@@ -368,7 +369,7 @@ const initLocalSearch = () => {
       }
     }
 
-    // Only add ellipsis and last page when there are many pages
+    // 省略后段页码时保留末页入口。
     if (nbPages > maxVisiblePages && endPage < nbPages - 1) {
       if (endPage < nbPages - 2) {
         parts.push('<li class="ais-Pagination-item ais-Pagination-item--ellipsis"><span class="ais-Pagination-link">...</span></li>')
@@ -376,7 +377,7 @@ const initLocalSearch = () => {
       parts.push(`<li class="ais-Pagination-item ais-Pagination-item--page"><a class="ais-Pagination-link" aria-label="Page ${nbPages}" href="#" data-page="${nbPages - 1}">${nbPages}</a></li>`)
     }
 
-    // Build prev/next links
+    // 生成上一页和下一页入口。
     const prevLink = isFirstPage
       ? '<span class="ais-Pagination-link ais-Pagination-link--disabled" aria-label="Previous Page"><i class="fas fa-angle-left"></i></span>'
       : `<a class="ais-Pagination-link" aria-label="Previous Page" href="#" data-page="${page - 1}"><i class="fas fa-angle-left"></i></a>`
@@ -388,7 +389,7 @@ const initLocalSearch = () => {
     $pagination.style.display = ''
   }
 
-  // Clear search results and stats
+  // 清空结果与计数。
   const clearSearchResults = () => {
     $results.textContent = ''
     $statsItem.textContent = ''
@@ -399,7 +400,7 @@ const initLocalSearch = () => {
     }
   }
 
-  // Show no results message
+  // 显示空结果提示。
   const showNoResults = searchText => {
     $results.textContent = ''
     const statsDiv = document.createElement('div')
@@ -431,7 +432,7 @@ const initLocalSearch = () => {
     } else if (resultItems.length === 0) {
       showNoResults(searchText)
     } else {
-      // Sort results by relevance
+      // 按相关度排序结果。
       resultItems.sort((left, right) => {
         if (left.includedCount !== right.includedCount) {
           return right.includedCount - left.includedCount
@@ -451,11 +452,11 @@ const initLocalSearch = () => {
     $loadingStatus.hidden = true
   }
 
-  // Debounced input handler
+  // 合并连续输入触发的查询。
   let searchTimeout
   const debouncedInputEvent = () => {
     clearTimeout(searchTimeout)
-    // Empty input: clear results immediately without debounce delay
+    // 输入为空时立即清空结果。
     if (!$input.value.trim()) {
       inputEventFunction()
       return
@@ -469,20 +470,20 @@ const initLocalSearch = () => {
   })
 
   const searchClickFn = () => {
-    btf.addPageEventListener(document.querySelector('#search-button > .search'), 'click', openSearch)
+    dragonfly.addPageEventListener(document.querySelector('#search-button > .search'), 'click', openSearch)
   }
 
   const searchFnOnce = () => {
-    btf.addAppEventListener($input, 'input', debouncedInputEvent)
-    btf.addAppEventListener(document.querySelector('#local-search .search-close-button'), 'click', closeSearch)
+    dragonfly.addAppEventListener($input, 'input', debouncedInputEvent)
+    dragonfly.addAppEventListener(document.querySelector('#local-search .search-close-button'), 'click', closeSearch)
     if (GLOBAL_CONFIG.localSearch.preload) {
       localSearch.fetchData()
     }
     localSearch.highlightSearchWords(document.getElementById('article-container'))
 
-    // Pagination event delegation - only add if pagination is enabled
+    // 启用分页时注册页码事件。
     if (enablePagination) {
-      btf.addAppEventListener($pagination, 'click', e => {
+      dragonfly.addAppEventListener($pagination, 'click', e => {
         e.preventDefault()
         const link = e.target.closest('a[data-page]')
         if (link) {
@@ -495,11 +496,11 @@ const initLocalSearch = () => {
       })
     }
 
-    // Initial state
+    // 初始化搜索状态。
     toggleResultsVisibility(false)
   }
 
-  btf.addAppEventListener(window, 'search:loaded', () => {
+  dragonfly.addAppEventListener(window, 'search:loaded', () => {
     const $loadDataItem = document.getElementById('loading-database')
     if (!$loadDataItem) return
     if (!localSearch.isfetched) {
@@ -520,9 +521,9 @@ const initLocalSearch = () => {
 
   searchClickFn()
   searchFnOnce()
-  btf.addGlobalFn('encrypt', () => localSearch.highlightSearchWords(document.getElementById('article-container')), 'search')
+  dragonfly.addGlobalFn('encrypt', () => localSearch.highlightSearchWords(document.getElementById('article-container')), 'search')
 
-  btf.addAppEventListener(window, 'theme:page-load', () => {
+  dragonfly.addAppEventListener(window, 'theme:page-load', () => {
     closeSearch()
     localSearch.highlightSearchWords(document.getElementById('article-container'))
     searchClickFn()

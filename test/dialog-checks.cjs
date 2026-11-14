@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
@@ -67,7 +69,7 @@ module.exports = async (browser, origin, mount = '/', provider = 'local') => {
     await page.waitForURL(url => url.pathname === mount + 'article/post-0/')
     await dialog.waitFor({ state: 'hidden' })
     await unlocked()
-    await page.evaluate(() => btf.activateDarkMode())
+    await page.evaluate(() => dragonfly.activateDarkMode())
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await opener.click()
     await focusInput()

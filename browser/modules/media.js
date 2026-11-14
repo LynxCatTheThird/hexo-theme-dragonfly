@@ -1,4 +1,5 @@
-// Modified in Dragonfly.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const addPhotoFigcaption = $article => {
   if (!GLOBAL_CONFIG.isPhotoFigcaption) return
   $article.querySelectorAll('img').forEach(item => {
@@ -13,7 +14,7 @@ const addPhotoFigcaption = $article => {
 }
 
 const runLightbox = $article => {
-  btf.loadLightbox($article.querySelectorAll('img:not(.no-lightbox)'))
+  dragonfly.loadLightbox($article.querySelectorAll('img:not(.no-lightbox)'))
 }
 
 export const mountMedia = article => {

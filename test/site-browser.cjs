@@ -1,4 +1,6 @@
-// A real site's routes and content need not match the isolated regression fixtures.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 真实站点使用自己的路由和内容。
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')

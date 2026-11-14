@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 'use strict'
 
 hexo.extend.helper.register('aside_archives', function (options = {}) {
   const { config, page, site, url_for: urlFor, _p } = this
   const { archive_dir: archiveDir, timezone, language } = config
 
-  // Destructure and set default options with object destructuring
   const {
     type = 'monthly',
     format = type === 'monthly' ? 'MMMM YYYY' : 'YYYY',
@@ -14,10 +15,8 @@ hexo.extend.helper.register('aside_archives', function (options = {}) {
     transform
   } = options
 
-  // Optimize locale handling
   const lang = toMomentLocale(page.lang || page.language || language)
 
-  // Early return if no posts
   if (!site.posts.length) return ''
 
   const archives = new Map()
@@ -34,7 +33,7 @@ hexo.extend.helper.register('aside_archives', function (options = {}) {
         year,
         month,
         count: 1,
-        date // Store date object for later formatting
+        date // 保留日期对象供最后格式化。
       })
     }
   })
@@ -46,16 +45,15 @@ hexo.extend.helper.register('aside_archives', function (options = {}) {
     return a.year - b.year || a.month - b.month
   })
 
-  // Format names after aggregation
+  // 聚合完成后再格式化归档名称。
   data.forEach(item => {
     let date = item.date.clone()
     if (timezone) date = date.tz(timezone)
     if (lang) date = date.locale(lang)
     item.name = date.format(format)
-    delete item.date // Clean up
+    delete item.date // 清理临时字段。
   })
 
-  // Create link generator function
   const createArchiveLink = item => {
     let url = `${archiveDir}/${item.year}/`
     if (type === 'monthly') {
@@ -64,10 +62,8 @@ hexo.extend.helper.register('aside_archives', function (options = {}) {
     return urlFor(url)
   }
 
-  // Limit results efficiently
   const limitedData = limit > 0 ? data.slice(0, Math.min(data.length, limit)) : data
 
-  // Use template literal for better readability
   const archiveHeader = `
     <div class="item-headline"><i class="fas fa-archive"></i><span>${_p('aside.card_archives')}</span>${
       data.length > limitedData.length
@@ -79,7 +75,6 @@ hexo.extend.helper.register('aside_archives', function (options = {}) {
     }</div>
   `
 
-  // Use map for generating list items, join for performance
   const archiveList = `
     <ul class="card-archive-list">
       ${limitedData
@@ -102,7 +97,6 @@ hexo.extend.helper.register('aside_archives', function (options = {}) {
   return archiveHeader + archiveList
 })
 
-// Improved locale conversion function
 const toMomentLocale = lang => {
   if (!lang || ['en', 'default'].includes(lang)) return 'en'
   return lang.toLowerCase().replace('_', '-')

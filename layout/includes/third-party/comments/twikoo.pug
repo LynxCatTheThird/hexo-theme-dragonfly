@@ -1,9 +1,11 @@
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { envId, region, option } = theme.twikoo
 - const { use, lazyload, count } = theme.comments
 
 script(data-swup-reload-script).
   (() => {
-    const pageSignal = btf.pageSignal
+    const pageSignal = dragonfly.pageSignal
     const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
     const option = !{JSON.stringify(option)}
 
@@ -29,7 +31,7 @@ script(data-swup-reload-script).
         envId: '!{envId}',
         region: '!{region}',
         onCommentLoaded: () => {
-          btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+          dragonfly.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
         },
         ...option,
         path: isShuoshuo ? path : (option && option.path) || path
@@ -47,7 +49,7 @@ script(data-swup-reload-script).
 
     const loadTwikoo = (el, path) => {
       if (typeof twikoo === 'object') setTimeout(() => init(el, path), 0)
-      else btf.getScript('!{url_for(theme.asset.twikoo)}').then(() => init(el, path))
+      else dragonfly.getScript('!{url_for(theme.asset.twikoo)}').then(() => init(el, path))
     }
 
     if (isShuoshuo) {
@@ -58,7 +60,7 @@ script(data-swup-reload-script).
     }
 
     if ('!{use[0]}' === 'Twikoo' || !!{lazyload}) {
-      if (!{lazyload}) btf.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+      if (!{lazyload}) dragonfly.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
       else loadTwikoo()
     } else {
       window.loadOtherComment = loadTwikoo

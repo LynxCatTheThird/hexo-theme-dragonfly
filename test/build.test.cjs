@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -41,5 +43,6 @@ test('consumer package contains the complete production graph and no test output
   for (const file of manifest.files) assert.ok(files.has('dist/source/' + file.path), file.path)
   assert.ok(files.has('tools/build.cjs'))
   assert.ok(files.has('browser/main.js'))
+  for (const file of ['LICENSE', 'NOTICE', 'LICENSES/searchdb-MIT.txt', 'LICENSES/lorc-CC-BY-3.0.txt', 'source/img/dragonfly.svg.license', 'source/img/favicon.ico.license', 'dist/source/licenses/dragonfly/NOTICE']) assert.ok(files.has(file), file)
   assert.ok(![...files].some(file => /^(test\/|\.github\/)|package-lock\.json$|\.tgz$|\/development\//.test(file)))
 })

@@ -1,0 +1,41 @@
+Dragonfly
+https://github.com/LynxCatTheThird/hexo-theme-dragonfly
+
+Dragonfly 由 LynxCatTheThird 及贡献者维护，采用 Apache License 2.0。
+本分支自 2026 年起修改了主题的导航、渲染、资源加载、交互、测试和文档。
+许可正文见 LICENSE；各文件的既有版权与来源声明继续有效。
+
+上游来源
+
+本项目基于 Jerry（my@crazywong.com；CrazyWong / jerryc127）及贡献者维护的 Butterfly：
+https://github.com/jerryc127/hexo-theme-butterfly
+上游随附 Apache License 2.0；本项目保留其许可证及适用的来源声明。
+Butterfly 的历史基础是 Molunerfinn 及贡献者维护的 hexo-theme-melody：
+https://github.com/Molunerfinn/hexo-theme-melody
+历史 MIT 许可见 LICENSES/melody-MIT.txt（2017 年初始版本）。
+
+保留的第三方代码
+
+- source/css/_third-party/normalize.min.css：normalize.css 8.0.1，
+  Nicolas Gallagher、Jonathan Neal；MIT，见 LICENSES/normalize-MIT.txt。
+- browser/search/local-search.js：参考 hexo-generator-searchdb 的搜索实现，
+  theme-next；由 Butterfly 和 Dragonfly 修改。MIT 原文见 LICENSES/searchdb-MIT.txt。
+  https://github.com/next-theme/hexo-generator-searchdb
+- scripts/tag/note.js、scripts/tag/tabs.js：保留上游对 hexo-theme-next 的来源说明
+  和 Jerry 的修改署名。早期 NexT 的 MIT 许可见 LICENSES/next-MIT.txt。
+  https://github.com/iissnan/hexo-theme-next
+- source/css/_highlight/prismjs/diff.styl：包含 Prism 与 Prism Themes
+  配色规则的适配；MIT 原文及署名见 LICENSES/prism-MIT.txt 和 prism-themes-MIT.txt。
+
+项目标志
+
+source/img/dragonfly.svg、favicon.svg 与 favicon.ico 使用 Lorc 的作品 Dragonfly：
+https://game-icons.net/1x1/lorc/dragonfly.html
+许可：Creative Commons Attribution 3.0 Unported（CC BY 3.0）。
+https://creativecommons.org/licenses/by/3.0/
+Dragonfly 项目调整了配色和显示尺寸，并从 SVG 生成 ICO；保留原图形路径。
+许可正文见 LICENSES/lorc-CC-BY-3.0.txt，文件说明见图像旁的 .license 文件。
+
+外部组件的名称、许可与作者归各自项目所有；依赖版本和文件路径见
+package.json 与 plugins.yml。butterfly-extsrc 是外部组件包的真实名称。
+本文件用于说明来源与署名，不改变任何许可证条款，也不表示上游为本分支背书。

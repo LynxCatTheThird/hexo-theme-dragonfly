@@ -1,4 +1,5 @@
-// Modified in this fork.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 'use strict'
 
 hexo.extend.helper.register('inject_head_js', function () {
@@ -66,18 +67,18 @@ hexo.extend.helper.register('inject_head_js', function () {
     const appController = new AbortController()
     let pageController = new AbortController()
     let callbackId = 0
-    window.btf = {
+    window.dragonfly = {
       get appSignal () { return appController.signal },
       get pageSignal () { return pageController.signal },
       resetPageScope: () => { pageController.abort(); pageController = new AbortController() },
       saveToLocal,
       getScript: assetLoader('script', { async: true }, 'src'),
       getCSS: (url, id) => loadCSS(url, id ? { id } : {}),
-      // Page callbacks expire with the page that registered them.
+      // 页面回调随所属页面一同释放。
       addPageFn: (key, fn, name) => {
-        const id = btf.addGlobalFn(key, fn, name)
+        const id = dragonfly.addGlobalFn(key, fn, name)
         if (id === undefined) return
-        btf.pageSignal.addEventListener('abort', () => {
+        dragonfly.pageSignal.addEventListener('abort', () => {
           if (window.globalFn?.[key]?.[id] === fn) delete window.globalFn[key][id]
         }, { once: true })
       },
@@ -91,6 +92,8 @@ hexo.extend.helper.register('inject_head_js', function () {
         return id
       }
     }
+    // 保留旧注入脚本的对象引用，主题内部统一使用 dragonfly。
+    window.btf = window.dragonfly
   `
 
   const createDarkmodeJs = () => {
@@ -115,7 +118,7 @@ hexo.extend.helper.register('inject_head_js', function () {
           e.matches ? activateDarkMode() : activateLightMode()
           Object.values(window.globalFn?.themeChange || {}).forEach(fn => fn(e.matches ? 'dark' : 'light'))
         }
-      }, { signal: btf.appSignal })
+      }, { signal: dragonfly.appSignal })
     ` : autoMode === 2 ? timeFallback : ''
 
     return `
@@ -124,8 +127,8 @@ hexo.extend.helper.register('inject_head_js', function () {
         document.documentElement.dataset.theme = theme
         metaThemeColor?.setAttribute('content', theme === 'dark' ? '${themeColorDark}' : '${themeColorLight}')
       }
-      const activateDarkMode = btf.activateDarkMode = () => setTheme('dark')
-      const activateLightMode = btf.activateLightMode = () => setTheme('light')
+      const activateDarkMode = dragonfly.activateDarkMode = () => setTheme('dark')
+      const activateLightMode = dragonfly.activateLightMode = () => setTheme('light')
       const theme = saveToLocal.get('theme')
       if (theme === undefined) { ${automatic} }
       else {

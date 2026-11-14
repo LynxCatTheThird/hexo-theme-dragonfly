@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 /* eslint-disable camelcase */
 /**
- * Butterfly
- * Related Posts
- * According the tag
+ * 上游：Butterfly（Jerry 及贡献者）。
+ * 相关文章。
+ * 按共同标签匹配。
  */
 
 'use strict'

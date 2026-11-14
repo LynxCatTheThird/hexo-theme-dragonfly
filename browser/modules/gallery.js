@@ -1,4 +1,5 @@
-// Modified in Dragonfly.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 const loading = new WeakSet()
 const indexGrids = new WeakMap()
 
@@ -23,21 +24,18 @@ const runJustifiedGallery = (container, data, config, signal) => {
     ? Math.ceil(Math.max(0, dataLength - firstLimit) / limit) + 1
     : 0
 
-  // Gallery configuration
+  // 图库布局参数。
   const igConfig = {
     gap: 5,
     isConstantSize: true,
     sizeRange: [150, 600],
-    // useResizeObserver: true,
-    // observeChildren: true,
     useTransform: true
-    // useRecycle: false
   }
 
   const ig = new InfiniteGrid.JustifiedInfiniteGrid(container, igConfig)
   let isLayoutHidden = false
 
-  // Utility functions
+  // 图片节点工具。
   const sanitizeString = str => String(str ?? '')
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
@@ -59,14 +57,14 @@ const runJustifiedGallery = (container, data, config, signal) => {
     return data.slice(startIndex, startIndex + count).map(createImageItem)
   }
 
-  // Load more button
+  // 加载更多按钮。
   const addLoadMoreButton = container => {
     const button = document.createElement('button')
     button.innerHTML = `${GLOBAL_CONFIG.infinitegrid.buttonText}<i class="fa-solid fa-arrow-down"></i>`
 
-    btf.addPageEventListener(button, 'click', () => {
+    dragonfly.addPageEventListener(button, 'click', () => {
       button.remove()
-      btf.setLoading.add(container)
+      dragonfly.setLoading.add(container)
       appendItems(ig.getGroups().length + 1, limit)
     }, { once: true })
 
@@ -78,7 +76,7 @@ const runJustifiedGallery = (container, data, config, signal) => {
     ig.append(getItems(nextGroupKey, count, isFirst), nextGroupKey)
   }
 
-  // Event handlers
+  // 图片加载与布局事件。
   const handleRenderComplete = e => {
     if (signal.aborted || !container.isConnected) return
     if (tabs) {
@@ -95,21 +93,21 @@ const runJustifiedGallery = (container, data, config, signal) => {
     const { updated, isResize, mounted } = e
     if (!updated.length || !mounted.length || isResize) return
 
-    btf.loadLightbox(container.querySelectorAll('img:not(.medium-zoom-image)'))
+    dragonfly.loadLightbox(container.querySelectorAll('img:not(.medium-zoom-image)'))
 
     if (ig.getGroups().length === maxGroupKey) {
-      btf.setLoading.remove(container)
+      dragonfly.setLoading.remove(container)
       !tabs && ig.off('renderComplete', handleRenderComplete)
       return
     }
 
     if (isButton) {
-      btf.setLoading.remove(container)
+      dragonfly.setLoading.remove(container)
       addLoadMoreButton(container)
     }
   }
 
-  const handleRequestAppend = btf.debounce(e => {
+  const handleRequestAppend = dragonfly.debounce(e => {
     const nextGroupKey = (+e.groupKey || 0) + 1
 
     if (nextGroupKey === 1) appendItems(nextGroupKey, firstLimit, true)
@@ -118,7 +116,7 @@ const runJustifiedGallery = (container, data, config, signal) => {
     if (nextGroupKey === maxGroupKey) ig.off('requestAppend', handleRequestAppend)
   }, 300)
 
-  btf.setLoading.add(container)
+  dragonfly.setLoading.add(container)
   ig.on('renderComplete', handleRenderComplete)
 
   if (isButton && dataLength) {
@@ -127,7 +125,7 @@ const runJustifiedGallery = (container, data, config, signal) => {
     ig.on('requestAppend', handleRequestAppend)
     ig.renderItems()
   } else {
-    btf.setLoading.remove(container)
+    dragonfly.setLoading.remove(container)
   }
 
   signal.addEventListener('abort', () => { handleRequestAppend.cancel(); ig.destroy() }, { once: true })
@@ -135,11 +133,11 @@ const runJustifiedGallery = (container, data, config, signal) => {
 
 const addJustifiedGallery = async (elements, tabs = false) => {
   if (!elements.length) return
-  const signal = btf.pageSignal
+  const signal = dragonfly.pageSignal
 
   const initGallery = async () => {
     for (const element of elements) {
-      if (signal.aborted || !element.isConnected || loading.has(element) || btf.isHidden(element) || element.classList.contains('loaded')) continue
+      if (signal.aborted || !element.isConnected || loading.has(element) || dragonfly.isHidden(element) || element.classList.contains('loaded')) continue
       loading.add(element)
 
       const config = {
@@ -170,7 +168,7 @@ const addJustifiedGallery = async (elements, tabs = false) => {
   if (typeof InfiniteGrid === 'function') {
     await initGallery()
   } else {
-    await btf.getScript(GLOBAL_CONFIG.infinitegrid.js)
+    await dragonfly.getScript(GLOBAL_CONFIG.infinitegrid.js)
     await initGallery()
   }
 }
@@ -178,7 +176,7 @@ const addJustifiedGallery = async (elements, tabs = false) => {
 const justifiedIndexPostUI = () => {
   const recentPostsElement = document.getElementById('recent-posts')
   if (!(recentPostsElement && recentPostsElement.classList.contains('masonry'))) return
-  const signal = btf.pageSignal
+  const signal = dragonfly.pageSignal
 
   const init = () => {
     if (signal.aborted || !recentPostsElement.isConnected || indexGrids.has(recentPostsElement)) return
@@ -192,7 +190,7 @@ const justifiedIndexPostUI = () => {
     signal.addEventListener('abort', () => { masonryItem.destroy(); indexGrids.delete(recentPostsElement) }, { once: true })
   }
 
-  return typeof InfiniteGrid === 'function' ? init() : btf.getScript(`${GLOBAL_CONFIG.infinitegrid.js}`).then(init)
+  return typeof InfiniteGrid === 'function' ? init() : dragonfly.getScript(`${GLOBAL_CONFIG.infinitegrid.js}`).then(init)
 }
 
 export { addJustifiedGallery, justifiedIndexPostUI }

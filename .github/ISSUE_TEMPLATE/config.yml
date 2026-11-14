@@ -1,18 +1,7 @@
-blank_issues_enabled: false
+# SPDX-License-Identifier: Apache-2.0
+# Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+blank_issues_enabled: true
 contact_links:
-  - name: Questions about Butterfly
-    url: https://github.com/jerryc127/hexo-theme-butterfly/discussions
-    about: 一些使用問題請到 Discussion 詢問。 Please ask questions in Discussion.
-
-  - name: Butterfly Q&A
-    url: https://butterfly.js.org/posts/98d20436/
-    about: Butterfly Q&A
-
-  - name: Telegram
-    url: https://t.me/bu2fly
-    about: 'Official Telegram Group'
-
-  - name: QQ 群
-    url: https://jq.qq.com/?_wv=1027&k=KU9105XR
-    about: '群號 1070540070'
-
+  - name: Dragonfly 配置与迁移文档
+    url: https://github.com/LynxCatTheThird/hexo-theme-dragonfly/tree/dev/docs
+    about: 查看配置、安装与迁移步骤。

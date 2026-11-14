@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 #loading-box
   .loading-left-bg
   .loading-right-bg
@@ -32,13 +33,13 @@ script.
     } else {
       window.addEventListener('load', preloader.endLoading)
       document.addEventListener('DOMContentLoaded', preloader.endLoading)
-      // Add timeout protection: force end after 7 seconds
+      // 7 秒后结束加载遮罩。
       setTimeout(preloader.endLoading, 7000)
     }
 
     if (!{theme.navigation && theme.navigation.enable}) {
-      btf.addGlobalFn('navigationStart', preloader.initLoading, 'preloader_init')
-      btf.addGlobalFn('pageLoad', preloader.endLoading, 'preloader_end')
-      btf.addGlobalFn('navigationEnd', preloader.endLoading, 'preloader_end')
+      dragonfly.addGlobalFn('navigationStart', preloader.initLoading, 'preloader_init')
+      dragonfly.addGlobalFn('pageLoad', preloader.endLoading, 'preloader_end')
+      dragonfly.addGlobalFn('navigationEnd', preloader.endLoading, 'preloader_end')
     }
   })()

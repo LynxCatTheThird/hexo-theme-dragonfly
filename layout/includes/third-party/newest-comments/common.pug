@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 script.
   window.newestComments = {
     ready: fn => {
@@ -21,11 +22,11 @@ script.
     changeContent: content => {
       if (!content) return ''
 
-      content = content.replace(/<img[^>]*>/gis, '[!{_p("aside.card_newest_comments.image")}]') // replace image link
-      content = content.replace(/<pre><code>[\s\S]*?<\/pre>/gi, '[!{_p("aside.card_newest_comments.code")}]') // replace code block
-      content = content.replace(/<a[^>]+?>[\s\S]*?<\/a>/gi, '[!{_p("aside.card_newest_comments.link")}]') // replace url
-      content = content.replace(/<code[^>]*?>[\s\S]*?<\/code>/gi, '[!{_p("aside.card_newest_comments.code")}]') // replace code
-      content = content.replace(/<[^>]+>/g, '') // remove html tag
+      content = content.replace(/<img[^>]*>/gis, '[!{_p("aside.card_newest_comments.image")}]') // 使用图片提示替代图片。
+      content = content.replace(/<pre><code>[\s\S]*?<\/pre>/gi, '[!{_p("aside.card_newest_comments.code")}]') // 使用代码提示替代代码块。
+      content = content.replace(/<a[^>]+?>[\s\S]*?<\/a>/gi, '[!{_p("aside.card_newest_comments.link")}]') // 使用链接提示替代链接。
+      content = content.replace(/<code[^>]*?>[\s\S]*?<\/code>/gi, '[!{_p("aside.card_newest_comments.code")}]') // 使用代码提示替代行内代码。
+      content = content.replace(/<[^>]+>/g, '') // 移除 HTML 标签。
 
       if (content.length > 150) {
         content = Array.from(content).slice(0, 150).join('') + '...'
@@ -50,7 +51,7 @@ script.
 
           html += `<div class="content">
           <a class="comment" href="${escapeHtml(item.url)}" title="${escapeHtml(item.content)}">${escapeHtml(item.content)}</a>
-          <div class="name"><span>${escapeHtml(item.nick)} / </span><time datetime="${escapeHtml(item.date)}">${btf.diffDate(item.date, true)}</time></div>
+          <div class="name"><span>${escapeHtml(item.nick)} / </span><time datetime="${escapeHtml(item.date)}">${dragonfly.diffDate(item.date, true)}</time></div>
           </div></div>`
 
           return html
@@ -64,14 +65,14 @@ script.
     },
 
     fetchAndRender: (keyName, ele, getComment) => {
-      const signal = btf.pageSignal
+      const signal = dragonfly.pageSignal
       Promise.resolve(getComment(ele)).then(array => {
-        btf.saveToLocal.set(keyName, JSON.stringify(array), !{theme.aside.card_newest_comments.storage}/(60*24))
+        dragonfly.saveToLocal.set(keyName, JSON.stringify(array), !{theme.aside.card_newest_comments.storage}/(60*24))
         if (!signal.aborted && ele.isConnected) newestComments.generateHtml(array, ele)
       }).catch(e => {
         if (signal.aborted || !ele.isConnected) return
         console.error(e)
-        const data = btf.saveToLocal.get(keyName)
+        const data = dragonfly.saveToLocal.get(keyName)
         if (data) {
           newestComments.generateHtml(JSON.parse(data), ele)
         } else {
@@ -83,7 +84,7 @@ script.
     newestCommentInit: (name, getComment) => {
       const $dom = document.querySelector('#card-newest-comments .aside-list')
       if ($dom) {
-        const data = btf.saveToLocal.get(name)
+        const data = dragonfly.saveToLocal.get(name)
         if (data) {
           newestComments.generateHtml(JSON.parse(data), $dom)
         } else {
@@ -94,6 +95,6 @@ script.
 
     run: (name, getComment) => {
       newestComments.newestCommentInit(name, getComment)
-      btf.addGlobalFn('pageLoad', () => newestComments.newestCommentInit(name, getComment), name)
+      dragonfly.addGlobalFn('pageLoad', () => newestComments.newestCommentInit(name, getComment), name)
     }
   }

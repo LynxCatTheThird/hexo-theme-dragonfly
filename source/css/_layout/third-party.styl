@@ -1,4 +1,5 @@
-// Modified in this fork.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 #waline-wrap
   --waline-font-size: 1.1em
   --waline-theme-color: $button-bg
@@ -246,7 +247,7 @@ mjx-container
     mjx-break
       white-space: nowrap !important
 
-// Keep MathJax 4 SVG chunks inline and scroll their block parent.
+// 保持 MathJax 4 的 SVG 分块同行，并由外层容器处理横向滚动。
 #article-container :is(p, h1, h2, h3, h4, h5, h6):has(mjx-container:not([display]))
   max-width: 100%
   overflow-x: auto

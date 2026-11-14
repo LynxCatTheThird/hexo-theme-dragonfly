@@ -1,4 +1,6 @@
-// Independent theme consumer; all generated files stay outside the checkout.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
+// 使用独立测试站点，生成文件写入临时目录。
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
@@ -31,7 +33,7 @@ try {
     const site = path.join(temp, variant)
     fs.mkdirSync(path.join(site, 'source/_posts'), { recursive: true })
     fs.mkdirSync(path.join(site, 'themes'), { recursive: true })
-    fs.symlinkSync(theme, path.join(site, 'themes/butterfly'), 'dir')
+    fs.symlinkSync(theme, path.join(site, 'themes/dragonfly'), 'dir')
     fs.symlinkSync(path.join(theme, 'node_modules'), path.join(site, 'node_modules'), 'dir')
     fs.writeFileSync(path.join(site, 'package.json'), JSON.stringify(sitePackage))
     const config = structuredClone(base)
@@ -81,7 +83,7 @@ comments: false
     fs.writeFileSync(path.join(site, 'source/contract-async.js'), 'window.__asyncRuns = (window.__asyncRuns || 0) + 1')
     fs.writeFileSync(path.join(site, 'source/contract-module.js'), `window.__moduleRuns = (window.__moduleRuns || 0) + 1
 const mount = () => { if (document.getElementById('script-contract')) window.__moduleMounts = (window.__moduleMounts || 0) + 1 }
-btf.addGlobalFn('pageLoad', mount, 'contractModule')
+dragonfly.addGlobalFn('pageLoad', mount, 'contractModule')
 if (document.readyState !== 'complete') document.addEventListener('DOMContentLoaded', mount, { once: true })
 `)
     fs.mkdirSync(path.join(site, 'source/gallery'), { recursive: true })
@@ -114,7 +116,7 @@ ${encrypted ? 'password: component-test-only\nautoSave: false\n' : ''}---
 <picture><source srcset="/img/fixture.svg 1x, /img/fixture-2x.svg 2x"><img id="responsive-image" src="/img/fixture.svg" srcset="/img/fixture.svg 1x, /img/fixture-2x.svg 2x" sizes="80px" width="80" height="40" alt="Responsive image"></picture>
 <img id="ordinary-image" src="/img/fixture.svg" width="80" height="40" alt="Ordinary image">
 `)
-    // Home stays tall enough to exercise scroll restoration without personal posts.
+    // 通过固定夹具保持页面高度，验证滚动位置恢复。
     for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(site, 'source/_posts', `post-${i}.md`), `---\ntitle: Post ${i}\ndate: 2025-01-01\n---\nTest post ${i}.`)
     const fixture = fs.readFileSync(path.join(__dirname, 'fixtures/components.md'), 'utf8')
     for (const engine of basic ? [] : ['katex', 'mathjax']) for (const encrypted of [false, true]) {

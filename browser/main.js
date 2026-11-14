@@ -1,11 +1,12 @@
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 import { addRuntime, addLastPushDate, relativeDate, addPostOutdateNotice } from './dates.js'
 
-// Modified in this fork.
 document.addEventListener('DOMContentLoaded', () => {
   let headerContentWidth, $nav
   let mobileSidebarOpen = false
 
-  // rightsideScrollPercent
+  // 右侧阅读进度。
   let goUpElement = null
   let scrollPercentElement = null
 
@@ -26,30 +27,30 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-  // 初始化header
+  // 初始化页头。
   const initAdjust = () => {
     adjustMenu(true)
     $nav.classList.add('show')
   }
 
-  // sidebar menus
+  // 移动端侧栏菜单。
   const sidebarFn = {
     open: () => {
-      btf.overflowPaddingR.add()
-      btf.animateIn(document.getElementById('menu-mask'), 'to_show 0.5s')
+      dragonfly.overflowPaddingR.add()
+      dragonfly.animateIn(document.getElementById('menu-mask'), 'to_show 0.5s')
       document.getElementById('sidebar-menus').classList.add('open')
       mobileSidebarOpen = true
     },
     close: () => {
-      btf.overflowPaddingR.remove()
-      btf.animateOut(document.getElementById('menu-mask'), 'to_hide 0.5s')
+      dragonfly.overflowPaddingR.remove()
+      dragonfly.animateOut(document.getElementById('menu-mask'), 'to_hide 0.5s')
       document.getElementById('sidebar-menus').classList.remove('open')
       mobileSidebarOpen = false
     }
   }
 
   const rightsideScrollPercent = currentTop => {
-    const scrollPercent = btf.getScrollPercent(currentTop, document.body)
+    const scrollPercent = dragonfly.getScrollPercent(currentTop, document.body)
 
     if (!goUpElement || !scrollPercentElement) return
     if (scrollPercent < 95) {
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const $header = document.getElementById('page-header')
     const isShowPercent = GLOBAL_CONFIG.percent.rightside
 
-    // 檢查文檔高度是否小於視窗高度
+    // 检查文档高度是否小于视窗高度
     const checkDocumentHeight = () => {
       if (document.body.scrollHeight <= window.innerHeight + 56) {
         $rightside.classList.add('rightside-show')
@@ -75,15 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return false
     }
 
-    // find the scroll direction
+    // 判断滚动方向。
     const scrollDirection = currentTop => {
-      const result = currentTop > initTop // true is down & false is up
+      const result = currentTop > initTop // true 向下，false 向上。
       initTop = currentTop
       return result
     }
 
     let flag = ''
-    const scrollTask = btf.rafThrottle(() => {
+    const scrollTask = dragonfly.rafThrottle(() => {
       if (checkDocumentHeight()) return
 
       const currentTop = window.scrollY || document.documentElement.scrollTop
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     checkDocumentHeight()
-    btf.addPageEventListener(window, 'scroll', scrollTask, { passive: true })
+    dragonfly.addPageEventListener(window, 'scroll', scrollTask, { passive: true })
   }
 
   const handleThemeChange = mode => {
@@ -134,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const rightSideFn = {
-    readmode: () => { // read mode
+    readmode: () => { // 阅读模式。
       if (document.querySelector('.exit-readmode')) return
       const $body = document.body
       const newEle = document.createElement('button')
@@ -151,19 +152,19 @@ document.addEventListener('DOMContentLoaded', () => {
       newEle.innerHTML = '<i class="fas fa-sign-out-alt"></i>'
       newEle.addEventListener('click', exitReadMode)
       $body.appendChild(newEle)
-      btf.addGlobalFn('pageCleanup', exitReadMode, 'exitReadMode')
+      dragonfly.addGlobalFn('pageCleanup', exitReadMode, 'exitReadMode')
     },
-    darkmode: () => { // switch between light and dark mode
+    darkmode: () => { // 切换浅色与深色模式。
       const willChangeMode = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
       if (willChangeMode === 'dark') {
-        btf.activateDarkMode()
+        dragonfly.activateDarkMode()
       } else {
-        btf.activateLightMode()
+        dragonfly.activateLightMode()
       }
-      btf.saveToLocal.set('theme', willChangeMode, 2)
+      dragonfly.saveToLocal.set('theme', willChangeMode, 2)
       handleThemeChange(willChangeMode)
     },
-    'rightside-config': item => { // Show or hide rightside-hide-btn
+    'rightside-config': item => { // 展开或收起工具栏按钮。
       const hideLayout = item.firstElementChild
       if (hideLayout.classList.contains('show')) {
         hideLayout.classList.add('status')
@@ -174,16 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       hideLayout.classList.toggle('show')
     },
-    'go-up': () => { // Back to top
-      btf.scrollToDest(0, 500)
+    'go-up': () => { // 返回顶部。
+      dragonfly.scrollToDest(0, 500)
     },
-    'hide-aside-btn': () => { // Hide aside
+    'hide-aside-btn': () => { // 切换侧栏可见性。
       const $htmlDom = document.documentElement.classList
       const saveStatus = $htmlDom.contains('hide-aside') ? 'show' : 'hide'
-      btf.saveToLocal.set('aside-status', saveStatus, 2)
+      dragonfly.saveToLocal.set('aside-status', saveStatus, 2)
       $htmlDom.toggle('hide-aside')
     },
-    'mobile-toc-button': (p, item) => { // Show mobile toc
+    'mobile-toc-button': (p, item) => { // 显示移动端目录。
       const tocEle = document.getElementById('card-toc')
       tocEle.style.transition = 'transform 0.3s ease-in-out'
 
@@ -202,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   }
 
-  btf.addAppEventListener(document.getElementById('rightside'), 'click', e => {
+  dragonfly.addAppEventListener(document.getElementById('rightside'), 'click', e => {
     const $target = e.target.closest('[id]')
     if ($target && rightSideFn[$target.id]) {
       rightSideFn[$target.id](e.currentTarget, $target)
@@ -223,10 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const openMobileMenu = () => {
     const toggleMenu = document.getElementById('toggle-menu')
     if (!toggleMenu) return
-    btf.addPageEventListener(toggleMenu, 'click', () => { sidebarFn.open() })
+    dragonfly.addPageEventListener(toggleMenu, 'click', () => { sidebarFn.open() })
   }
 
-  // One copy handler keeps TeX and copyright text consistent across navigation.
+  // 统一处理公式复制和文章署名，切页后继续生效。
 
   const toggleCardCategory = () => {
     const cardCategory = document.querySelector('#aside-cat-list.expandBtn')
@@ -239,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         target.parentNode.classList.toggle('expand')
       }
     }
-    btf.addPageEventListener(cardCategory, 'click', handleToggleBtn, true)
+    dragonfly.addPageEventListener(cardCategory, 'click', handleToggleBtn, true)
   }
 
   const lazyloadImg = () => {
@@ -249,22 +250,22 @@ document.addEventListener('DOMContentLoaded', () => {
       data_src: 'lazy-src'
     })
 
-    btf.addGlobalFn('pageLoad', () => {
+    dragonfly.addGlobalFn('pageLoad', () => {
       window.lazyLoadInstance.update()
     }, 'lazyload')
   }
 
   const unRefreshFn = () => {
-    const resizeHandler = btf.rafThrottle(() => {
+    const resizeHandler = dragonfly.rafThrottle(() => {
       adjustMenu(false)
-      if (mobileSidebarOpen && btf.isHidden(document.getElementById('toggle-menu'))) {
+      if (mobileSidebarOpen && dragonfly.isHidden(document.getElementById('toggle-menu'))) {
         sidebarFn.close()
       }
     })
-    btf.addAppEventListener(window, 'resize', resizeHandler, { passive: true })
+    dragonfly.addAppEventListener(window, 'resize', resizeHandler, { passive: true })
 
     const menuMask = document.getElementById('menu-mask')
-    menuMask && btf.addAppEventListener(menuMask, 'click', () => { sidebarFn.close() })
+    menuMask && dragonfly.addAppEventListener(menuMask, 'click', () => { sidebarFn.close() })
 
     clickFnOfSubMenu()
     GLOBAL_CONFIG.islazyloadPlugin && lazyloadImg()
@@ -275,11 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const scrollDownInIndex = () => {
     const handleScrollToDest = () => {
-      btf.scrollToDest(document.getElementById('content-inner').offsetTop, 300)
+      dragonfly.scrollToDest(document.getElementById('content-inner').offsetTop, 300)
     }
 
     const $scrollDownEle = document.getElementById('scroll-down')
-    $scrollDownEle && btf.addPageEventListener($scrollDownEle, 'click', handleScrollToDest)
+    $scrollDownEle && dragonfly.addPageEventListener($scrollDownEle, 'click', handleScrollToDest)
   }
 
   const loadOptionalModules = () => {
@@ -295,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!article || article.querySelector('.hbe-container')) return
     window.lazyLoadInstance?.update()
     loadOptionalModules()
-    const signal = btf.pageSignal
+    const signal = dragonfly.pageSignal
     let ready
     if (!mountedArticles.has(article)) {
       mountedArticles.add(article)
@@ -334,20 +335,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let articleReady
     if (GLOBAL_CONFIG_SITE.pageType !== 'shuoshuo') {
       articleReady = forPostFn()
-      btf.switchComments(document)
+      dragonfly.switchComments(document)
     }
 
     openMobileMenu()
     return articleReady
   }
 
-  btf.addGlobalFn('pageLoad', refreshFn, 'refreshFn')
+  dragonfly.addGlobalFn('pageLoad', refreshFn, 'refreshFn')
   refreshFn()
   unRefreshFn()
   loadOptionalModules()
 
-  // 處理 hexo-blog-encrypt 事件
-  btf.addAppEventListener(window, 'hexo-blog-decrypt', e => {
+  // 处理 hexo-blog-encrypt 事件
+  dragonfly.addAppEventListener(window, 'hexo-blog-decrypt', e => {
     forPostFn()
     const encryptFn = window.globalFn && window.globalFn.encrypt ? window.globalFn.encrypt : {}
     Object.values(encryptFn).forEach(fn => {
@@ -355,5 +356,5 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   })
 
-  btf.addAppEventListener(document, 'shuoshuo:rendered', forPostFn)
+  dragonfly.addAppEventListener(document, 'shuoshuo:rendered', forPostFn)
 })

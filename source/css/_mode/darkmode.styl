@@ -1,4 +1,5 @@
-// Modified in this fork.
+// SPDX-License-Identifier: Apache-2.0
+// Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 if hexo-config('darkmode.enable') || hexo-config('display_mode') == 'dark'
   [data-theme='dark']
     --global-bg: darken(#121212, 2)
@@ -111,7 +112,7 @@ if hexo-config('darkmode.enable') || hexo-config('display_mode') == 'dark'
         background-color: #525252
         color: #e2f1ff
 
-    // 頭部
+    // 头部
     #page-header
       &.nav-fixed > #nav,
       &.not-top-img > #nav
@@ -126,7 +127,7 @@ if hexo-config('darkmode.enable') || hexo-config('display_mode') == 'dark'
         #switch-btn
           filter: brightness(.8)
 
-    // hide-tags
+    // 隐藏标签。
     .hide-button,
     .toggle-button,
     #post-outdate-notice,

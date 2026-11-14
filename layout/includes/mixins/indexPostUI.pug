@@ -1,4 +1,5 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 mixin indexPostUI()
   - const indexLayout = theme.index_layout
   - const masonryLayoutClass = [6, 7].includes(indexLayout) ? 'masonry' : ''
@@ -89,7 +90,7 @@ mixin indexPostUI()
                         span.artalk-count(data-page-key=url_for(link))
                           i.fa-solid.fa-spinner.fa-spin
 
-            //- Display the article introduction on homepage
+            //- 首页文章摘要。
             - const content = postDesc(article)
             if content
               .content!=content

@@ -1,11 +1,12 @@
-//- Modified in this fork.
+//- SPDX-License-Identifier: Apache-2.0
+//- Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
 - const { effect, source, sub, typed_option } = theme.subtitle
 - let subContent = typeof sub === 'string' ? [sub] : (sub || new Array())
 
 script(data-swup-reload-script).
   window.typedJSFn = {
     _seq: 0,
-    signal: btf.pageSignal,
+    signal: dragonfly.pageSignal,
     init: str => {
       window.typed = new Typed('#subtitle', Object.assign({
         strings: str,
@@ -24,7 +25,7 @@ script(data-swup-reload-script).
 
       if (!{effect}) {
         if (typeof Typed === 'function') invoke()
-        else btf.getScript('!{url_for(theme.asset.typed)}').then(invoke)
+        else dragonfly.getScript('!{url_for(theme.asset.typed)}').then(invoke)
       } else {
         invoke()
       }
@@ -66,7 +67,7 @@ script(data-swup-reload-script).
       }
     }
   }
-  btf.addGlobalFn('pageCleanup', () => {
+  dragonfly.addGlobalFn('pageCleanup', () => {
     window.typedJSFn._seq++
     window.typed?.destroy()
     window.typed = null
@@ -102,7 +103,7 @@ case source
     script(data-swup-reload-script).
       function subtitleType () {
         typedJSFn.fetchSubtitle(
-          () => btf.getScript('https://sdk.jinrishici.com/v2/browser/jinrishici.js').then(() =>
+          () => dragonfly.getScript('https://sdk.jinrishici.com/v2/browser/jinrishici.js').then(() =>
             new Promise((resolve, reject) => {
               jinrishici.load(result => {
                 if (result && result.data && result.data.content) resolve(result.data.content)
