@@ -30,14 +30,14 @@ npm run test:integration
 | 命令 | 验证范围 |
 | --- | --- |
 | `npm test` | 配置、渲染、生命周期、构建清单和归档内容 |
-| `npm run test:integration` | 独立站点的八组配置与浏览器交互 |
+| `npm run test:integration` | 独立站点的十组配置与浏览器交互 |
 | `npm run test:package` | 打包后安装生产依赖，验证实际消费端构建 |
 | `npm run test:site -- /path/to/site` | 在现有博客中添加临时组件文章，验证后清理 |
 | `npm run test:browser -- /path/to/public` | 检查已生成的完整回归夹具站点 |
 
 最后一个命令需要测试夹具中的固定页面，普通博客使用 `test:site`。`test:site` 会运行现有博客的构建插件；使用已有备份或测试副本更便于保留构建状态。
 
-八组配置为 `default`、`components`、`subpath`、`navigation-off`、`cdn-modules`、`development`、`algolia`、`legacy-images`。测试默认将第三方 URL 映射到本地安装的实际发行文件。
+十组配置为 `default`、`components`、`subpath`、`navigation-off`、`cdn-modules`、`development`、`algolia`、`legacy-images`、`npmmirror`、`zstatic`。测试默认将第三方 URL 映射到本地安装的实际发行文件。
 
 ```sh
 # 单独检查子路径部署，并保留生成目录。

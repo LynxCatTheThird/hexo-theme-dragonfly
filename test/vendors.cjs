@@ -19,7 +19,7 @@ module.exports = async (context, { allowCustom = false } = {}) => {
     let match
     if (url.hostname === 'registry.npmmirror.com') match = url.pathname.match(/^\/(@[^/]+\/[^/]+|[^/]+)\/[^/]+\/files\/(.+)$/)
     else if (['cdn.jsdelivr.net', 'unpkg.com'].includes(url.hostname)) match = url.pathname.match(/^\/(?:npm\/)?(@[^/]+\/[^/@]+|[^/@]+)(?:@[^/]+)?\/(.+)$/)
-    else if (url.hostname === 'cdnjs.cloudflare.com') {
+    else if (['cdnjs.cloudflare.com', 's4.zstatic.net'].includes(url.hostname)) {
       const cdnjs = url.pathname.match(/^\/ajax\/libs\/([^/]+)\/[^/]+\/(.+)$/)
       const data = cdnjs && Object.values(plugins).find(data => (data.other_name || data.name) === cdnjs[1])
       if (data) match = [null, data.name, (data.file.match(/^(?:lib|dist|browser)\//)?.[0] || '') + cdnjs[2]]
@@ -29,8 +29,8 @@ module.exports = async (context, { allowCustom = false } = {}) => {
     const [, name, asset] = match
     if (allowCustom && !Object.values(plugins).some(plugin => plugin.name === name)) return route.fallback()
     let file = path.resolve(__dirname, '../node_modules', name, asset)
-    // jsDelivr 可以为未附带压缩版的 JS 和 CSS 生成 .min 地址。
-    if (['cdn.jsdelivr.net', 'cdnjs.cloudflare.com'].includes(url.hostname) && !fs.existsSync(file)) file = file.replace(/\.min\.(js|css)$/, '.$1')
+    // CDN 压缩文件映射到本地发行文件；浏览器测试验证 URL 规则与运行行为。
+    if (['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 's4.zstatic.net'].includes(url.hostname) && !fs.existsSync(file)) file = file.replace(/\.min\.(js|css)$/, '.$1')
     const base = path.resolve(__dirname, '../node_modules', name) + path.sep
     if (!file.startsWith(base) || !fs.existsSync(file)) throw new Error(`Missing test vendor: ${name}/${asset}`)
     await route.fulfill({ contentType: types[path.extname(file)] || 'application/octet-stream', headers: { 'access-control-allow-origin': '*' }, body: fs.readFileSync(file) })

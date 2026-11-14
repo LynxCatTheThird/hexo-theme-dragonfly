@@ -28,7 +28,7 @@ const run = (args, site, env = {}) => {
   if (result.status !== 0 || /^ERROR\b/m.test((result.stdout || '') + (result.stderr || ''))) throw result.error || new Error(`Test failed in ${site}: ${result.status}`)
 }
 try {
-  for (const variant of ['default', 'components', 'subpath', 'navigation-off', 'cdn-modules', 'development', 'algolia', 'legacy-images']) {
+  for (const variant of ['default', 'components', 'subpath', 'navigation-off', 'cdn-modules', 'development', 'algolia', 'legacy-images', 'npmmirror', 'zstatic']) {
     if (process.env.TEST_VARIANT && process.env.TEST_VARIANT !== variant) continue
     const site = path.join(temp, variant)
     fs.mkdirSync(path.join(site, 'source/_posts'), { recursive: true })
@@ -59,6 +59,13 @@ try {
       config.theme_config.navigation = { enable: true }
     }
     if (variant === 'legacy-images') config.theme_config.lazyload = { enable: true, native: false, field: 'post' }
+    if (['npmmirror', 'zstatic'].includes(variant)) {
+      config.root = '/blog/'
+      config.url += '/blog'
+      config.theme_config.CDN = { internal_provider: 'local', third_party_provider: variant }
+      // Swup 核心包的静态分发尚待 npmmirror 白名单生效，沿用站点的单项覆盖。
+      if (variant === 'npmmirror') config.theme_config.CDN.option = { swup: 'https://cdnjs.cloudflare.com/ajax/libs/swup/4.10.0/Swup.umd.min.js' }
+    }
     if (process.env.TEST_PROVIDER) config.theme_config.CDN.third_party_provider = process.env.TEST_PROVIDER
     fs.writeFileSync(path.join(site, '_config.yml'), JSON.stringify(config))
     for (const slug of ['tags', 'about', 'policy']) {

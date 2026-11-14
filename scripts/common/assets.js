@@ -8,7 +8,7 @@ const internalAssets = Object.fromEntries(Object.entries({
   echarts_runtime: 'js/echarts.js', local_search: 'js/search/local-search.js', algolia_js: 'js/search/algolia.js',
   main_css: 'css/index.css'
 }).map(([key, file]) => [key, { name: 'hexo-theme-dragonfly', version, file, generated: key === 'main_css' }]))
-const providers = ['local', 'jsdelivr', 'unpkg', 'cdnjs', 'custom']
+const providers = ['local', 'jsdelivr', 'unpkg', 'cdnjs', 'npmmirror', 'zstatic', 'custom']
 const minifyPath = file => file.replace(/(?<!\.min)\.(js|css)$/, '.min.$1')
 const validURL = (value, key) => {
   if (typeof value !== 'string' || !value.trim() || /[<>\s]|\$\{/.test(value) || (/^[\w+.-]+:/.test(value) && !/^https?:\/\//.test(value))) {
@@ -53,7 +53,9 @@ const resolveAssets = (config, thirdParty, internal = internalAssets) => {
         local: (own ? data.file : `/pluginsSrc/${data.name}/${data.file}`) + (cdn.version ? `?v=${data.version}` : ''),
         jsdelivr: `https://cdn.jsdelivr.net/npm/${data.name}${version}/${values.min_file}`,
         unpkg: `https://unpkg.com/${data.name}${version}/${file}`,
-        cdnjs: `https://cdnjs.cloudflare.com/ajax/libs/${values.cdnjs_name}/${data.version}/${values.min_cdnjs_file}`
+        cdnjs: `https://cdnjs.cloudflare.com/ajax/libs/${values.cdnjs_name}/${data.version}/${values.min_cdnjs_file}`,
+        npmmirror: `https://registry.npmmirror.com/${data.name}/${data.version}/files/${file}`,
+        zstatic: `https://s4.zstatic.net/ajax/libs/${values.cdnjs_name}/${data.version}/${values.min_cdnjs_file}`
       }
       if (provider === 'custom') {
         const format = own && cdn.internal_custom_format != null ? cdn.internal_custom_format : cdn.custom_format
@@ -63,7 +65,8 @@ const resolveAssets = (config, thirdParty, internal = internalAssets) => {
           return values[token]
         })
       }
-      result[key] = validURL(provider === 'cdnjs' && data.cdnjs === false ? urls.unpkg : urls[provider], key)
+      // zstatic 使用 cdnjs 目录，缺少对应库时与 cdnjs 一样转用 unpkg。
+      result[key] = validURL(['cdnjs', 'zstatic'].includes(provider) && data.cdnjs === false ? urls.unpkg : urls[provider], key)
     }
     if (own && /hexo-theme-butterfly/.test(result[key])) throw new Error(`CDN.${key}: internal assets must belong to Dragonfly`)
   }

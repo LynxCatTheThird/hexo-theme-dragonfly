@@ -236,7 +236,34 @@ waline:
 
 内部 provider 为 `custom` 且独立模板为空时，会回退到 `custom_format`。主题代码通常与 npm 镜像采用不同的目录布局，自建 CDN 时宜明确填写独立模板。完整逐项覆盖清单已列在 [_config.yml](../_config.yml) 的 `CDN.option` 下，取消所需行的注释即可填写。
 
-内部资源支持 `local`、`custom`；第三方支持 `local`、`jsdelivr`、`unpkg`、`cdnjs`、`custom`。本地第三方文件放在站点 `source/pluginsSrc/<包名>/<文件路径>`，版本和路径见 [plugins.yml](../plugins.yml)。仅选择 `local` 不会下载这些组件。
+内部资源支持 `local`、`custom`；第三方支持 `local`、`jsdelivr`、`unpkg`、`cdnjs`、`npmmirror`、`zstatic`、`custom`。本地第三方文件放在站点 `source/pluginsSrc/<包名>/<文件路径>`，版本和路径见 [plugins.yml](../plugins.yml)。仅选择 `local` 不会下载这些组件。
+
+npmmirror 与 zstatic 已内置地址模板，可直接选择：
+
+```yaml
+CDN:
+  internal_provider: local
+  third_party_provider: npmmirror # 也可选 zstatic
+```
+
+| provider | 内置地址规则 |
+| --- | --- |
+| `npmmirror` | `https://registry.npmmirror.com/${name}/${version}/files/${file}` |
+| `zstatic` | `https://s4.zstatic.net/ajax/libs/${cdnjs_name}/${version}/${min_cdnjs_file}` |
+
+这两个 provider 的主地址固定包含版本；`custom_format` 仅在选用 `custom` 时读取，原有自定义模板继续有效。zstatic 使用 cdnjs 的名称、路径和压缩文件映射；标记 `cdnjs: false` 的组件与 cdnjs provider 一样回退到 unpkg。
+
+npmmirror 的 npm 包镜像与静态文件分发使用不同规则。2026-11-14 核查时，Swup 核心包的静态地址仍受白名单限制，四个 `@swup/*` 插件可访问。因此站点暂保留以下单项覆盖，待上游白名单发布并验证地址可用后再移除：
+
+```yaml
+CDN:
+  third_party_provider: npmmirror
+  option:
+    swup: https://cdnjs.cloudflare.com/ajax/libs/swup/4.10.0/Swup.umd.min.js
+```
+
+浏览器回归使用本地发行文件验证 URL 规则与组件运行；实际 CDN 可达性单独检查。此次网络检查中部分 zstatic URL 返回 403/1010，实际可达性由服务端策略与网络环境决定。内置回退依据资源清单，在构建时确定最终 URL。
+
 
 ```yaml
 CDN:
@@ -259,7 +286,7 @@ CDN:
 
 主题内部脚本需要连同其引用的全部 chunk 一起上传；字体样式表还需要能访问相对路径下的字体文件。页面、文章图片及 `inject` 中手写的 URL 不经过这套资源映射，按各自配置设置地址。
 
-单项 `CDN.option` 优先于 provider；开发模式强制内部资源使用本地构建，并忽略其单项覆盖。生产模式下，站点生成的 CSS 默认使用本地地址，显式的 `CDN.option.main_css` 可指定其他地址。`cdnjs` 对 `plugins.yml` 中标记 `cdnjs: false` 的资源回退到 unpkg。
+单项 `CDN.option` 优先于 provider；开发模式强制内部资源使用本地构建，并忽略其单项覆盖。生产模式下，站点生成的 CSS 默认使用本地地址，显式的 `CDN.option.main_css` 可指定其他地址。`cdnjs` 和 `zstatic` 对 `plugins.yml` 中标记 `cdnjs: false` 的资源回退到 unpkg。
 
 | 占位符 | 内容 |
 | --- | --- |
