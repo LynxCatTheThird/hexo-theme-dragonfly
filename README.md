@@ -249,3 +249,9 @@ KaTeX renders at site build time; `math.katex.mhchem: true` enables chemistry wi
 Markdown ownership is configured in the site's `theme_config.markdown.renderer` (or `_config.butterfly.yml`). `auto` uses the built-in renderer only when no Markdown renderer is installed; `theme` explicitly selects it; `external` preserves site rendering. Built-in math options and Markdown extensions apply only to the theme renderer; external renderers own their math parsing.
 
 Page scripts must opt in to navigation execution with `data-swup-reload-script`. A module URL runs once per session; register an explicit `pageLoad` callback for subsequent mounts.
+
+Dragonfly packages use `hexo-theme-dragonfly` (`theme: dragonfly` for npm installation). Node 22.14+ is required; CI checks Node 22 and 24. Git installs may keep the `themes/butterfly` directory.
+
+`npm run release:prepare` creates the npm archive, complete browser assets, source commit and SHA-256 checksums in `dist/release/`. `npm run test:package -- /path/to/archive.tgz` verifies a clean production installation. The release workflow accepts an existing `vX.Y.Z` tag matching the package version; manual runs prepare artifacts by default. Publishing requires the explicit publish input or a published GitHub release and npm trusted-publisher configuration.
+
+For a custom CDN, upload the entire assets archive under an immutable version prefix before switching `CDN.internal_custom_format`. Serve JavaScript with a JavaScript MIME type and cross-origin access; use long immutable caching only for versioned assets. Keep old chunks available for cached pages; HTML, mutable manifests and site-generated CSS must revalidate. Roll back the whole asset version together.

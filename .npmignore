@@ -4,3 +4,4 @@ node_modules/
 /.github/
 /dist/source/js/build/development/
 /dist/manifest-development.json
+/dist/release/

@@ -7,12 +7,16 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: ${{ matrix.node }}
       - run: npm install --ignore-scripts --no-package-lock
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:integration
+      - run: npm run test:package

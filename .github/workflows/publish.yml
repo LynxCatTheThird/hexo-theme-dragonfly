@@ -1,21 +1,65 @@
-name: npm publish
+name: Prepare and publish Dragonfly
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag matching package version (vX.Y.Z)
+        required: true
+        type: string
+      publish:
+        description: Publish the verified archive to npm
+        default: false
+        type: boolean
   release:
-    types: [created]
+    types: [published]
+permissions:
+  contents: read
 jobs:
+  prepare:
+    if: github.repository == 'LynxCatTheThird/hexo-theme-dragonfly'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-package-lock
+      - run: npm ls --all --json > "$RUNNER_TEMP/dragonfly-dependencies.json"
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:integration
+      - run: npm run release:prepare
+      - name: Install and test the prepared package
+        run: node test/package.cjs "dist/release/$(node -p "require('./dist/release/release.json').archive")"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dragonfly-release
+          path: dist/release/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dragonfly-dependencies
+          path: ${{ runner.temp }}/dragonfly-dependencies.json
   publish:
+    needs: prepare
+    if: github.event_name == 'release' || inputs.publish
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write          # OIDC 必須
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dragonfly-release
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'   # trusted publishing 需要 >= 22.14
-      - run: npm install -g npm@latest
-      - run: npm install
-      - name: Publish
-        run: |
-          echo "repo=$GITHUB_REPOSITORY"
-          npm publish --access public
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - run: sha256sum --check SHA256SUMS
+      - name: Publish the tested archive without rebuilding
+        run: npm publish "$(node -p "require('./release.json').archive")" --ignore-scripts --access public --provenance

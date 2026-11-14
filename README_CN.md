@@ -249,3 +249,9 @@ KaTeX 在站點建置時渲染；`math.katex.mhchem: true` 啟用化學公式，
 在站點 `theme_config.markdown.renderer`（或 `_config.butterfly.yml`）設定 Markdown 所有權。`auto` 僅在未安裝 Markdown 渲染器時使用主題內建渲染器；`theme` 明確選用內建渲染器；`external` 保留站點渲染。內建數學選項與 Markdown 擴展僅適用於主題渲染器；外部渲染器自行處理公式解析。
 
 頁面腳本須以 `data-swup-reload-script` 明確選擇切頁後執行。同一模組 URL 每個會話只執行一次；後續掛載請註冊明確的 `pageLoad` 回調。
+
+Dragonfly 分發包名為 `hexo-theme-dragonfly`（npm 安裝時使用 `theme: dragonfly`）。要求 Node 22.14+，CI 驗證 Node 22 和 24；Git 安裝可保留 `themes/butterfly` 目錄。
+
+`npm run release:prepare` 在 `dist/release/` 生成 npm 包、完整瀏覽器資產、來源提交與 SHA-256 校驗和。`npm run test:package -- /path/to/archive.tgz` 驗證獨立生產安裝。發布工作流接受與包版本一致的現有 `vX.Y.Z` 標籤，手動運行默認只生成產物；公開發布需要顯式 publish 輸入或已發布的 GitHub release，並配置 npm trusted publisher。
+
+自定義 CDN 應先把完整資產包上傳到不可變的版本前綴，再切換 `CDN.internal_custom_format`。JavaScript 應提供正確 MIME 與跨域訪問；長期不可變緩存僅用於版本化資產。保留舊 chunk 供緩存頁面使用；HTML、可變清單和站點生成的 CSS 需要重新驗證。回退時切換整套資產版本。

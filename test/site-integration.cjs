@@ -52,7 +52,8 @@ const run = (file, args, env = process.env) => {
       }
     }))
     run(path.join(site, 'node_modules/.bin/hexo'), ['generate', '--config', `${path.join(site, '_config.yml')},${config}`])
-    run(process.execPath, [path.join(__dirname, 'browser.cjs'), output], { ...process.env, MOCK_VISITOR_COUNTER: '1' })
+    const root = require('js-yaml').load(fs.readFileSync(path.join(site, '_config.yml'), 'utf8')).root || '/'
+    run(process.execPath, [path.join(__dirname, 'site-browser.cjs'), output], { ...process.env, TEST_ROOT: root })
   } finally {
     created.forEach(file => fs.unlinkSync(file))
     if (process.env.TEST_KEEP_OUTPUT) console.log('Test output:', temp)

@@ -89,6 +89,10 @@ module.exports = async (browser, origin, mount = '/', provider = 'local') => {
     await dialog.waitFor()
     await dialog.locator('input[type=search]').waitFor()
     await page.setViewportSize({ width: 390, height: 500 })
+    await page.waitForFunction(() => {
+      const box = document.querySelector('dialog[open]').getBoundingClientRect()
+      return box.width <= 390 && box.height <= 500
+    })
     const box = await dialog.boundingBox()
     assert.ok(box.width <= 390 && box.height <= 500)
     assert.ok(await dialog.locator('input[type=search]').isVisible())
