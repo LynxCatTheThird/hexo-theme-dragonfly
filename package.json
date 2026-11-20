@@ -1,7 +1,7 @@
 {
   "_comment": "Dragonfly 项目修改；采用 Apache-2.0，来源与原作者署名见 NOTICE。",
   "name": "hexo-theme-dragonfly",
-  "version": "5.7.2",
+  "version": "6.0.0-alpha.1",
   "description": "Dragonfly：基于 Hexo 的静态博客主题",
   "main": "package.json",
   "scripts": {
