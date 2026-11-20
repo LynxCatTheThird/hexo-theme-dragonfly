@@ -12,6 +12,9 @@
 
 [配置指南](docs/configuration.md) · [文章写作](docs/writing.md) · [开发与分发](docs/development.md) · [迁移说明](docs/migration.md) · [报告问题](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/issues)
 
+> [!WARNING]
+> Dragonfly 的开发高度依赖 AI 编程工具。自动化测试可能遗漏特定配置下的问题。部署或升级前，请备份站点配置，用自己的文章在本地预览，并检查常用功能。
+
 ## 安装
 
 使用 Node.js 22.14 或更高版本、Hexo 8；测试覆盖 Node.js 22、24。主题的兼容检查最低接受 Hexo 5.3，旧版本需自行验证所用组件。
@@ -42,6 +45,8 @@ cp themes/dragonfly/_config.yml _config.dragonfly.yml
 欢迎通过 [Issue](https://github.com/LynxCatTheThird/hexo-theme-dragonfly/issues) 或 Pull Request 提交问题、改进和测试结果。
 
 Dragonfly 基于 Jerry（CrazyWong）及贡献者维护的 [Butterfly](https://github.com/jerryc127/hexo-theme-butterfly)，其历史基础是 Molunerfinn 的 [Melody](https://github.com/Molunerfinn/hexo-theme-melody)。感谢原作者与各项目贡献者提供的基础。Dragonfly 独立维护，问题反馈请使用本仓库的入口。
+
+感谢 EvanNotFound 和 [Redefine](https://github.com/EvanNotFound/hexo-theme-redefine) 的贡献者。Dragonfly 在设计 CDN 配置时参考了 Redefine 的做法。
 
 主题采用 [Apache License 2.0](LICENSE)，原始来源、保留署名和第三方许可见 [NOTICE](NOTICE) 与 [LICENSES](LICENSES)。站点文章的版权设置独立于主题代码许可。
 

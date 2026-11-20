@@ -1,4 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0；Dragonfly 项目文件，来源与署名见 NOTICE。 -->
+
 # 文章写作
 
 正文使用 Markdown，主题标签由 Hexo 在构建时展开。以下示例按内置 Markdown 渲染器编写，启用方式见[配置指南](configuration.md#markdown-与公式)。
@@ -16,19 +17,19 @@ comments: true
 ---
 ```
 
-| 字段 | 作用 |
-| --- | --- |
-| `cover` | 文章列表封面，也可作为文章顶部图片的回退值 |
-| `top_img` | 当前页顶部图片；`false` 关闭顶部封面 |
-| `description` | 摘要来源之一，是否使用由 `index_post_content.method` 决定 |
-| `math` | `katex`、`mathjax` 或 `false`，覆盖默认公式引擎 |
-| `toc` | 当前文章或独立页面的目录开关 |
-| `toc_number`、`toc_expand` | 覆盖目录编号与默认展开行为 |
-| `toc_style_simple` | 当前文章的简化目录布局 |
-| `aside` | `false` 隐藏当前文章或独立页面的侧栏 |
-| `comments` | `false` 隐藏当前页评论区 |
-| `series` | 当前文章所属系列名称，用于系列标签与侧栏卡片 |
-| `abcjs` | 在 `abcjs.enable: true`、`per_page: false` 时为当前页启用乐谱 |
+| 字段                       | 作用                                                          |
+| -------------------------- | ------------------------------------------------------------- |
+| `cover`                    | 文章列表封面，也可作为文章顶部图片的回退值                    |
+| `top_img`                  | 当前页顶部图片；`false` 关闭顶部封面                          |
+| `description`              | 摘要来源之一，是否使用由 `index_post_content.method` 决定     |
+| `math`                     | `katex`、`mathjax` 或 `false`，覆盖默认公式引擎               |
+| `toc`                      | 当前文章或独立页面的目录开关                                  |
+| `toc_number`、`toc_expand` | 覆盖目录编号与默认展开行为                                    |
+| `toc_style_simple`         | 当前文章的简化目录布局                                        |
+| `aside`                    | `false` 隐藏当前文章或独立页面的侧栏                          |
+| `comments`                 | `false` 隐藏当前页评论区                                      |
+| `series`                   | 当前文章所属系列名称，用于系列标签与侧栏卡片                  |
+| `abcjs`                    | 在 `abcjs.enable: true`、`per_page: false` 时为当前页启用乐谱 |
 
 目录根据正文标题生成。归档、标签和分类详情页的侧栏由主题 `aside.display` 控制。
 
@@ -71,7 +72,7 @@ $$
 ```markdown
 {% mermaid %}
 flowchart LR
-  A[开始] --> B[完成]
+A[开始] --> B[完成]
 {% endmermaid %}
 ```
 
@@ -83,12 +84,18 @@ flowchart LR
 
 ```markdown
 {% chartjs 90,,example-chart %}
+
 <!-- chart -->
+
 {"type":"bar","data":{"labels":["A","B"],"datasets":[{"label":"数量","data":[3,5]}]}}
+
 <!-- endchart -->
 <!-- desc -->
+
 两组数据的数量比较。
+
 <!-- enddesc -->
+
 {% endchartjs %}
 ```
 
@@ -135,12 +142,18 @@ C D E F | G A B c |
 
 ```markdown
 {% tabs example,1 %}
+
 <!-- tab 第一项 -->
+
 第一项的正文。
+
 <!-- endtab -->
 <!-- tab 第二项@fas fa-code -->
+
 第二项的正文。
+
 <!-- endtab -->
+
 {% endtabs %}
 ```
 

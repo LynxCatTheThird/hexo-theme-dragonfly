@@ -63,8 +63,6 @@ try {
       config.root = '/blog/'
       config.url += '/blog'
       config.theme_config.CDN = { internal_provider: 'local', third_party_provider: variant }
-      // Swup 核心包的静态分发尚待 npmmirror 白名单生效，沿用站点的单项覆盖。
-      if (variant === 'npmmirror') config.theme_config.CDN.option = { swup: 'https://cdnjs.cloudflare.com/ajax/libs/swup/4.10.0/Swup.umd.min.js' }
     }
     if (process.env.TEST_PROVIDER) config.theme_config.CDN.third_party_provider = process.env.TEST_PROVIDER
     fs.writeFileSync(path.join(site, '_config.yml'), JSON.stringify(config))

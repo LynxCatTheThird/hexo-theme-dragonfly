@@ -35,7 +35,6 @@ social:
   # fab fa-github: https://github.com/你的账号 || GitHub || '#24292e'
   # fas fa-envelope: mailto:hello@example.com || 联系邮箱
 
-
 # 外观与布局
 # ────────────────────────────────
 
@@ -243,7 +242,6 @@ rightside_item_order:
 # 右侧设置按钮的旋转动效。
 rightside_config_animation: true
 
-
 # 封面与图片
 # ────────────────────────────────
 
@@ -320,7 +318,6 @@ lightbox: null
 # 传给所选图片查看器的参数。
 lightbox_options: {}
 
-
 # 首页与归档
 # ────────────────────────────────
 
@@ -359,7 +356,6 @@ category_ui: null
 
 # 标签页样式：index 使用首页布局，留空使用归档布局。
 tag_ui: null
-
 
 # 文章阅读
 # ────────────────────────────────
@@ -467,7 +463,6 @@ wordcount:
   post_wordcount: true
   min2read: true
   total_wordcount: true
-
 
 # 内容渲染
 # ────────────────────────────────
@@ -599,7 +594,6 @@ chartjs:
     light: transparent
     dark: transparent
 
-
 # 搜索与评论
 # ────────────────────────────────
 
@@ -671,7 +665,6 @@ waline:
   pageview: false
   option: null
 
-
 # 统计与搜索引擎
 # ────────────────────────────────
 
@@ -715,7 +708,6 @@ structured_data:
   # 站点别名数组，用于结构化数据。
   alternate_name:
     # - 我的博客
-
 
 # 动效与加载
 # ────────────────────────────────
@@ -788,7 +780,6 @@ clickShowText:
   random: false
   mobile: false
 
-
 # 导航与资源
 # ────────────────────────────────
 
@@ -810,9 +801,9 @@ CDN:
   # 主题内部代码：local / custom。
   internal_provider: local
   # 第三方资源：local / jsdelivr / unpkg / cdnjs / npmmirror / zstatic / custom。
-  third_party_provider: jsdelivr
+  third_party_provider: npmmirror
   # 控制 local/jsdelivr/unpkg 的版本标记；cdnjs/npmmirror/zstatic 主地址固定包含版本。
-  version: true
+  version: false
   # 开发构建始终使用本地主题代码。
   development: false
   # npmmirror 和 zstatic 已内置地址规则，直接选择 provider 即可。
@@ -868,7 +859,7 @@ CDN:
     # medium_zoom:
     # lazyload:
     # egjs_infinitegrid:
-    # fontawesome: https://cdn.example.com/fontawesome/css/all.min.css
+    # fontawesome:
     # prismjs_js:
     # prismjs_autoloader:
     # prismjs_lineNumber_js:
@@ -887,7 +878,6 @@ CDN:
 
 # 通过 Stylus 添加浏览器样式前缀。
 css_prefix: true
-
 
 # 应用与扩展
 # ────────────────────────────────

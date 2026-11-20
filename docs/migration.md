@@ -1,17 +1,18 @@
 <!-- SPDX-License-Identifier: Apache-2.0；Dragonfly 项目文件，来源与署名见 NOTICE。 -->
+
 # 迁移到 Dragonfly
 
 先保存现有配置和自定义改动，再更新主题代码。本文用于已有站点；新站点直接按 [README](../README.md#安装) 安装。
 
 ## 名称对应
 
-| 旧名称 | 新名称 |
-| --- | --- |
-| `themes/butterfly` | `themes/dragonfly` |
-| `_config.butterfly.yml` | `_config.dragonfly.yml` |
-| `theme: butterfly` | `theme: dragonfly` |
-| 浏览器接口 `btf` | `dragonfly` |
-| `/img/butterfly-icon.png` | `/img/dragonfly.svg` |
+| 旧名称                    | 新名称                  |
+| ------------------------- | ----------------------- |
+| `themes/butterfly`        | `themes/dragonfly`      |
+| `_config.butterfly.yml`   | `_config.dragonfly.yml` |
+| `theme: butterfly`        | `theme: dragonfly`      |
+| 浏览器接口 `btf`          | `dragonfly`             |
+| `/img/butterfly-icon.png` | `/img/dragonfly.svg`    |
 
 主题目录、站点的 `theme` 与根目录配置文件名要对应。保留已有 `_config.butterfly.yml` 的内容并重命名，可以沿用头像、封面、评论和文章许可设置；主题默认配置用于逐项核对新增字段。
 

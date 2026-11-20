@@ -1,17 +1,18 @@
 <!-- SPDX-License-Identifier: Apache-2.0；Dragonfly 项目文件，来源与署名见 NOTICE。 -->
+
 # 配置指南
 
-本文说明配置位置、常用组合和生效条件。完整字段见 [_config.yml](../_config.yml)；文章格式与图表、标签示例见[文章写作](writing.md)。
+本文说明配置位置、常用组合和生效条件。完整字段见 [\_config.yml](../_config.yml)；文章格式与图表、标签示例见[文章写作](writing.md)。
 
 ## 配置放在哪里
 
-| 位置 | 职责 | 示例 |
-| --- | --- | --- |
-| 站点 `_config.yml` | Hexo 地址、目录、生成器和插件 | `url`、`root`、`theme`、`search.path` |
-| 站点 `_config.dragonfly.yml` | 日常主题设置 | 菜单、侧栏、公式、评论、CDN |
-| 站点 `_config.yml` 的 `theme_config` | 对主题设置的进一步覆盖 | 临时验证或多环境配置 |
-| 主题目录 `_config.yml` | 随版本维护的主题默认设置 | 新字段的默认值与说明 |
-| 文章 front matter | 当前文章的局部设置 | `math`、`toc`、`aside`、`comments` |
+| 位置                                 | 职责                          | 示例                                  |
+| ------------------------------------ | ----------------------------- | ------------------------------------- |
+| 站点 `_config.yml`                   | Hexo 地址、目录、生成器和插件 | `url`、`root`、`theme`、`search.path` |
+| 站点 `_config.dragonfly.yml`         | 日常主题设置                  | 菜单、侧栏、公式、评论、CDN           |
+| 站点 `_config.yml` 的 `theme_config` | 对主题设置的进一步覆盖        | 临时验证或多环境配置                  |
+| 主题目录 `_config.yml`               | 随版本维护的主题默认设置      | 新字段的默认值与说明                  |
+| 文章 front matter                    | 当前文章的局部设置            | `math`、`toc`、`aside`、`comments`    |
 
 在当前支持的 Hexo 加载流程中，优先级为：站点 `theme_config` → 站点 `_config.dragonfly.yml` → 主题配置与程序默认值。嵌套对象逐层合并；数组可能合并而非整体替换，因此菜单、评论服务和图片列表等设置宜集中写在同一处。
 
@@ -49,8 +50,7 @@ URL 本身保持在一个物理行上；编辑器的视觉自动折行不影响�
 ```yaml
 CDN:
   option:
-    fontawesome:
-      https://cdn.example.com/fontawesome/css/all.min.css
+    fontawesome: https://cdn.example.com/fontawesome/css/all.min.css
 ```
 
 带子项的空配置使用 `menu:` 这类写法，便于直接启用下方的注释示例。原来写成 `menu: null` 时，要先删去同一行的 `null`，再添加缩进子项。`options: {}` 改为多行对象时也要移除 `{}`，例如：
@@ -112,11 +112,11 @@ footer:
 
 ## 封面、正文图片与灯箱
 
-| 位置 | 图片选择顺序 |
-| --- | --- |
-| 文章顶部 | 文章 `top_img` → 文章 `cover` → `default_top_img` |
-| 独立页面顶部 | 页面 `top_img` → `default_top_img` |
-| 首页、归档页 | `index_img` / `archive_img` → `default_top_img` |
+| 位置             | 图片选择顺序                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| 文章顶部         | 文章 `top_img` → 文章 `cover` → `default_top_img`                                    |
+| 独立页面顶部     | 页面 `top_img` → `default_top_img`                                                   |
+| 首页、归档页     | `index_img` / `archive_img` → `default_top_img`                                      |
 | 标签、分类详情页 | `tag_per_img` / `category_per_img` 中的对应名称 → 通用详情页封面 → `default_top_img` |
 
 `disable_top_img: true` 全局关闭顶部封面，文章或页面的 `top_img: false` 单独关闭当前页。`cover` 下的三个开关分别控制首页、侧栏和归档中的文章封面显示。
@@ -124,8 +124,14 @@ footer:
 普通文章图默认保留真实 `src`、`srcset` 与尺寸，并补充浏览器原生懒加载属性。`lazyload.field: post` 处理正文，`site` 处理完整页面；专用图库保留自己的布局和加载流程。首屏关键图可写为：
 
 ```html
-<img src="/img/cover.jpg" width="1200" height="675"
-     loading="eager" fetchpriority="high" alt="文章封面">
+<img
+  src="/img/cover.jpg"
+  width="1200"
+  height="675"
+  loading="eager"
+  fetchpriority="high"
+  alt="文章封面"
+/>
 ```
 
 `lazyload.native: false` 使用旧插件加载方式，普通图片会使用占位图。`no-lazyload` 类保留立即加载，`no-lightbox` 类让图片使用普通点击行为。`photofigcaption` 开启后，图注优先使用图片的 `title`，其次使用 `alt`。
@@ -134,11 +140,11 @@ footer:
 
 ## Markdown 与公式
 
-| `markdown.renderer` | 行为 |
-| --- | --- |
-| `auto` | 站点已注册 Markdown 渲染器时保留它，否则使用内置实现 |
-| `theme` | 由主题处理 `.md` 和 `.markdown` |
-| `external` | 使用站点渲染器，由站点负责 Markdown 扩展和公式解析 |
+| `markdown.renderer` | 行为                                                 |
+| ------------------- | ---------------------------------------------------- |
+| `auto`              | 站点已注册 Markdown 渲染器时保留它，否则使用内置实现 |
+| `theme`             | 由主题处理 `.md` 和 `.markdown`                      |
+| `external`          | 使用站点渲染器，由站点负责 Markdown 扩展和公式解析   |
 
 内置实现提供脚注、任务列表、上下标等扩展，并在文章渲染阶段处理公式。以下组合适合需要公式的站点：
 
@@ -228,13 +234,13 @@ waline:
 
 自定义 URL 有三种入口，都位于主题配置的 `CDN` 段：
 
-| 配置 | 用途 | 生效条件 |
-| --- | --- | --- |
-| `custom_format` | 批量生成第三方资源的完整 URL | `third_party_provider: custom` |
-| `internal_custom_format` | 为主题内部 JS 使用独立 URL 模板 | `internal_provider: custom` |
-| `option.<资源键>` | 直接指定单个文件的完整 URL | 对应项填写非空地址；开发模式忽略内部项 |
+| 配置                     | 用途                            | 生效条件                               |
+| ------------------------ | ------------------------------- | -------------------------------------- |
+| `custom_format`          | 批量生成第三方资源的完整 URL    | `third_party_provider: custom`         |
+| `internal_custom_format` | 为主题内部 JS 使用独立 URL 模板 | `internal_provider: custom`            |
+| `option.<资源键>`        | 直接指定单个文件的完整 URL      | 对应项填写非空地址；开发模式忽略内部项 |
 
-内部 provider 为 `custom` 且独立模板为空时，会回退到 `custom_format`。主题代码通常与 npm 镜像采用不同的目录布局，自建 CDN 时宜明确填写独立模板。完整逐项覆盖清单已列在 [_config.yml](../_config.yml) 的 `CDN.option` 下，取消所需行的注释即可填写。
+内部 provider 为 `custom` 且独立模板为空时，会回退到 `custom_format`。主题代码通常与 npm 镜像采用不同的目录布局，自建 CDN 时宜明确填写独立模板。完整逐项覆盖清单已列在 [\_config.yml](../_config.yml) 的 `CDN.option` 下，取消所需行的注释即可填写。
 
 内部资源支持 `local`、`custom`；第三方支持 `local`、`jsdelivr`、`unpkg`、`cdnjs`、`npmmirror`、`zstatic`、`custom`。本地第三方文件放在站点 `source/pluginsSrc/<包名>/<文件路径>`，版本和路径见 [plugins.yml](../plugins.yml)。仅选择 `local` 不会下载这些组件。
 
@@ -246,24 +252,14 @@ CDN:
   third_party_provider: npmmirror # 也可选 zstatic
 ```
 
-| provider | 内置地址规则 |
-| --- | --- |
-| `npmmirror` | `https://registry.npmmirror.com/${name}/${version}/files/${file}` |
-| `zstatic` | `https://s4.zstatic.net/ajax/libs/${cdnjs_name}/${version}/${min_cdnjs_file}` |
+| provider    | 内置地址规则                                                                  |
+| ----------- | ----------------------------------------------------------------------------- |
+| `npmmirror` | `https://registry.npmmirror.com/${name}/${version}/files/${file}`             |
+| `zstatic`   | `https://s4.zstatic.net/ajax/libs/${cdnjs_name}/${version}/${min_cdnjs_file}` |
 
 这两个 provider 的主地址固定包含版本；`custom_format` 仅在选用 `custom` 时读取，原有自定义模板继续有效。zstatic 使用 cdnjs 的名称、路径和压缩文件映射；标记 `cdnjs: false` 的组件与 cdnjs provider 一样回退到 unpkg。
 
-npmmirror 的 npm 包镜像与静态文件分发使用不同规则。2026-11-14 核查时，Swup 核心包的静态地址仍受白名单限制，四个 `@swup/*` 插件可访问。因此站点暂保留以下单项覆盖，待上游白名单发布并验证地址可用后再移除：
-
-```yaml
-CDN:
-  third_party_provider: npmmirror
-  option:
-    swup: https://cdnjs.cloudflare.com/ajax/libs/swup/4.10.0/Swup.umd.min.js
-```
-
 浏览器回归使用本地发行文件验证 URL 规则与组件运行；实际 CDN 可达性单独检查。此次网络检查中部分 zstatic URL 返回 403/1010，实际可达性由服务端策略与网络环境决定。内置回退依据资源清单，在构建时确定最终 URL。
-
 
 ```yaml
 CDN:
@@ -288,13 +284,13 @@ CDN:
 
 单项 `CDN.option` 优先于 provider；开发模式强制内部资源使用本地构建，并忽略其单项覆盖。生产模式下，站点生成的 CSS 默认使用本地地址，显式的 `CDN.option.main_css` 可指定其他地址。`cdnjs` 和 `zstatic` 对 `plugins.yml` 中标记 `cdnjs: false` 的资源回退到 unpkg。
 
-| 占位符 | 内容 |
-| --- | --- |
-| `${name}` | 包名，包含作用域 |
-| `${version}` | 第三方声明版本；内部 JS 使用源码摘要前缀 |
-| `${file}` / `${min_file}` | 包内原始路径 / 对应的压缩文件路径 |
-| `${cdnjs_name}` | cdnjs 上的名称或别名 |
-| `${cdnjs_file}` / `${min_cdnjs_file}` | cdnjs 文件路径 / 对应的压缩路径 |
+| 占位符                                | 内容                                     |
+| ------------------------------------- | ---------------------------------------- |
+| `${name}`                             | 包名，包含作用域                         |
+| `${version}`                          | 第三方声明版本；内部 JS 使用源码摘要前缀 |
+| `${file}` / `${min_file}`             | 包内原始路径 / 对应的压缩文件路径        |
+| `${cdnjs_name}`                       | cdnjs 上的名称或别名                     |
+| `${cdnjs_file}` / `${min_cdnjs_file}` | cdnjs 文件路径 / 对应的压缩路径          |
 
 `CDN.internal_custom_format` 为内部资源单独设置模板。内部 JS 的 `${file}` 形如 `dist/source/js/build/production/main-….js`；上传时保留资源包的目录层级。`${version}` 对内部 JS 是源码摘要，不等同于 npm 版本号。`version` 开关控制内置 provider 的版本标记，自定义模板按自身内容展开。
 
@@ -304,13 +300,13 @@ CDN:
 
 `pwa` 提供 manifest 与图标入口，Service Worker 和离线缓存由站点插件生成。`inject.head`、`inject.bottom` 接受 HTML 字符串列表；跨页面脚本的挂载方式见[开发文档](development.md)。
 
-| 现象 | 先检查 |
-| --- | --- |
-| 配置修改后无变化 | 是否写在主题配置中；站点 `theme_config` 是否覆盖了同名项；是否重新生成 |
-| 公式仍显示源码 | Markdown 渲染职责、`math.use`、文章的 `math` 与 `per_page` |
-| 搜索索引返回 404 | 搜索生成器是否安装、`search.path` 是否生成、子路径与 CDN 地址 |
-| 图表显示为普通代码 | 对应组件是否开启；ECharts JSON 是否有效；Mermaid 是否使用标签写法 |
-| 切页后自定义按钮失效 | 初始化是否只在首次加载运行；是否注册页面挂载与清理 |
-| 本地组件返回 404 | `source/pluginsSrc` 下是否具有实际文件及其关联字体、样式 |
+| 现象                 | 先检查                                                                 |
+| -------------------- | ---------------------------------------------------------------------- |
+| 配置修改后无变化     | 是否写在主题配置中；站点 `theme_config` 是否覆盖了同名项；是否重新生成 |
+| 公式仍显示源码       | Markdown 渲染职责、`math.use`、文章的 `math` 与 `per_page`             |
+| 搜索索引返回 404     | 搜索生成器是否安装、`search.path` 是否生成、子路径与 CDN 地址          |
+| 图表显示为普通代码   | 对应组件是否开启；ECharts JSON 是否有效；Mermaid 是否使用标签写法      |
+| 切页后自定义按钮失效 | 初始化是否只在首次加载运行；是否注册页面挂载与清理                     |
+| 本地组件返回 404     | `source/pluginsSrc` 下是否具有实际文件及其关联字体、样式               |
 
 文章许可由 `post_copyright` 设置，复制附注由 `copy.copyright` 设置。站点署名使用 `footer.owner`，框架与主题信息使用 `footer.copyright`；主题代码许可及第三方来源见 [NOTICE](../NOTICE)。
