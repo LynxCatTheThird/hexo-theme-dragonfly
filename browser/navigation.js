@@ -15,9 +15,16 @@ import { createPageScriptsPlugin } from './page-scripts.js'
   }
 
   const init = async () => {
+    let preloadPlugin
     try {
       await dragonfly.getScript(settings.assets.swup)
-      await Promise.all([dragonfly.getScript(settings.assets.head), dragonfly.getScript(settings.assets.a11y), dragonfly.getScript(settings.assets.scripts)])
+      const pending = ['head', 'a11y', 'scripts'].map(key => dragonfly.getScript(settings.assets[key]))
+      if (settings.preload && settings.cache) {
+        pending.push(dragonfly.getScript(settings.assets.preload)
+          .then(() => { preloadPlugin = new SwupPreloadPlugin({ throttle: 2, preloadVisibleLinks: false }) })
+          .catch(error => console.warn('[preload]', error)))
+      }
+      await Promise.all(pending)
     } catch (error) {
       console.warn('[navigation]', error)
       return
@@ -27,14 +34,7 @@ import { createPageScriptsPlugin } from './page-scripts.js'
       new SwupHeadPlugin({ persistAssets: true, awaitAssets: true }),
       new SwupA11yPlugin({ announcements: { visit: '{title}', url: '{url}' } })
     ]
-    if (settings.preload && settings.cache) {
-      try {
-        await dragonfly.getScript(settings.assets.preload)
-        plugins.push(new SwupPreloadPlugin({ throttle: 2, preloadVisibleLinks: false }))
-      } catch (error) {
-        console.warn('[preload]', error)
-      }
-    }
+    if (preloadPlugin) plugins.push(preloadPlugin)
     const swup = window.swup = new Swup({
       plugins,
       containers: ['#config-diff', '#body-wrap', '#rightside-config-hide', '#rightside-config-show', '.page-scripts'],

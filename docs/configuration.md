@@ -242,6 +242,8 @@ waline:
 
 内部 provider 为 `custom` 且独立模板为空时，会回退到 `custom_format`。主题代码通常与 npm 镜像采用不同的目录布局，自建 CDN 时宜明确填写独立模板。完整逐项覆盖清单已列在 [\_config.yml](../_config.yml) 的 `CDN.option` 下，取消所需行的注释即可填写。
 
+构建时，主题按每页引用的外部脚本、样式表、预加载资源和组件配置生成 `preconnect`。更换 CDN、单项资源地址或通过 `inject.head` 注入远程样式时，重新构建即可，无需另填域名。普通文章外链不会触发预连接。
+
 内部资源支持 `local`、`custom`；第三方支持 `local`、`jsdelivr`、`unpkg`、`cdnjs`、`npmmirror`、`zstatic`、`custom`。本地第三方文件放在站点 `source/pluginsSrc/<包名>/<文件路径>`，版本和路径见 [plugins.yml](../plugins.yml)。仅选择 `local` 不会下载这些组件。
 
 npmmirror 与 zstatic 已内置地址模板，可直接选择：

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Dragonfly 项目修改；来源、原作者署名与第三方许可见 NOTICE。
-const { escapeHTML, unescapeHTML } = require('hexo-util')
+const { Parser } = require('htmlparser2')
+const { escapeHTML } = require('hexo-util')
 const { version } = require('../../package.json')
 
 const internalAssets = Object.fromEntries(Object.entries({
@@ -74,16 +75,38 @@ const resolveAssets = (config, thirdParty, internal = internalAssets) => {
 }
 
 const preconnect = (html, urls, siteURL) => {
-  // 仅为当前 HTML 实际引用的远端建立连接提示，避免启用无关组件的网络开销。
+  const base = new URL(siteURL || 'https://theme.invalid')
   const origins = new Set()
-  const content = unescapeHTML(html)
-  const siteOrigin = siteURL && new URL(siteURL).origin
-  for (const url of urls) {
-    if (typeof url !== 'string' || !/^(?:https?:)?\/\//.test(url)) continue
-    if (!content.includes(url)) continue
-    const origin = new URL(url, 'https://theme.invalid').origin
-    if (origin !== siteOrigin) origins.add(origin)
+  const existing = new Set()
+  const add = (url, target = origins) => {
+    if (typeof url !== 'string' || !/^(?:https?:)?\/\//i.test(url)) return
+    try {
+      const { origin } = new URL(url, base)
+      if (origin !== base.origin) target.add(origin)
+    } catch { /* 无效地址不生成连接提示。 */ }
   }
+  // 延迟加载的组件把地址写入脚本或 data 属性；普通正文和外链不参与预连接。
+  const configText = []
+  let script = false
+  new Parser({
+    onopentag (tag, attrs) {
+      script = tag === 'script'
+      if (script) add(attrs.src)
+      if (tag === 'link') {
+        const rel = (attrs.rel || '').toLowerCase().split(/\s+/)
+        if (rel.includes('preconnect')) add(attrs.href, existing)
+        if (rel.some(value => ['stylesheet', 'preload', 'modulepreload'].includes(value))) add(attrs.href)
+      }
+      for (const [key, value] of Object.entries(attrs)) {
+        if (key.startsWith('data-')) configText.push(value)
+      }
+    },
+    ontext (text) { if (script) configText.push(text) },
+    onclosetag (tag) { if (tag === 'script') script = false }
+  }).end(html)
+  const references = configText.join('\n')
+  for (const url of urls) if (url && references.includes(url)) add(url)
+  for (const origin of existing) origins.delete(origin)
   return [...origins].map(origin => `<link rel="preconnect" href="${escapeHTML(origin).replace(/&#x2F;/g, '/')}" crossorigin>`).join('')
 }
 module.exports = { internalAssets, providers, resolveAssets, preconnect }

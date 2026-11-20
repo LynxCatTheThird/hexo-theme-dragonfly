@@ -92,8 +92,16 @@ test('cdnjs metadata preserves package aliases and explicitly falls back for uns
 })
 
 test('preconnect follows used resolved URLs and deduplicates origins', () => {
-  const html = '<script src="https://override.test/main.js"></script><link href="https://override.test/a.css"><link href="https://font.test/font.css">'
+  const html = '<script src="https://override.test/main.js"></script><link rel="stylesheet" href="https://override.test/a.css"><link rel="stylesheet" href="https://font.test/font.css">'
   assert.equal(preconnect(html, ['https://unused.test/a.js', 'https://override.test/main.js', 'https://override.test/a.css', 'https://font.test/font.css', '/local.css']), '<link rel="preconnect" href="https://override.test" crossorigin><link rel="preconnect" href="https://font.test" crossorigin>')
-  assert.equal(preconnect(html, ['https://override.test/main.js'], 'https://override.test/blog'), '')
+  assert.equal(preconnect('<script src="//override.test/main.js"></script>', [], 'http://override.test/blog'), '')
   assert.equal(preconnect('<script src="https://query.test/a.js?a=1&amp;b=2"></script>', ['https://query.test/a.js?a=1&b=2']), '<link rel="preconnect" href="https://query.test" crossorigin>')
+})
+
+test('预连接跟随注入资源和导航配置，保留手动提示并跳过普通外链', () => {
+  const html = `<link rel="preconnect" href="https://font.test"><link rel="stylesheet" href="https://font.test/style.css">
+    <script src="//custom.test/widget.js" data-navigation='{&quot;swup&quot;:&quot;https://nav.test/core.js&quot;}'></script>
+    <a href="https://other.test/plugin.js">示例</a>`
+  assert.equal(preconnect(html, ['https://nav.test/core.js', 'https://other.test/plugin.js'], 'https://blog.test'),
+    '<link rel="preconnect" href="https://custom.test" crossorigin><link rel="preconnect" href="https://nav.test" crossorigin>')
 })
